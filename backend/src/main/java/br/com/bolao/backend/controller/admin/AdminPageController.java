@@ -35,6 +35,8 @@ public class AdminPageController {
     public String dashboard(Model model) {
         model.addAttribute("dashboard", adminDashboardService.buscarResumo());
         model.addAttribute("topRanking", adminDashboardService.listarTopRanking());
+        model.addAttribute("partidasPendentes", adminDashboardService.listarPartidasPendentes());
+        model.addAttribute("ultimosResultados", adminDashboardService.listarUltimosResultados());
         return "admin/dashboard";
     }
 

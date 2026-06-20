@@ -1,10 +1,12 @@
 package br.com.bolao.backend.service.admin;
 
-import br.com.bolao.backend.dto.admin.DashboardResumoDTO;
-import br.com.bolao.backend.dto.admin.RankingLinhaDTO;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import br.com.bolao.backend.dto.admin.DashboardResumoDTO;
+import br.com.bolao.backend.dto.admin.PartidaAdminDTO;
+import br.com.bolao.backend.dto.admin.RankingLinhaDTO;
 
 @Service
 public class AdminDashboardService {
@@ -29,6 +31,22 @@ public class AdminDashboardService {
     public List<RankingLinhaDTO> listarTopRanking() {
         return adminRankingService.listarRanking()
                 .stream()
+                .limit(5)
+                .toList();
+    }
+
+    public List<PartidaAdminDTO> listarPartidasPendentes() {
+        return adminPartidaService.listarPartidas()
+                .stream()
+                .filter(partida -> partida.status().equals("Pendente"))
+                .limit(5)
+                .toList();
+    }
+
+    public List<PartidaAdminDTO> listarUltimosResultados() {
+        return adminPartidaService.listarPartidas()
+                .stream()
+                .filter(partida -> partida.status().equals("Encerrada"))
                 .limit(5)
                 .toList();
     }
