@@ -17,8 +17,7 @@ public class AdminPartidaService {
                 new PartidaAdminDTO(2L, "França", "Alemanha", "Semifinal", "12/07/2026 15:00", "Pendente", "-"),
                 new PartidaAdminDTO(3L, "Espanha", "Portugal", "Quartas", "08/07/2026 18:00", "Encerrada", "2 x 1"),
                 new PartidaAdminDTO(4L, "Inglaterra", "Itália", "Oitavas", "04/07/2026 16:00", "Encerrada", "1 x 1"),
-                new PartidaAdminDTO(5L, "Uruguai", "México", "Grupos", "25/06/2026 21:00", "Pendente", "-")
-        );
+                new PartidaAdminDTO(5L, "Uruguai", "México", "Grupos", "25/06/2026 21:00", "Pendente", "-"));
     }
 
     public PartidaResultadoDTO buscarParaResultado(Long id) {
@@ -33,16 +32,18 @@ public class AdminPartidaService {
                 partida.selecaoA(),
                 partida.selecaoB(),
                 partida.fase(),
-                partida.dataHora()
-        );
+                partida.dataHora());
     }
 
-    public String lancarResultado(Long id, int golsA, int golsB) {
-        validarResultado(golsA, golsB);
+    public String lancarResultado(Long id, String golsA, String golsB) {
+        int golsSelecaoA = converterGols(golsA);
+        int golsSelecaoB = converterGols(golsB);
+
+        validarResultado(golsSelecaoA, golsSelecaoB);
 
         PartidaResultadoDTO partida = buscarParaResultado(id);
 
-        return partida.selecaoA() + " " + golsA + " x " + golsB + " " + partida.selecaoB();
+        return partida.selecaoA() + " " + golsSelecaoA + " x " + golsSelecaoB + " " + partida.selecaoB();
     }
 
     public int contarPartidasPendentes() {
@@ -57,8 +58,24 @@ public class AdminPartidaService {
             throw new AdminException("Os gols não podem ser negativos.");
         }
 
-        if (golsA > 99 || golsB > 99) {
+        if (golsA > 20 || golsB > 20) {
             throw new AdminException("Informe um placar válido.");
         }
+    }
+
+    private int converterGols(String valor) {
+        if (valor == null || valor.isBlank()) {
+            throw new AdminException("Informe os gols das duas seleções.");
+        }
+
+        if (!valor.matches("\\d+")) {
+            throw new AdminException("Os gols devem ser números inteiros positivos.");
+        }
+
+        if (valor.length() > 2) {
+            throw new AdminException("Informe um placar válido. O limite é de 20 gols por seleção.");
+        }
+
+        return Integer.parseInt(valor);
     }
 }

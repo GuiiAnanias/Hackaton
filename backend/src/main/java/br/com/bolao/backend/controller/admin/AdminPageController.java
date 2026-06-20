@@ -62,8 +62,8 @@ public class AdminPageController {
     @PostMapping("/partidas/{id}/resultado")
     public String salvarResultado(
             @PathVariable Long id,
-            @RequestParam int golsA,
-            @RequestParam int golsB,
+            @RequestParam String golsA,
+            @RequestParam String golsB,
             RedirectAttributes redirectAttributes) {
         try {
             String resultado = adminPartidaService.lancarResultado(id, golsA, golsB);
