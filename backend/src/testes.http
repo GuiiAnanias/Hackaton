@@ -1,0 +1,13 @@
+### 1. Cadastrar uma Seleção
+POST http://localhost:8080/api/admin/selecoes
+Content-Type: application/json
+
+{
+  "nome": "Brasil",
+  "codigoFifa": "BRA",
+  "grupo": "A",
+  "bandeira": "brasil.png"
+}
+
+### 2. Listar todas as Seleções
+GET http://localhost:8080/api/admin/selecoes
