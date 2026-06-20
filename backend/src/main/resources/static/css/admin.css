@@ -243,3 +243,23 @@ body {
 .table-action:hover {
     background-color: #1d4ed8;
 }
+
+.alert-success {
+    background-color: #dcfce7;
+    border: 1px solid #86efac;
+    color: #166534;
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.alert-success strong {
+    font-size: 15px;
+}
+
+.alert-success span {
+    font-size: 14px;
+}

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import br.com.bolao.backend.service.admin.AdminDashboardService;
 import br.com.bolao.backend.service.admin.AdminPartidaService;
@@ -58,7 +59,17 @@ public class AdminPageController {
     }
 
     @PostMapping("/partidas/{id}/resultado")
-    public String salvarResultado(@PathVariable Long id) {
+    public String salvarResultado(
+            @PathVariable Long id,
+            @RequestParam int golsA,
+            @RequestParam int golsB,
+            RedirectAttributes redirectAttributes) {
+        String resultado = adminPartidaService.lancarResultado(id, golsA, golsB);
+
+        redirectAttributes.addFlashAttribute("mensagemSucesso",
+                "Resultado lançado com sucesso. A pontuação dos palpites foi recalculada.");
+        redirectAttributes.addFlashAttribute("resultadoLancado", resultado);
+
         return "redirect:/admin/ranking";
     }
 }

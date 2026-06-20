@@ -23,6 +23,10 @@
                 <h2>Ranking Geral</h2>
                 <p>Ordenação por pontuação total, placares exatos e data de cadastro.</p>
             </section>
+            <section class="alert-success" th:if="${mensagemSucesso != null}">
+                <strong th:text="${mensagemSucesso}">Resultado lançado com sucesso.</strong>
+                <span th:if="${resultadoLancado != null}" th:text="${resultadoLancado}">Brasil 2 x 1 Argentina</span>
+            </section>
 
             <table class="admin-table">
                 <thead>
