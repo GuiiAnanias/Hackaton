@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import br.com.bolao.backend.exception.AdminException;
 import br.com.bolao.backend.service.admin.AdminDashboardService;
 import br.com.bolao.backend.service.admin.AdminPartidaService;
 import br.com.bolao.backend.service.admin.AdminRankingService;
@@ -64,12 +65,18 @@ public class AdminPageController {
             @RequestParam int golsA,
             @RequestParam int golsB,
             RedirectAttributes redirectAttributes) {
-        String resultado = adminPartidaService.lancarResultado(id, golsA, golsB);
+        try {
+            String resultado = adminPartidaService.lancarResultado(id, golsA, golsB);
 
-        redirectAttributes.addFlashAttribute("mensagemSucesso",
-                "Resultado lançado com sucesso. A pontuação dos palpites foi recalculada.");
-        redirectAttributes.addFlashAttribute("resultadoLancado", resultado);
+            redirectAttributes.addFlashAttribute("mensagemSucesso",
+                    "Resultado lançado com sucesso. A pontuação dos palpites foi recalculada.");
+            redirectAttributes.addFlashAttribute("resultadoLancado", resultado);
 
-        return "redirect:/admin/ranking";
+            return "redirect:/admin/ranking";
+        } catch (AdminException exception) {
+            redirectAttributes.addFlashAttribute("mensagemErro", exception.getMessage());
+
+            return "redirect:/admin/partidas/" + id + "/resultado";
+        }
     }
 }

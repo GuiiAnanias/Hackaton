@@ -27,6 +27,9 @@
                 <strong th:text="${mensagemSucesso}">Resultado lançado com sucesso.</strong>
                 <span th:if="${resultadoLancado != null}" th:text="${resultadoLancado}">Brasil 2 x 1 Argentina</span>
             </section>
+            <section class="alert-error" th:if="${mensagemErro != null}">
+                <strong th:text="${mensagemErro}">Erro ao carregar ranking.</strong>
+            </section>
 
             <table class="admin-table">
                 <thead>

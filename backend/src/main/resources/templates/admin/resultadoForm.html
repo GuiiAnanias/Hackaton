@@ -24,6 +24,10 @@
                 <p>Informe o placar final da partida.</p>
             </section>
 
+            <section class="alert-error" th:if="${mensagemErro != null}">
+                <strong th:text="${mensagemErro}">Erro ao lançar resultado.</strong>
+            </section>
+
             <form class="admin-form" method="post" th:action="@{/admin/partidas/{id}/resultado(id=${partida.id})}">
                 <div class="match-info">
                     <strong th:text="${partida.selecaoA}">Seleção A</strong>

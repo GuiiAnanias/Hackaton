@@ -24,6 +24,10 @@
                 <p>Gerencie os resultados das partidas cadastradas.</p>
             </section>
 
+            <section class="alert-error" th:if="${mensagemErro != null}">
+                <strong th:text="${mensagemErro}">Erro ao carregar partidas.</strong>
+            </section>
+
             <section class="table-section">
                 <div class="section-title">
                     <h3>Lista de partidas</h3>

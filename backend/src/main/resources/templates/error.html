@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Erro</title>
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+<div class="admin-wrapper">
+    <aside class="admin-sidebar">
+        <h1>Bolão 2026</h1>
+        <nav>
+            <a th:href="@{/admin/dashboard}">Dashboard</a>
+            <a th:href="@{/admin/partidas}">Partidas</a>
+            <a th:href="@{/admin/ranking}">Ranking</a>
+        </nav>
+    </aside>
+
+    <main class="admin-content">
+        <section class="admin-header">
+            <h2>Algo deu errado</h2>
+            <p>Não foi possível carregar a página solicitada.</p>
+        </section>
+
+        <section class="alert-error">
+            <strong>Verifique o endereço acessado ou tente novamente.</strong>
+            <span th:if="${status != null}">Código do erro: <span th:text="${status}">500</span></span>
+        </section>
+
+        <a class="admin-button-link" th:href="@{/admin/dashboard}">Voltar para o dashboard</a>
+    </main>
+</div>
+</body>
+</html>
