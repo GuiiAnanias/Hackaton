@@ -132,16 +132,48 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 16px;
+    gap: 8px;
     margin-top: 24px;
+    flex-wrap: wrap;
 }
 
-.pagination button {
-    padding: 10px 14px;
+.pagination div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.pagination a,
+.pagination-ellipsis {
+    min-width: 42px;
+    height: 42px;
+    padding: 0 12px;
     border: 1px solid #d1d5db;
     background-color: #ffffff;
+    color: #111827;
+    text-decoration: none;
     border-radius: 8px;
-    cursor: pointer;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+}
+
+.pagination a:hover {
+    background-color: #f3f4f6;
+}
+
+.pagination a.active {
+    background-color: #2563eb;
+    color: #ffffff;
+    border-color: #2563eb;
+}
+
+.pagination-ellipsis {
+    border: none;
+    background-color: transparent;
+    color: #6b7280;
 }
 
 .admin-form {
