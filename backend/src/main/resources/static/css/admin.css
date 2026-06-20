@@ -188,3 +188,26 @@ body {
 .admin-button:hover {
     background-color: #1d4ed8;
 }
+
+.status-badge {
+    display: inline-block;
+    background-color: #e5e7eb;
+    color: #374151;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 13px;
+}
+
+.table-action {
+    display: inline-block;
+    background-color: #2563eb;
+    color: #ffffff;
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.table-action:hover {
+    background-color: #1d4ed8;
+}

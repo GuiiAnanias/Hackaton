@@ -1,75 +1,78 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <title>Dashboard Admin</title>
     <link rel="stylesheet" th:href="@{/css/admin.css}">
 </head>
+
 <body>
-<div class="admin-wrapper">
-    <aside class="admin-sidebar">
-        <h1>Bolão 2026</h1>
-        <nav>
-            <a th:href="@{/admin/dashboard}">Dashboard</a>
-            <a th:href="@{/admin/ranking}">Ranking</a>
-            <a th:href="@{/admin/partidas/1/resultado}">Lançar Resultado</a>
-        </nav>
-    </aside>
+    <div class="admin-wrapper">
+        <aside class="admin-sidebar">
+            <h1>Bolão 2026</h1>
+            <nav>
+                <a th:href="@{/admin/dashboard}">Dashboard</a>
+                <a th:href="@{/admin/partidas}">Partidas</a>
+                <a th:href="@{/admin/ranking}">Ranking</a>
+            </nav>
+        </aside>
 
-    <main class="admin-content">
-        <section class="admin-header">
-            <h2>Dashboard</h2>
-            <p>Resumo geral do sistema administrativo.</p>
-        </section>
+        <main class="admin-content">
+            <section class="admin-header">
+                <h2>Dashboard</h2>
+                <p>Resumo geral do sistema administrativo.</p>
+            </section>
 
-        <section class="card-grid">
-            <div class="info-card">
-                <span>Total de usuários</span>
-                <strong th:text="${totalUsuarios}">0</strong>
-            </div>
+            <section class="card-grid">
+                <div class="info-card">
+                    <span>Total de usuários</span>
+                    <strong th:text="${totalUsuarios}">0</strong>
+                </div>
 
-            <div class="info-card">
-                <span>Total de palpites</span>
-                <strong th:text="${totalPalpites}">0</strong>
-            </div>
+                <div class="info-card">
+                    <span>Total de palpites</span>
+                    <strong th:text="${totalPalpites}">0</strong>
+                </div>
 
-            <div class="info-card">
-                <span>Partidas pendentes</span>
-                <strong th:text="${partidasPendentes}">0</strong>
-            </div>
+                <div class="info-card">
+                    <span>Partidas pendentes</span>
+                    <strong th:text="${partidasPendentes}">0</strong>
+                </div>
 
-            <div class="info-card">
-                <span>Usuários ativos 24h</span>
-                <strong th:text="${usuariosAtivos}">0</strong>
-            </div>
-        </section>
+                <div class="info-card">
+                    <span>Usuários ativos 24h</span>
+                    <strong th:text="${usuariosAtivos}">0</strong>
+                </div>
+            </section>
 
-        <section class="table-section">
-            <div class="section-title">
-                <h3>Top 5 Ranking</h3>
-                <a th:href="@{/admin/ranking}">Ver ranking completo</a>
-            </div>
+            <section class="table-section">
+                <div class="section-title">
+                    <h3>Top 5 Ranking</h3>
+                    <a th:href="@{/admin/ranking}">Ver ranking completo</a>
+                </div>
 
-            <table class="admin-table">
-                <thead>
-                <tr>
-                    <th>Posição</th>
-                    <th>Usuário</th>
-                    <th>Pontos</th>
-                    <th>Placares exatos</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="usuario : ${topRanking}">
-                    <td th:text="${usuario.posicao}">1</td>
-                    <td th:text="${usuario.nome}">Usuário</td>
-                    <td th:text="${usuario.pontuacaoTotal}">0</td>
-                    <td th:text="${usuario.placaresExatos}">0</td>
-                </tr>
-                </tbody>
-            </table>
-        </section>
-    </main>
-</div>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Posição</th>
+                            <th>Usuário</th>
+                            <th>Pontos</th>
+                            <th>Placares exatos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="usuario : ${topRanking}">
+                            <td th:text="${usuario.posicao}">1</td>
+                            <td th:text="${usuario.nome}">Usuário</td>
+                            <td th:text="${usuario.pontuacaoTotal}">0</td>
+                            <td th:text="${usuario.placaresExatos}">0</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
 </body>
+
 </html>

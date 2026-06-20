@@ -1,54 +1,57 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <title>Ranking Geral</title>
     <link rel="stylesheet" th:href="@{/css/admin.css}">
 </head>
+
 <body>
-<div class="admin-wrapper">
-    <aside class="admin-sidebar">
-        <h1>Bolão 2026</h1>
-        <nav>
-            <a th:href="@{/admin/dashboard}">Dashboard</a>
-            <a th:href="@{/admin/ranking}">Ranking</a>
-            <a th:href="@{/admin/partidas/1/resultado}">Lançar Resultado</a>
-        </nav>
-    </aside>
+    <div class="admin-wrapper">
+        <aside class="admin-sidebar">
+            <h1>Bolão 2026</h1>
+            <nav>
+                <a th:href="@{/admin/dashboard}">Dashboard</a>
+                <a th:href="@{/admin/partidas}">Partidas</a>
+                <a th:href="@{/admin/ranking}">Ranking</a>
+            </nav>
+        </aside>
 
-    <main class="admin-content">
-        <section class="admin-header">
-            <h2>Ranking Geral</h2>
-            <p>Ordenação por pontuação total, placares exatos e data de cadastro.</p>
-        </section>
+        <main class="admin-content">
+            <section class="admin-header">
+                <h2>Ranking Geral</h2>
+                <p>Ordenação por pontuação total, placares exatos e data de cadastro.</p>
+            </section>
 
-        <table class="admin-table">
-            <thead>
-            <tr>
-                <th>Posição</th>
-                <th>Usuário</th>
-                <th>Pontuação total</th>
-                <th>Placares exatos</th>
-                <th>Cadastro</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="usuario : ${ranking}">
-                <td th:text="${usuario.posicao}">1</td>
-                <td th:text="${usuario.nome}">Usuário</td>
-                <td th:text="${usuario.pontuacaoTotal}">0</td>
-                <td th:text="${usuario.placaresExatos}">0</td>
-                <td th:text="${usuario.criadoEm}">00/00/0000</td>
-            </tr>
-            </tbody>
-        </table>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Posição</th>
+                        <th>Usuário</th>
+                        <th>Pontuação total</th>
+                        <th>Placares exatos</th>
+                        <th>Cadastro</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="usuario : ${ranking}">
+                        <td th:text="${usuario.posicao}">1</td>
+                        <td th:text="${usuario.nome}">Usuário</td>
+                        <td th:text="${usuario.pontuacaoTotal}">0</td>
+                        <td th:text="${usuario.placaresExatos}">0</td>
+                        <td th:text="${usuario.criadoEm}">00/00/0000</td>
+                    </tr>
+                </tbody>
+            </table>
 
-        <div class="pagination">
-            <button>Anterior</button>
-            <span>Página 1</span>
-            <button>Próxima</button>
-        </div>
-    </main>
-</div>
+            <div class="pagination">
+                <button>Anterior</button>
+                <span>Página 1</span>
+                <button>Próxima</button>
+            </div>
+        </main>
+    </div>
 </body>
+
 </html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Partidas</title>
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+<div class="admin-wrapper">
+    <aside class="admin-sidebar">
+        <h1>Bolão 2026</h1>
+        <nav>
+            <a th:href="@{/admin/dashboard}">Dashboard</a>
+            <a th:href="@{/admin/partidas}">Partidas</a>
+            <a th:href="@{/admin/ranking}">Ranking</a>
+        </nav>
+    </aside>
+
+    <main class="admin-content">
+        <section class="admin-header">
+            <h2>Partidas</h2>
+            <p>Gerencie os resultados das partidas cadastradas.</p>
+        </section>
+
+        <section class="table-section">
+            <div class="section-title">
+                <h3>Lista de partidas</h3>
+            </div>
+
+            <table class="admin-table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Partida</th>
+                    <th>Fase</th>
+                    <th>Data e hora</th>
+                    <th>Status</th>
+                    <th>Resultado</th>
+                    <th>Ação</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="partida : ${partidas}">
+                    <td th:text="${partida.id}">1</td>
+                    <td>
+                        <span th:text="${partida.selecaoA}">Brasil</span>
+                        <span> x </span>
+                        <span th:text="${partida.selecaoB}">Argentina</span>
+                    </td>
+                    <td th:text="${partida.fase}">Final</td>
+                    <td th:text="${partida.dataHora}">16/07/2026 16:00</td>
+                    <td>
+                        <span class="status-badge" th:text="${partida.status}">Pendente</span>
+                    </td>
+                    <td th:text="${partida.resultado}">-</td>
+                    <td>
+                        <a class="table-action" th:href="@{/admin/partidas/{id}/resultado(id=${partida.id})}">
+                            Lançar resultado
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</div>
+</body>
+</html>

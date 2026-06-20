@@ -1,49 +1,52 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <title>Lançar Resultado</title>
     <link rel="stylesheet" th:href="@{/css/admin.css}">
 </head>
+
 <body>
-<div class="admin-wrapper">
-    <aside class="admin-sidebar">
-        <h1>Bolão 2026</h1>
-        <nav>
-            <a th:href="@{/admin/dashboard}">Dashboard</a>
-            <a th:href="@{/admin/ranking}">Ranking</a>
-            <a th:href="@{/admin/partidas/1/resultado}">Lançar Resultado</a>
-        </nav>
-    </aside>
+    <div class="admin-wrapper">
+        <aside class="admin-sidebar">
+            <h1>Bolão 2026</h1>
+            <nav>
+                <a th:href="@{/admin/dashboard}">Dashboard</a>
+                <a th:href="@{/admin/partidas}">Partidas</a>
+                <a th:href="@{/admin/ranking}">Ranking</a>
+            </nav>
+        </aside>
 
-    <main class="admin-content">
-        <section class="admin-header">
-            <h2>Lançar Resultado</h2>
-            <p>Informe o placar final da partida.</p>
-        </section>
+        <main class="admin-content">
+            <section class="admin-header">
+                <h2>Lançar Resultado</h2>
+                <p>Informe o placar final da partida.</p>
+            </section>
 
-        <form class="admin-form" method="post" th:action="@{/admin/partidas/{id}/resultado(id=${partida.id})}">
-            <div class="match-info">
-                <strong th:text="${partida.selecaoA}">Seleção A</strong>
-                <span>x</span>
-                <strong th:text="${partida.selecaoB}">Seleção B</strong>
-            </div>
+            <form class="admin-form" method="post" th:action="@{/admin/partidas/{id}/resultado(id=${partida.id})}">
+                <div class="match-info">
+                    <strong th:text="${partida.selecaoA}">Seleção A</strong>
+                    <span>x</span>
+                    <strong th:text="${partida.selecaoB}">Seleção B</strong>
+                </div>
 
-            <p>
-                <span th:text="${partida.fase}">Fase</span>
-                <span> - </span>
-                <span th:text="${partida.dataHora}">Data</span>
-            </p>
+                <p>
+                    <span th:text="${partida.fase}">Fase</span>
+                    <span> - </span>
+                    <span th:text="${partida.dataHora}">Data</span>
+                </p>
 
-            <label for="golsA" th:text="'Gols ' + ${partida.selecaoA}">Gols A</label>
-            <input type="number" id="golsA" name="golsA" min="0" required>
+                <label for="golsA" th:text="'Gols ' + ${partida.selecaoA}">Gols A</label>
+                <input type="number" id="golsA" name="golsA" min="0" required>
 
-            <label for="golsB" th:text="'Gols ' + ${partida.selecaoB}">Gols B</label>
-            <input type="number" id="golsB" name="golsB" min="0" required>
+                <label for="golsB" th:text="'Gols ' + ${partida.selecaoB}">Gols B</label>
+                <input type="number" id="golsB" name="golsB" min="0" required>
 
-            <button class="admin-button" type="submit">Salvar Resultado</button>
-        </form>
-    </main>
-</div>
+                <button class="admin-button" type="submit">Salvar Resultado</button>
+            </form>
+        </main>
+    </div>
 </body>
+
 </html>

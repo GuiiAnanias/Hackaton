@@ -29,9 +29,28 @@ public class AdminPageController {
         return "admin/ranking";
     }
 
+    @GetMapping("/partidas")
+    public String partidas(Model model) {
+        model.addAttribute("partidas", partidasMock());
+        return "admin/partidas";
+    }
+
     @GetMapping("/partidas/{id}/resultado")
     public String formularioResultado(@PathVariable Long id, Model model) {
-        model.addAttribute("partida", new PartidaResultado(id, "Brasil", "Argentina", "Final", "16/07/2026 16:00"));
+        PartidaLinha partida = partidasMock()
+                .stream()
+                .filter(item -> item.id().equals(id))
+                .findFirst()
+                .orElse(new PartidaLinha(id, "Brasil", "Argentina", "Final", "16/07/2026 16:00", "Pendente", "-"));
+
+        model.addAttribute("partida", new PartidaResultado(
+                partida.id(),
+                partida.selecaoA(),
+                partida.selecaoB(),
+                partida.fase(),
+                partida.dataHora()
+        ));
+
         return "admin/resultadoForm";
     }
 
@@ -51,12 +70,33 @@ public class AdminPageController {
         );
     }
 
+    private List<PartidaLinha> partidasMock() {
+        return List.of(
+                new PartidaLinha(1L, "Brasil", "Argentina", "Final", "16/07/2026 16:00", "Pendente", "-"),
+                new PartidaLinha(2L, "França", "Alemanha", "Semifinal", "12/07/2026 15:00", "Pendente", "-"),
+                new PartidaLinha(3L, "Espanha", "Portugal", "Quartas", "08/07/2026 18:00", "Encerrada", "2 x 1"),
+                new PartidaLinha(4L, "Inglaterra", "Itália", "Oitavas", "04/07/2026 16:00", "Encerrada", "1 x 1"),
+                new PartidaLinha(5L, "Uruguai", "México", "Grupos", "25/06/2026 21:00", "Pendente", "-")
+        );
+    }
+
     public record RankingLinha(
             int posicao,
             String nome,
             int pontuacaoTotal,
             int placaresExatos,
             String criadoEm
+    ) {
+    }
+
+    public record PartidaLinha(
+            Long id,
+            String selecaoA,
+            String selecaoB,
+            String fase,
+            String dataHora,
+            String status,
+            String resultado
     ) {
     }
 
