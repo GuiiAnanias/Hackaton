@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<body>
+<aside class="admin-sidebar" th:fragment="sidebar(activePage)">
+    <h1>Bolão 2026</h1>
+
+    <nav>
+        <a th:href="@{/admin/dashboard}" th:classappend="${activePage == 'dashboard'} ? 'active' : ''">Dashboard</a>
+        <a th:href="@{/admin/partidas}" th:classappend="${activePage == 'partidas'} ? 'active' : ''">Partidas</a>
+        <a th:href="@{/admin/selecoes}" th:classappend="${activePage == 'selecoes'} ? 'active' : ''">Seleções</a>
+        <a th:href="@{/admin/ranking}" th:classappend="${activePage == 'ranking'} ? 'active' : ''">Ranking</a>
+        <a th:href="@{/admin/logout}">Sair</a>
+    </nav>
+</aside>
+</body>
+
+</html>

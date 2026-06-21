@@ -4,9 +4,13 @@ import br.com.bolao.backend.dto.admin.PartidaAdminDTO;
 import br.com.bolao.backend.dto.admin.PartidaResultadoDTO;
 import br.com.bolao.backend.exception.AdminException;
 import br.com.bolao.backend.model.Partida;
+import br.com.bolao.backend.model.Selecao;
+import br.com.bolao.backend.repository.SelecaoRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Comparator;
 import java.util.List;
 
@@ -16,9 +20,11 @@ public class AdminPartidaService {
     private static final DateTimeFormatter DATA_HORA_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     private final PartidaService partidaService;
+    private final SelecaoRepository selecaoRepository;
 
-    public AdminPartidaService(PartidaService partidaService) {
+    public AdminPartidaService(PartidaService partidaService, SelecaoRepository selecaoRepository) {
         this.partidaService = partidaService;
+        this.selecaoRepository = selecaoRepository;
     }
 
     public List<PartidaAdminDTO> listarPartidas() {
@@ -27,6 +33,38 @@ public class AdminPartidaService {
                 .sorted(Comparator.comparing(Partida::getDataHora, Comparator.nullsLast(Comparator.naturalOrder())))
                 .map(this::converterParaDTO)
                 .toList();
+    }
+
+    public void criarPartida(
+            Long selecaoMandanteId,
+            Long selecaoVisitanteId,
+            String dataHora,
+            String fase,
+            String estadio,
+            String grupo
+    ) {
+        Selecao selecaoMandante = buscarSelecao(selecaoMandanteId, "Informe a seleção mandante.");
+        Selecao selecaoVisitante = buscarSelecao(selecaoVisitanteId, "Informe a seleção visitante.");
+
+        if (selecaoMandante.getId().equals(selecaoVisitante.getId())) {
+            throw new AdminException("A partida precisa ter duas seleções diferentes.");
+        }
+
+        validarTexto(fase, "Informe a fase da partida.");
+        validarTexto(grupo, "Informe o grupo da partida.");
+
+        Partida partida = new Partida();
+        partida.setSelecaoMandante(selecaoMandante);
+        partida.setSelecaoVisitante(selecaoVisitante);
+        partida.setDataHora(converterDataHora(dataHora));
+        partida.setFase(fase.trim());
+        partida.setEstadio(formatarCampoOpcional(estadio));
+        partida.setGrupo(grupo.trim().toUpperCase());
+        partida.setStatus("AGENDADA");
+        partida.setGolsMandante(null);
+        partida.setGolsVisitante(null);
+
+        partidaService.salvar(partida);
     }
 
     public PartidaResultadoDTO buscarParaResultado(Long id) {
@@ -70,6 +108,15 @@ public class AdminPartidaService {
 
             throw new AdminException("Não foi possível lançar o resultado da partida.");
         }
+    }
+
+    private Selecao buscarSelecao(Long id, String mensagem) {
+        if (id == null) {
+            throw new AdminException(mensagem);
+        }
+
+        return selecaoRepository.findById(id)
+                .orElseThrow(() -> new AdminException("Seleção não encontrada."));
     }
 
     private PartidaAdminDTO converterParaDTO(Partida partida) {
@@ -134,6 +181,32 @@ public class AdminPartidaService {
         }
 
         return valor;
+    }
+
+    private String formatarCampoOpcional(String valor) {
+        if (valor == null || valor.isBlank()) {
+            return null;
+        }
+
+        return valor.trim();
+    }
+
+    private void validarTexto(String valor, String mensagem) {
+        if (valor == null || valor.isBlank()) {
+            throw new AdminException(mensagem);
+        }
+    }
+
+    private LocalDateTime converterDataHora(String valor) {
+        if (valor == null || valor.isBlank()) {
+            throw new AdminException("Informe a data e hora da partida.");
+        }
+
+        try {
+            return LocalDateTime.parse(valor);
+        } catch (DateTimeParseException exception) {
+            throw new AdminException("Informe uma data e hora válidas.");
+        }
     }
 
     private int converterGols(String valor) {

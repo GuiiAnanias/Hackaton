@@ -5,7 +5,6 @@ import br.com.bolao.backend.model.Palpite;
 import br.com.bolao.backend.model.Partida;
 import br.com.bolao.backend.model.Usuario;
 import br.com.bolao.backend.repository.PalpiteRepository;
-import br.com.bolao.backend.repository.PartidaRepository;
 import br.com.bolao.backend.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,81 +15,77 @@ import java.util.List;
 public class PontuacaoService {
 
     private final PalpiteRepository palpiteRepository;
-    private final PartidaRepository partidaRepository;
     private final UsuarioRepository usuarioRepository;
 
-    public PontuacaoService(PalpiteRepository palpiteRepository,
-                            PartidaRepository partidaRepository,
-                            UsuarioRepository usuarioRepository) {
+    public PontuacaoService(PalpiteRepository palpiteRepository, UsuarioRepository usuarioRepository) {
         this.palpiteRepository = palpiteRepository;
-        this.partidaRepository = partidaRepository;
         this.usuarioRepository = usuarioRepository;
     }
 
-    /**
-     * Calcula (ou recalcula) a pontuacao de TODOS os palpites de uma partida.
-     * Chamar depois que o admin salvar o placar.
-     * Serve tanto para o lancamento inicial (RF-030) quanto para a correcao
-     * de um resultado ja lancado (RF-044). Tudo em uma transacao unica para
-     * garantir consistencia (Regra 4.3).
-     */
     @Transactional
     public void processarResultado(Long partidaId) {
-        Partida partida = partidaRepository.findById(partidaId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Partida nao encontrada: " + partidaId));
-
-        if (partida.getGolsMandante() == null || partida.getGolsVisitante() == null) {
-            throw new IllegalStateException("O resultado da partida ainda nao foi lancado.");
-        }
-
         List<Palpite> palpites = palpiteRepository.findByPartidaId(partidaId);
 
-        for (Palpite palpite : palpites) {
-            int pontosAntigos = palpite.getPontos() == null ? 0 : palpite.getPontos();
-            boolean eraExato = palpite.getCriterio() == CriterioPontuacao.PLACAR_EXATO;
+        palpites.forEach(this::calcularPontuacaoDoPalpite);
 
-            ResultadoCalculo calculo = calcular(palpite, partida);
+        palpiteRepository.saveAll(palpites);
 
-            palpite.setPontos(calculo.pontos());
-            palpite.setCriterio(calculo.criterio());
-            palpiteRepository.save(palpite);
-
-            Usuario usuario = palpite.getUsuario();
-            usuario.setPontuacaoTotal(
-                    usuario.getPontuacaoTotal() - pontosAntigos + calculo.pontos());
-
-            int exatoNovo = calculo.criterio() == CriterioPontuacao.PLACAR_EXATO ? 1 : 0;
-            int exatoAntigo = eraExato ? 1 : 0;
-            usuario.setPlacaresExatos(
-                    usuario.getPlacaresExatos() - exatoAntigo + exatoNovo);
-
-            usuarioRepository.save(usuario);
-        }
-
-        partida.setStatus("ENCERRADA");
-        partidaRepository.save(partida);
+        palpites.stream()
+                .map(Palpite::getUsuario)
+                .map(Usuario::getId)
+                .distinct()
+                .forEach(this::recalcularPontuacaoUsuario);
     }
 
-    /**
-     * Regra oficial (RF-031 / Regra 4.1):
-     *  placar exato -> 10 | acertou vencedor/empate -> 5 | errou -> 0
-     */
-    private ResultadoCalculo calcular(Palpite palpite, Partida partida) {
-        int pm = palpite.getGolsMandante();
-        int pv = palpite.getGolsVisitante();
-        int rm = partida.getGolsMandante();
-        int rv = partida.getGolsVisitante();
+    private void calcularPontuacaoDoPalpite(Palpite palpite) {
+        Partida partida = palpite.getPartida();
 
-        if (pm == rm && pv == rv) {
-            return new ResultadoCalculo(10, CriterioPontuacao.PLACAR_EXATO);
+        if (partida.getGolsMandante() == null || partida.getGolsVisitante() == null) {
+            palpite.setPontos(0);
+            palpite.setCriterio(CriterioPontuacao.ERRO);
+            return;
         }
-        if (Integer.signum(pm - pv) == Integer.signum(rm - rv)) {
-            return new ResultadoCalculo(5, CriterioPontuacao.VENCEDOR);
+
+        if (palpite.getGolsMandante().equals(partida.getGolsMandante())
+                && palpite.getGolsVisitante().equals(partida.getGolsVisitante())) {
+            palpite.setPontos(10);
+            palpite.setCriterio(CriterioPontuacao.PLACAR_EXATO);
+            return;
         }
-        return new ResultadoCalculo(0, CriterioPontuacao.ERRO);
+
+        if (compararResultado(palpite.getGolsMandante(), palpite.getGolsVisitante())
+                == compararResultado(partida.getGolsMandante(), partida.getGolsVisitante())) {
+            palpite.setPontos(5);
+            palpite.setCriterio(CriterioPontuacao.VENCEDOR);
+            return;
+        }
+
+        palpite.setPontos(0);
+        palpite.setCriterio(CriterioPontuacao.ERRO);
     }
 
-    private record ResultadoCalculo(int pontos, CriterioPontuacao criterio) {
+    private int compararResultado(Integer golsMandante, Integer golsVisitante) {
+        return Integer.compare(golsMandante, golsVisitante);
+    }
+
+    private void recalcularPontuacaoUsuario(Long usuarioId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        List<Palpite> palpites = palpiteRepository.findByUsuarioId(usuarioId);
+
+        int pontuacaoTotal = palpites.stream()
+                .map(Palpite::getPontos)
+                .mapToInt(pontos -> pontos == null ? 0 : pontos)
+                .sum();
+
+        int placaresExatos = (int) palpites.stream()
+                .filter(palpite -> palpite.getCriterio() == CriterioPontuacao.PLACAR_EXATO)
+                .count();
+
+        usuario.setPontuacaoTotal(pontuacaoTotal);
+        usuario.setPlacaresExatos(placaresExatos);
+
+        usuarioRepository.save(usuario);
     }
 }

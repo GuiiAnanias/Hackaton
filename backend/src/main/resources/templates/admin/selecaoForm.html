@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/admin-head :: head('Nova Seleção')}"></head>
+
+<body>
+<div class="admin-wrapper">
+    <aside th:replace="~{fragments/admin-sidebar :: sidebar('selecoes')}"></aside>
+
+    <main class="admin-content">
+        <section class="admin-header">
+            <h2>Nova Seleção</h2>
+            <p>Cadastre uma seleção para usar na criação de partidas.</p>
+        </section>
+
+        <section class="alert-error" th:if="${mensagemErro != null}">
+            <strong th:text="${mensagemErro}">Erro ao cadastrar seleção.</strong>
+        </section>
+
+        <form class="admin-form" method="post" th:action="@{/admin/selecoes}">
+            <div class="form-group">
+                <label for="nome">Nome da seleção</label>
+                <input type="text" id="nome" name="nome" placeholder="Brasil" required>
+            </div>
+
+            <div class="form-group">
+                <label for="codigoFifa">Código FIFA</label>
+                <input type="text" id="codigoFifa" name="codigoFifa" placeholder="BRA" maxlength="5" required>
+            </div>
+
+            <div class="form-group">
+                <label for="grupo">Grupo</label>
+                <input type="text" id="grupo" name="grupo" placeholder="G" maxlength="2" required>
+            </div>
+
+            <div class="form-actions">
+                <a class="admin-button-secondary" th:href="@{/admin/selecoes}">Cancelar</a>
+                <button type="submit" class="admin-button">Cadastrar seleção</button>
+            </div>
+        </form>
+    </main>
+</div>
+
+<script th:replace="~{fragments/admin-head :: scripts}"></script>
+</body>
+
+</html>
