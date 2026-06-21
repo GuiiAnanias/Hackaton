@@ -1,34 +1,38 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
-<head>
+
+<head th:replace="~{fragments/admin-head :: head('Erro no Painel')}">
     <meta charset="UTF-8">
     <title>Erro no Painel</title>
     <link rel="stylesheet" th:href="@{/css/admin.css}">
 </head>
+
 <body>
-<div class="admin-wrapper">
-    <aside class="admin-sidebar">
-        <h1>Bolão 2026</h1>
-        <nav>
-            <a th:href="@{/admin/dashboard}">Dashboard</a>
-            <a th:href="@{/admin/partidas}">Partidas</a>
-            <a th:href="@{/admin/ranking}">Ranking</a>
-        </nav>
-    </aside>
+    <div class="admin-wrapper">
+        <aside class="admin-sidebar">
+            <h1>Bolão 2026</h1>
+            <nav>
+                <a th:href="@{/admin/dashboard}">Dashboard</a>
+                <a th:href="@{/admin/partidas}">Partidas</a>
+                <a th:href="@{/admin/ranking}">Ranking</a>
+            </nav>
+        </aside>
 
-    <main class="admin-content">
-        <section class="admin-header">
-            <h2 th:text="${tituloErro}">Erro</h2>
-            <p>O painel encontrou um problema ao executar esta ação.</p>
-        </section>
+        <main class="admin-content">
+            <section class="admin-header">
+                <h2 th:text="${tituloErro}">Erro</h2>
+                <p>O painel encontrou um problema ao executar esta ação.</p>
+            </section>
 
-        <section class="alert-error">
-            <strong th:text="${mensagemErro}">Ocorreu um erro.</strong>
-            <span>Volte para uma das telas do painel e tente novamente.</span>
-        </section>
+            <section class="alert-error">
+                <strong th:text="${mensagemErro}">Ocorreu um erro.</strong>
+                <span>Volte para uma das telas do painel e tente novamente.</span>
+            </section>
 
-        <a class="admin-button-link" th:href="@{/admin/dashboard}">Voltar para o dashboard</a>
-    </main>
-</div>
+            <a class="admin-button-link" th:href="@{/admin/dashboard}">Voltar para o dashboard</a>
+        </main>
+    </div>
+    <script th:replace="~{fragments/admin-head :: scripts}"></script>
 </body>
+
 </html>
