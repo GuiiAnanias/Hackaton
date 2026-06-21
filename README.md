@@ -30,7 +30,7 @@ Spring Boot Web
 Spring Security
 JWT
 Spring Data JPA
-MySQL
+MySQL Driver
 Thymeleaf
 Bootstrap
 Lombok
