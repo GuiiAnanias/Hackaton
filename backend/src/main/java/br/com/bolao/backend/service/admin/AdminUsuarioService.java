@@ -1,0 +1,24 @@
+package br.com.bolao.backend.service.admin;
+
+import br.com.bolao.backend.model.Usuario;
+import br.com.bolao.backend.repository.UsuarioRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class AdminUsuarioService {
+
+    @Autowired
+    private UsuarioRepository repository;
+
+    public List<Usuario> listarTodos() {
+        return repository.findAll();
+    }
+
+    public Optional<Usuario> buscarPorId(Long id) {
+        return repository.findById(id);
+    }
+}

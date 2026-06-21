@@ -1,0 +1,20 @@
+### 1. Criar uma nova Seleção
+POST http://localhost:8080/selecoes
+Content-Type: application/json
+
+{
+  "nome": "Brasil",
+  "codigoFifa": "BRA",
+  "bandeira": "brasil.png",
+  "grupo": "G"
+}
+
+###
+
+### 2. Listar todas as Seleções
+GET http://localhost:8080/selecoes
+
+###
+
+### 3. Buscar Seleção por ID (Substitua o '1' pelo ID real)
+GET http://localhost:8080/selecoes/1
