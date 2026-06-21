@@ -8,11 +8,6 @@ import java.util.List;
 
 @Service
 public class AdminMockDataService {
-
-    public int buscarTotalPalpites() {
-        return 15672;
-    }
-
     public List<UsuarioRankingBaseDTO> listarUsuariosRanking() {
         return List.of(
                 new UsuarioRankingBaseDTO("Ana Silva", 150, 8, LocalDate.of(2026, 2, 10)),
