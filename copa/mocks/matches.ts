@@ -56,7 +56,7 @@ export const matches: Match[] = [
     },
     {
         id: 6,
-        teamA: "Argentina",
+        teamA: "França",
         teamB: "Alemanha",
         date: "10/06/2026 15:00",
         dateISO: "2026-06-10T15:00:00",
