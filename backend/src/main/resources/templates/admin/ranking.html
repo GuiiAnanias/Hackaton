@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 
-<head>
+<head th:replace="~{fragments/admin-head :: head('Ranking Admin')}">
     <meta charset="UTF-8">
     <title>Ranking Geral</title>
     <link rel="stylesheet" th:href="@{/css/admin.css}">
@@ -32,26 +32,28 @@
                 <strong th:text="${mensagemErro}">Erro ao carregar ranking.</strong>
                 <span th:if="${mensagemDetalhe != null}" th:text="${mensagemDetalhe}">Detalhes do erro.</span>
             </section>
-            <table class="admin-table" th:if="${!rankingPagina.usuarios.isEmpty()}">
-                <thead>
-                    <tr>
-                        <th>Posição</th>
-                        <th>Usuário</th>
-                        <th>Pontos</th>
-                        <th>Placares exatos</th>
-                        <th>Cadastro</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="usuario : ${rankingPagina.usuarios}">
-                        <td th:text="${usuario.posicao}">1</td>
-                        <td th:text="${usuario.nome}">Usuário</td>
-                        <td th:text="${usuario.pontuacaoTotal}">0</td>
-                        <td th:text="${usuario.placaresExatos}">0</td>
-                        <td th:text="${usuario.criadoEm}">00/00/0000</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="admin-table-responsive">
+                <table class="admin-table" th:if="${!rankingPagina.usuarios.isEmpty()}">
+                    <thead>
+                        <tr>
+                            <th>Posição</th>
+                            <th>Usuário</th>
+                            <th>Pontos</th>
+                            <th>Placares exatos</th>
+                            <th>Cadastro</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="usuario : ${rankingPagina.usuarios}">
+                            <td th:text="${usuario.posicao}">1</td>
+                            <td th:text="${usuario.nome}">Usuário</td>
+                            <td th:text="${usuario.pontuacaoTotal}">0</td>
+                            <td th:text="${usuario.placaresExatos}">0</td>
+                            <td th:text="${usuario.criadoEm}">00/00/0000</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
             <section class="empty-state" th:if="${rankingPagina.usuarios.isEmpty()}">
                 <strong>Nenhum usuário no ranking.</strong>
@@ -94,6 +96,7 @@
             </div>
         </main>
     </div>
+    <script th:replace="~{fragments/admin-head :: scripts}"></script>
 </body>
 
 </html>

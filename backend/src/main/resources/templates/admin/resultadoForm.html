@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 
-<head>
+<head th:replace="~{fragments/admin-head :: head('Lançar Resultado')}">
     <meta charset="UTF-8">
     <title>Lançar Resultado</title>
     <link rel="stylesheet" th:href="@{/css/admin.css}">
@@ -57,6 +57,7 @@
             </form>
         </main>
     </div>
+    <script th:replace="~{fragments/admin-head :: scripts}"></script>
 </body>
 
 </html>

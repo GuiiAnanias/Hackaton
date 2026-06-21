@@ -461,3 +461,92 @@ body {
     color: #6b7280;
     font-size: 13px;
 }
+
+.admin-table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.admin-table-responsive .admin-table {
+    min-width: 720px;
+}
+
+@media (max-width: 900px) {
+    .admin-wrapper {
+        flex-direction: column;
+    }
+
+    .admin-sidebar {
+        width: 100%;
+        min-height: auto;
+        position: static;
+    }
+
+    .admin-sidebar nav {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+    }
+
+    .admin-sidebar nav a {
+        white-space: nowrap;
+    }
+
+    .admin-content {
+        padding: 24px;
+    }
+
+    .card-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .section-title,
+    .section-title-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .admin-form {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 600px) {
+    .admin-content {
+        padding: 18px;
+    }
+
+    .admin-header h2 {
+        font-size: 24px;
+    }
+
+    .card-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .info-card strong {
+        font-size: 28px;
+    }
+
+    .pagination {
+        justify-content: flex-start;
+    }
+
+    .pagination a,
+    .pagination-ellipsis {
+        min-width: 36px;
+        height: 36px;
+        font-size: 13px;
+    }
+
+    .login-card {
+        padding: 24px;
+    }
+
+    .match-info {
+        flex-direction: column;
+        gap: 8px;
+    }
+}

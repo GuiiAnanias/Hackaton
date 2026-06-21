@@ -1,180 +1,182 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 
-<head>
-    <meta charset="UTF-8">
-    <title>Dashboard Admin</title>
-    <link rel="stylesheet" th:href="@{/css/admin.css}">
-</head>
+<head th:replace="~{fragments/admin-head :: head('Dashboard Admin')}"></head>
 
 <body>
-    <div class="admin-wrapper">
-        <aside class="admin-sidebar">
-            <h1>Bolão 2026</h1>
-            <nav>
-                <a th:href="@{/admin/dashboard}">Dashboard</a>
-                <a th:href="@{/admin/partidas}">Partidas</a>
-                <a th:href="@{/admin/ranking}">Ranking</a>
-            </nav>
-        </aside>
+<div class="admin-wrapper">
+    <aside class="admin-sidebar">
+        <h1>Bolão 2026</h1>
+        <nav>
+            <a th:href="@{/admin/dashboard}">Dashboard</a>
+            <a th:href="@{/admin/partidas}">Partidas</a>
+            <a th:href="@{/admin/ranking}">Ranking</a>
+        </nav>
+    </aside>
 
-        <main class="admin-content">
-            <section class="admin-header">
-                <h2>Dashboard</h2>
-                <p>Resumo geral do sistema administrativo.</p>
-            </section>
+    <main class="admin-content">
+        <section class="admin-header">
+            <h2>Dashboard</h2>
+            <p>Resumo geral do sistema administrativo.</p>
+        </section>
 
-            <section class="alert-success" th:if="${mensagemSucesso != null}">
-                <strong th:text="${mensagemSucesso}">Ação realizada com sucesso.</strong>
-                <span th:if="${mensagemDetalhe != null}" th:text="${mensagemDetalhe}">Detalhes da ação.</span>
-            </section>
+        <section class="alert-success" th:if="${mensagemSucesso != null}">
+            <strong th:text="${mensagemSucesso}">Ação realizada com sucesso.</strong>
+            <span th:if="${mensagemDetalhe != null}" th:text="${mensagemDetalhe}">Detalhes da ação.</span>
+        </section>
 
-            <section class="alert-error" th:if="${mensagemErro != null}">
-                <strong th:text="${mensagemErro}">Erro ao carregar dashboard.</strong>
-                <span th:if="${mensagemDetalhe != null}" th:text="${mensagemDetalhe}">Detalhes do erro.</span>
-            </section>
+        <section class="alert-error" th:if="${mensagemErro != null}">
+            <strong th:text="${mensagemErro}">Erro ao carregar dashboard.</strong>
+            <span th:if="${mensagemDetalhe != null}" th:text="${mensagemDetalhe}">Detalhes do erro.</span>
+        </section>
 
-            <section class="card-grid">
-                <div class="info-card">
-                    <span>Total de usuários</span>
-                    <strong th:text="${dashboard.totalUsuarios}">0</strong>
-                </div>
+        <section class="card-grid">
+            <div class="info-card">
+                <span>Total de usuários</span>
+                <strong th:text="${dashboard.totalUsuarios}">0</strong>
+            </div>
 
-                <div class="info-card">
-                    <span>Total de palpites</span>
-                    <strong th:text="${dashboard.totalPalpites}">0</strong>
-                </div>
+            <div class="info-card">
+                <span>Total de palpites</span>
+                <strong th:text="${dashboard.totalPalpites}">0</strong>
+            </div>
 
-                <div class="info-card">
-                    <span>Partidas pendentes</span>
-                    <strong th:text="${dashboard.partidasPendentes}">0</strong>
-                </div>
+            <div class="info-card">
+                <span>Partidas pendentes</span>
+                <strong th:text="${dashboard.partidasPendentes}">0</strong>
+            </div>
 
-                <div class="info-card">
-                    <span>Usuários ativos</span>
-                    <strong th:text="${dashboard.usuariosAtivos}">0</strong>
-                </div>
-            </section>
+            <div class="info-card">
+                <span>Usuários ativos</span>
+                <strong th:text="${dashboard.usuariosAtivos}">0</strong>
+            </div>
+        </section>
 
-            <section class="table-section">
-                <div class="section-title">
-                    <h3>Top 5 Ranking</h3>
-                    <a th:href="@{/admin/ranking}">Ver ranking completo</a>
-                </div>
-                <table class="admin-table" th:if="${!topRanking.isEmpty()}">
+        <section class="table-section">
+            <div class="section-title">
+                <h3>Top 5 Ranking</h3>
+                <a th:href="@{/admin/ranking}">Ver ranking completo</a>
+            </div>
+
+            <div class="admin-table-responsive" th:if="${!topRanking.isEmpty()}">
+                <table class="admin-table">
                     <thead>
-                        <tr>
-                            <th>Posição</th>
-                            <th>Usuário</th>
-                            <th>Pontos</th>
-                            <th>Placares exatos</th>
-                        </tr>
+                    <tr>
+                        <th>Posição</th>
+                        <th>Usuário</th>
+                        <th>Pontos</th>
+                        <th>Placares exatos</th>
+                    </tr>
                     </thead>
                     <tbody>
-                        <tr th:each="usuario : ${topRanking}">
-                            <td th:text="${usuario.posicao}">1</td>
-                            <td th:text="${usuario.nome}">Usuário</td>
-                            <td th:text="${usuario.pontuacaoTotal}">0</td>
-                            <td th:text="${usuario.placaresExatos}">0</td>
-                        </tr>
+                    <tr th:each="usuario : ${topRanking}">
+                        <td th:text="${usuario.posicao}">1</td>
+                        <td th:text="${usuario.nome}">Usuário</td>
+                        <td th:text="${usuario.pontuacaoTotal}">0</td>
+                        <td th:text="${usuario.placaresExatos}">0</td>
+                    </tr>
                     </tbody>
                 </table>
-                <section class="empty-state" th:if="${topRanking.isEmpty()}">
-                    <strong>Nenhum usuário no ranking.</strong>
-                    <span>Os usuários aparecerão aqui quando começarem a pontuar no bolão.</span>
-                </section>
+            </div>
+
+            <section class="empty-state" th:if="${topRanking.isEmpty()}">
+                <strong>Nenhum usuário no ranking.</strong>
+                <span>Os usuários aparecerão aqui quando começarem a pontuar no bolão.</span>
             </section>
+        </section>
 
-            <section class="dashboard-section">
-                <div class="section-title-row">
-                    <div>
-                        <h3>Partidas pendentes</h3>
-                        <p>Jogos que ainda precisam receber resultado.</p>
-                    </div>
-                    <a class="section-link" th:href="@{/admin/partidas}">Ver todas</a>
+        <section class="dashboard-section">
+            <div class="section-title-row">
+                <div>
+                    <h3>Partidas pendentes</h3>
+                    <p>Jogos que ainda precisam receber resultado.</p>
                 </div>
+                <a class="section-link" th:href="@{/admin/partidas}">Ver todas</a>
+            </div>
 
-                <div class="table-card" th:if="${!partidasPendentes.isEmpty()}">
+            <div class="table-card" th:if="${!partidasPendentes.isEmpty()}">
+                <div class="admin-table-responsive">
                     <table class="admin-table">
                         <thead>
-                            <tr>
-                                <th>Partida</th>
-                                <th>Fase</th>
-                                <th>Data</th>
-                                <th>Status</th>
-                                <th>Ação</th>
-                            </tr>
+                        <tr>
+                            <th>Partida</th>
+                            <th>Fase</th>
+                            <th>Data</th>
+                            <th>Status</th>
+                            <th>Ação</th>
+                        </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="partida : ${partidasPendentes}">
-                                <td>
-                                    <strong th:text="${partida.selecaoA + ' x ' + partida.selecaoB}">Brasil x
-                                        Argentina</strong>
-                                </td>
-                                <td th:text="${partida.fase}">Final</td>
-                                <td th:text="${partida.dataHora}">16/07/2026 16:00</td>
-                                <td>
-                                    <span class="status-badge" th:text="${partida.status}">Pendente</span>
-                                </td>
-                                <td>
-                                    <a class="table-action"
-                                        th:href="@{/admin/partidas/{id}/resultado(id=${partida.id})}">
-                                        Lançar resultado
-                                    </a>
-                                </td>
-                            </tr>
+                        <tr th:each="partida : ${partidasPendentes}">
+                            <td>
+                                <strong th:text="${partida.selecaoA + ' x ' + partida.selecaoB}">Brasil x Argentina</strong>
+                            </td>
+                            <td th:text="${partida.fase}">Final</td>
+                            <td th:text="${partida.dataHora}">16/07/2026 16:00</td>
+                            <td>
+                                <span class="status-badge" th:text="${partida.status}">Pendente</span>
+                            </td>
+                            <td>
+                                <a class="table-action" th:href="@{/admin/partidas/{id}/resultado(id=${partida.id})}">
+                                    Lançar resultado
+                                </a>
+                            </td>
+                        </tr>
                         </tbody>
                     </table>
                 </div>
+            </div>
 
-                <section class="empty-state" th:if="${partidasPendentes.isEmpty()}">
-                    <strong>Nenhuma partida pendente.</strong>
-                    <span>Todos os resultados disponíveis já foram lançados.</span>
-                </section>
+            <section class="empty-state" th:if="${partidasPendentes.isEmpty()}">
+                <strong>Nenhuma partida pendente.</strong>
+                <span>Todos os resultados disponíveis já foram lançados.</span>
             </section>
+        </section>
 
-            <section class="dashboard-section">
-                <div class="section-title-row">
-                    <div>
-                        <h3>Últimos resultados</h3>
-                        <p>Partidas encerradas com placar registrado.</p>
-                    </div>
+        <section class="dashboard-section">
+            <div class="section-title-row">
+                <div>
+                    <h3>Últimos resultados</h3>
+                    <p>Partidas encerradas com placar registrado.</p>
                 </div>
+            </div>
 
-                <div class="table-card" th:if="${!ultimosResultados.isEmpty()}">
+            <div class="table-card" th:if="${!ultimosResultados.isEmpty()}">
+                <div class="admin-table-responsive">
                     <table class="admin-table">
                         <thead>
-                            <tr>
-                                <th>Partida</th>
-                                <th>Fase</th>
-                                <th>Data</th>
-                                <th>Resultado</th>
-                            </tr>
+                        <tr>
+                            <th>Partida</th>
+                            <th>Fase</th>
+                            <th>Data</th>
+                            <th>Resultado</th>
+                        </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="partida : ${ultimosResultados}">
-                                <td>
-                                    <strong th:text="${partida.selecaoA + ' x ' + partida.selecaoB}">Espanha x
-                                        Portugal</strong>
-                                </td>
-                                <td th:text="${partida.fase}">Quartas</td>
-                                <td th:text="${partida.dataHora}">08/07/2026 18:00</td>
-                                <td>
-                                    <span class="result-badge" th:text="${partida.resultado}">2 x 1</span>
-                                </td>
-                            </tr>
+                        <tr th:each="partida : ${ultimosResultados}">
+                            <td>
+                                <strong th:text="${partida.selecaoA + ' x ' + partida.selecaoB}">Espanha x Portugal</strong>
+                            </td>
+                            <td th:text="${partida.fase}">Quartas</td>
+                            <td th:text="${partida.dataHora}">08/07/2026 18:00</td>
+                            <td>
+                                <span class="result-badge" th:text="${partida.resultado}">2 x 1</span>
+                            </td>
+                        </tr>
                         </tbody>
                     </table>
                 </div>
+            </div>
 
-                <section class="empty-state" th:if="${ultimosResultados.isEmpty()}">
-                    <strong>Nenhum resultado lançado.</strong>
-                    <span>Os resultados aparecerão aqui quando forem cadastrados.</span>
-                </section>
+            <section class="empty-state" th:if="${ultimosResultados.isEmpty()}">
+                <strong>Nenhum resultado lançado.</strong>
+                <span>Os resultados aparecerão aqui quando forem cadastrados.</span>
             </section>
-            </section>
-        </main>
-    </div>
+        </section>
+    </main>
+</div>
+
+<script th:replace="~{fragments/admin-head :: scripts}"></script>
 </body>
 
 </html>

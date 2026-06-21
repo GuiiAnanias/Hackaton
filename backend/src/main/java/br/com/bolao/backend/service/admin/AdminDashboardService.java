@@ -3,6 +3,7 @@ package br.com.bolao.backend.service.admin;
 import br.com.bolao.backend.dto.admin.DashboardResumoDTO;
 import br.com.bolao.backend.dto.admin.PartidaAdminDTO;
 import br.com.bolao.backend.dto.admin.RankingLinhaDTO;
+import br.com.bolao.backend.service.PalpiteService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,27 +13,27 @@ public class AdminDashboardService {
 
     private final AdminRankingService adminRankingService;
     private final AdminPartidaService adminPartidaService;
-    private final AdminMockDataService adminMockDataService;
     private final AdminUsuarioService adminUsuarioService;
+    private final PalpiteService palpiteService;
 
     public AdminDashboardService(
             AdminRankingService adminRankingService,
             AdminPartidaService adminPartidaService,
-            AdminMockDataService adminMockDataService,
-            AdminUsuarioService adminUsuarioService
+            AdminUsuarioService adminUsuarioService,
+            PalpiteService palpiteService
     ) {
         this.adminRankingService = adminRankingService;
         this.adminPartidaService = adminPartidaService;
-        this.adminMockDataService = adminMockDataService;
         this.adminUsuarioService = adminUsuarioService;
+        this.palpiteService = palpiteService;
     }
 
     public DashboardResumoDTO buscarResumo() {
         return new DashboardResumoDTO(
-                Math.toIntExact(adminUsuarioService.contarTodos()),
-                adminMockDataService.buscarTotalPalpites(),
+                converterParaInt(adminUsuarioService.contarTodos()),
+                converterParaInt(palpiteService.contarTodos()),
                 adminPartidaService.contarPartidasPendentes(),
-                Math.toIntExact(adminUsuarioService.contarAtivos())
+                converterParaInt(adminUsuarioService.contarAtivos())
         );
     }
 
@@ -57,5 +58,13 @@ public class AdminDashboardService {
                 .filter(partida -> partida.status().equals("Encerrada"))
                 .limit(5)
                 .toList();
+    }
+
+    private int converterParaInt(long valor) {
+        if (valor > Integer.MAX_VALUE) {
+            return Integer.MAX_VALUE;
+        }
+
+        return (int) valor;
     }
 }
