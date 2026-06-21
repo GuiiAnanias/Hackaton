@@ -26,4 +26,12 @@ public class AdminUsuarioController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+    @PatchMapping("/{id}/bloqueio")
+    public ResponseEntity<Usuario> alternarBloqueio(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(service.alternarBloqueio(id));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

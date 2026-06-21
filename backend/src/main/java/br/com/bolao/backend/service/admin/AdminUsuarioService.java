@@ -21,4 +21,11 @@ public class AdminUsuarioService {
     public Optional<Usuario> buscarPorId(Long id) {
         return repository.findById(id);
     }
+
+    public Usuario alternarBloqueio(Long id) {
+        return repository.findById(id).map(usuario -> {
+            usuario.setAtivo(!usuario.isAtivo()); // Inverte o status: true vira false, false vira true
+            return repository.save(usuario);
+        }).orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+    }
 }

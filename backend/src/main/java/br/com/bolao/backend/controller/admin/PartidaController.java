@@ -15,6 +15,8 @@ public class PartidaController {
     @Autowired
     private PartidaService service;
 
+    // --- ENDPOINTS DO CRUD BÁSICO (RF-042) ---
+
     @GetMapping
     public ResponseEntity<List<Partida>> listar() {
         return ResponseEntity.ok(service.listarTodas());
@@ -45,5 +47,20 @@ public class PartidaController {
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
         service.deletar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // --- ENDPOINT PARA EDIÇÃO DE RESULTADO (RF-044) ---
+
+    @PatchMapping("/{id}/resultado")
+    public ResponseEntity<Partida> editarResultado(@PathVariable Long id, @RequestBody Partida resultado) {
+        try {
+            return ResponseEntity.ok(service.editarResultado(
+                    id,
+                    resultado.getGolsMandante(),
+                    resultado.getGolsVisitante()
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
