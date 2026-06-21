@@ -24,13 +24,14 @@
                 <p>Ordenação por pontuação total, placares exatos e data de cadastro.</p>
             </section>
             <section class="alert-success" th:if="${mensagemSucesso != null}">
-                <strong th:text="${mensagemSucesso}">Resultado lançado com sucesso.</strong>
-                <span th:if="${resultadoLancado != null}" th:text="${resultadoLancado}">Brasil 2 x 1 Argentina</span>
-            </section>
-            <section class="alert-error" th:if="${mensagemErro != null}">
-                <strong th:text="${mensagemErro}">Erro ao carregar ranking.</strong>
+                <strong th:text="${mensagemSucesso}">Ação realizada com sucesso.</strong>
+                <span th:if="${mensagemDetalhe != null}" th:text="${mensagemDetalhe}">Detalhes da ação.</span>
             </section>
 
+            <section class="alert-error" th:if="${mensagemErro != null}">
+                <strong th:text="${mensagemErro}">Erro ao carregar ranking.</strong>
+                <span th:if="${mensagemDetalhe != null}" th:text="${mensagemDetalhe}">Detalhes do erro.</span>
+            </section>
             <table class="admin-table" th:if="${!rankingPagina.usuarios.isEmpty()}">
                 <thead>
                     <tr>

@@ -24,8 +24,14 @@
                 <p>Informe o placar final da partida.</p>
             </section>
 
+            <section class="alert-success" th:if="${mensagemSucesso != null}">
+                <strong th:text="${mensagemSucesso}">Ação realizada com sucesso.</strong>
+                <span th:if="${mensagemDetalhe != null}" th:text="${mensagemDetalhe}">Detalhes da ação.</span>
+            </section>
+
             <section class="alert-error" th:if="${mensagemErro != null}">
                 <strong th:text="${mensagemErro}">Erro ao lançar resultado.</strong>
+                <span th:if="${mensagemDetalhe != null}" th:text="${mensagemDetalhe}">Detalhes do erro.</span>
             </section>
 
             <form class="admin-form" method="post" th:action="@{/admin/partidas/{id}/resultado(id=${partida.id})}">
@@ -42,10 +48,10 @@
                 </p>
 
                 <label for="golsA" th:text="'Gols ' + ${partida.selecaoA}">Gols A</label>
-                <input type="number" id="golsA" name="golsA" min="0" required>
+                <input type="number" id="golsA" name="golsA" min="0" max="20" required>
 
                 <label for="golsB" th:text="'Gols ' + ${partida.selecaoB}">Gols B</label>
-                <input type="number" id="golsB" name="golsB" min="0" required>
+                <input type="number" id="golsB" name="golsB" min="0" max="20" required>
 
                 <button class="admin-button" type="submit">Salvar Resultado</button>
             </form>

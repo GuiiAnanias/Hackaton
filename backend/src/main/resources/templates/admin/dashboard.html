@@ -24,6 +24,16 @@
                 <p>Resumo geral do sistema administrativo.</p>
             </section>
 
+            <section class="alert-success" th:if="${mensagemSucesso != null}">
+                <strong th:text="${mensagemSucesso}">Ação realizada com sucesso.</strong>
+                <span th:if="${mensagemDetalhe != null}" th:text="${mensagemDetalhe}">Detalhes da ação.</span>
+            </section>
+
+            <section class="alert-error" th:if="${mensagemErro != null}">
+                <strong th:text="${mensagemErro}">Erro ao carregar dashboard.</strong>
+                <span th:if="${mensagemDetalhe != null}" th:text="${mensagemDetalhe}">Detalhes do erro.</span>
+            </section>
+
             <section class="card-grid">
                 <div class="info-card">
                     <span>Total de usuários</span>
@@ -45,6 +55,7 @@
                     <strong th:text="${dashboard.usuariosAtivos}">0</strong>
                 </div>
             </section>
+
             <section class="table-section">
                 <div class="section-title">
                     <h3>Top 5 Ranking</h3>
@@ -73,6 +84,7 @@
                     <span>Os usuários aparecerão aqui quando começarem a pontuar no bolão.</span>
                 </section>
             </section>
+
             <section class="dashboard-section">
                 <div class="section-title-row">
                     <div>

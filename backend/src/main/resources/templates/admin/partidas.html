@@ -24,8 +24,14 @@
                 <p>Gerencie os resultados das partidas cadastradas.</p>
             </section>
 
+            <section class="alert-success" th:if="${mensagemSucesso != null}">
+                <strong th:text="${mensagemSucesso}">Ação realizada com sucesso.</strong>
+                <span th:if="${mensagemDetalhe != null}" th:text="${mensagemDetalhe}">Detalhes da ação.</span>
+            </section>
+
             <section class="alert-error" th:if="${mensagemErro != null}">
                 <strong th:text="${mensagemErro}">Erro ao carregar partidas.</strong>
+                <span th:if="${mensagemDetalhe != null}" th:text="${mensagemDetalhe}">Detalhes do erro.</span>
             </section>
 
             <section class="table-section">

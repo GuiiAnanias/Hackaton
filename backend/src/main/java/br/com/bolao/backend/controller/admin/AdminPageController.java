@@ -75,9 +75,9 @@ public class AdminPageController {
         try {
             String resultado = adminPartidaService.lancarResultado(id, golsA, golsB);
 
-            redirectAttributes.addFlashAttribute("mensagemSucesso",
-                    "Resultado lançado com sucesso. A pontuação dos palpites foi recalculada.");
-            redirectAttributes.addFlashAttribute("resultadoLancado", resultado);
+            redirectAttributes.addFlashAttribute("mensagemSucesso", "Resultado lançado com sucesso.");
+            redirectAttributes.addFlashAttribute("mensagemDetalhe",
+                    resultado + ". A pontuação dos palpites foi recalculada.");
 
             return "redirect:/admin/ranking";
         } catch (AdminException exception) {
