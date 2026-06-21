@@ -3,6 +3,8 @@ package br.com.bolao.backend.service.admin;
 import br.com.bolao.backend.dto.admin.PartidaAdminDTO;
 import br.com.bolao.backend.dto.admin.PartidaResultadoDTO;
 import br.com.bolao.backend.exception.AdminException;
+import br.com.bolao.backend.model.EstadioCopa;
+import br.com.bolao.backend.model.FaseCopa;
 import br.com.bolao.backend.model.Partida;
 import br.com.bolao.backend.model.Selecao;
 import br.com.bolao.backend.repository.SelecaoRepository;
@@ -45,22 +47,24 @@ public class AdminPartidaService {
     ) {
         Selecao selecaoMandante = buscarSelecao(selecaoMandanteId, "Informe a seleção mandante.");
         Selecao selecaoVisitante = buscarSelecao(selecaoVisitanteId, "Informe a seleção visitante.");
+        LocalDateTime dataHoraConvertida = converterDataHora(dataHora);
+        FaseCopa faseCopa = converterFase(fase);
+        EstadioCopa estadioCopa = converterEstadio(estadio);
 
         if (selecaoMandante.getId().equals(selecaoVisitante.getId())) {
             throw new AdminException("A partida precisa ter duas seleções diferentes.");
         }
 
-        validarTexto(fase, "Informe a fase da partida.");
         validarTexto(grupo, "Informe o grupo da partida.");
 
         Partida partida = new Partida();
         partida.setSelecaoMandante(selecaoMandante);
         partida.setSelecaoVisitante(selecaoVisitante);
-        partida.setDataHora(converterDataHora(dataHora));
-        partida.setFase(fase.trim());
-        partida.setEstadio(formatarCampoOpcional(estadio));
+        partida.setDataHora(dataHoraConvertida);
+        partida.setFase(faseCopa.getDescricao());
+        partida.setEstadio(estadioCopa.getDescricao());
         partida.setGrupo(grupo.trim().toUpperCase());
-        partida.setStatus("AGENDADA");
+        partida.setStatus(definirStatusInicial(dataHoraConvertida));
         partida.setGolsMandante(null);
         partida.setGolsVisitante(null);
 
@@ -183,14 +187,6 @@ public class AdminPartidaService {
         return valor;
     }
 
-    private String formatarCampoOpcional(String valor) {
-        if (valor == null || valor.isBlank()) {
-            return null;
-        }
-
-        return valor.trim();
-    }
-
     private void validarTexto(String valor, String mensagem) {
         if (valor == null || valor.isBlank()) {
             throw new AdminException(mensagem);
@@ -207,6 +203,38 @@ public class AdminPartidaService {
         } catch (DateTimeParseException exception) {
             throw new AdminException("Informe uma data e hora válidas.");
         }
+    }
+
+    private FaseCopa converterFase(String valor) {
+        if (valor == null || valor.isBlank()) {
+            throw new AdminException("Informe a fase da partida.");
+        }
+
+        try {
+            return FaseCopa.valueOf(valor);
+        } catch (IllegalArgumentException exception) {
+            throw new AdminException("Informe uma fase válida.");
+        }
+    }
+
+    private EstadioCopa converterEstadio(String valor) {
+        if (valor == null || valor.isBlank()) {
+            throw new AdminException("Informe o estádio da partida.");
+        }
+
+        try {
+            return EstadioCopa.valueOf(valor);
+        } catch (IllegalArgumentException exception) {
+            throw new AdminException("Informe um estádio válido.");
+        }
+    }
+
+    private String definirStatusInicial(LocalDateTime dataHora) {
+        if (dataHora.isBefore(LocalDateTime.now())) {
+            return "ENCERRADA";
+        }
+
+        return "AGENDADA";
     }
 
     private int converterGols(String valor) {

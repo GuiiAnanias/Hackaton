@@ -1,5 +1,7 @@
 package br.com.bolao.backend.controller.admin;
 
+import br.com.bolao.backend.model.EstadioCopa;
+import br.com.bolao.backend.model.FaseCopa;
 import br.com.bolao.backend.exception.AdminException;
 import br.com.bolao.backend.service.admin.AdminDashboardService;
 import br.com.bolao.backend.service.admin.AdminPartidaService;
@@ -27,8 +29,7 @@ public class AdminPageController {
             AdminDashboardService adminDashboardService,
             AdminRankingService adminRankingService,
             AdminPartidaService adminPartidaService,
-            AdminSelecaoService adminSelecaoService
-    ) {
+            AdminSelecaoService adminSelecaoService) {
         this.adminDashboardService = adminDashboardService;
         this.adminRankingService = adminRankingService;
         this.adminPartidaService = adminPartidaService;
@@ -40,7 +41,7 @@ public class AdminPageController {
         return "admin/login";
     }
 
-    @GetMapping({"", "/", "/dashboard"})
+    @GetMapping({ "", "/", "/dashboard" })
     public String dashboard(Model model) {
         model.addAttribute("dashboard", adminDashboardService.buscarResumo());
         model.addAttribute("topRanking", adminDashboardService.listarTopRanking());
@@ -53,8 +54,7 @@ public class AdminPageController {
     public String ranking(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
-            Model model
-    ) {
+            Model model) {
         model.addAttribute("rankingPagina", adminRankingService.listarRankingPaginado(page, size));
         return "admin/ranking";
     }
@@ -68,6 +68,8 @@ public class AdminPageController {
     @GetMapping("/partidas/nova")
     public String formularioNovaPartida(Model model) {
         model.addAttribute("selecoes", adminSelecaoService.listarSelecoes());
+        model.addAttribute("fases", FaseCopa.values());
+        model.addAttribute("estadios", EstadioCopa.values());
         return "admin/partidaForm";
     }
 
@@ -79,8 +81,7 @@ public class AdminPageController {
             @RequestParam String fase,
             @RequestParam(required = false) String estadio,
             @RequestParam String grupo,
-            RedirectAttributes redirectAttributes
-    ) {
+            RedirectAttributes redirectAttributes) {
         try {
             adminPartidaService.criarPartida(selecaoMandanteId, selecaoVisitanteId, dataHora, fase, estadio, grupo);
             redirectAttributes.addFlashAttribute("mensagemSucesso", "Partida cadastrada com sucesso.");
@@ -102,16 +103,14 @@ public class AdminPageController {
             @PathVariable Long id,
             @RequestParam String golsA,
             @RequestParam String golsB,
-            RedirectAttributes redirectAttributes
-    ) {
+            RedirectAttributes redirectAttributes) {
         try {
             String resultado = adminPartidaService.lancarResultado(id, golsA, golsB);
 
             redirectAttributes.addFlashAttribute("mensagemSucesso", "Resultado lançado com sucesso.");
             redirectAttributes.addFlashAttribute(
                     "mensagemDetalhe",
-                    resultado + ". A pontuação dos palpites foi recalculada."
-            );
+                    resultado + ". A pontuação dos palpites foi recalculada.");
 
             return "redirect:/admin/ranking";
         } catch (AdminException exception) {
@@ -136,8 +135,7 @@ public class AdminPageController {
             @RequestParam String nome,
             @RequestParam String codigoFifa,
             @RequestParam String grupo,
-            RedirectAttributes redirectAttributes
-    ) {
+            RedirectAttributes redirectAttributes) {
         try {
             adminSelecaoService.criarSelecao(nome, codigoFifa, grupo);
             redirectAttributes.addFlashAttribute("mensagemSucesso", "Seleção cadastrada com sucesso.");

@@ -4,71 +4,84 @@
 <head th:replace="~{fragments/admin-head :: head('Nova Partida')}"></head>
 
 <body>
-<div class="admin-wrapper">
-    <aside th:replace="~{fragments/admin-sidebar :: sidebar('partidas')}"></aside>
+    <div class="admin-wrapper">
+        <aside th:replace="~{fragments/admin-sidebar :: sidebar('partidas')}"></aside>
 
-    <main class="admin-content">
-        <section class="admin-header">
-            <h2>Nova Partida</h2>
-            <p>Cadastre uma partida da Copa do Mundo 2026.</p>
-        </section>
+        <main class="admin-content">
+            <section class="admin-header">
+                <h2>Nova Partida</h2>
+                <p>Cadastre uma partida da Copa do Mundo 2026.</p>
+            </section>
 
-        <section class="alert-error" th:if="${mensagemErro != null}">
-            <strong th:text="${mensagemErro}">Erro ao cadastrar partida.</strong>
-        </section>
+            <section class="alert-error" th:if="${mensagemErro != null}">
+                <strong th:text="${mensagemErro}">Erro ao cadastrar partida.</strong>
+            </section>
 
-        <div class="empty-state" th:if="${selecoes.size() < 2}">
-            <strong>Cadastre pelo menos duas seleções.</strong>
-            <span>É necessário ter duas seleções cadastradas para criar uma partida.</span>
-            <a class="admin-button-link" th:href="@{/admin/selecoes/nova}">Cadastrar seleção</a>
-        </div>
-
-        <form class="admin-form" method="post" th:action="@{/admin/partidas}" th:if="${selecoes.size() >= 2}">
-            <div class="form-group">
-                <label for="selecaoMandanteId">Seleção mandante</label>
-                <select id="selecaoMandanteId" name="selecaoMandanteId" required>
-                    <option value="">Selecione</option>
-                    <option th:each="selecao : ${selecoes}" th:value="${selecao.id}" th:text="${selecao.nome}">Brasil</option>
-                </select>
+            <div class="empty-state" th:if="${selecoes.size() < 2}">
+                <strong>Cadastre pelo menos duas seleções.</strong>
+                <span>É necessário ter duas seleções cadastradas para criar uma partida.</span>
+                <a class="admin-button-link" th:href="@{/admin/selecoes/nova}">Cadastrar seleção</a>
             </div>
 
-            <div class="form-group">
-                <label for="selecaoVisitanteId">Seleção visitante</label>
-                <select id="selecaoVisitanteId" name="selecaoVisitanteId" required>
-                    <option value="">Selecione</option>
-                    <option th:each="selecao : ${selecoes}" th:value="${selecao.id}" th:text="${selecao.nome}">Argentina</option>
-                </select>
-            </div>
+            <form class="admin-form" method="post" th:action="@{/admin/partidas}" th:if="${selecoes.size() >= 2}">
+                <div class="form-group">
+                    <label for="selecaoMandanteId">Seleção mandante</label>
+                    <select id="selecaoMandanteId" name="selecaoMandanteId" required>
+                        <option value="">Selecione</option>
+                        <option th:each="selecao : ${selecoes}" th:value="${selecao.id}" th:text="${selecao.nome}">
+                            Brasil</option>
+                    </select>
+                </div>
 
-            <div class="form-group">
-                <label for="dataHora">Data e hora</label>
-                <input type="datetime-local" id="dataHora" name="dataHora" required>
-            </div>
+                <div class="form-group">
+                    <label for="selecaoVisitanteId">Seleção visitante</label>
+                    <select id="selecaoVisitanteId" name="selecaoVisitanteId" required>
+                        <option value="">Selecione</option>
+                        <option th:each="selecao : ${selecoes}" th:value="${selecao.id}" th:text="${selecao.nome}">
+                            Argentina</option>
+                    </select>
+                </div>
 
-            <div class="form-group">
-                <label for="fase">Fase</label>
-                <input type="text" id="fase" name="fase" placeholder="Fase de grupos" required>
-            </div>
+                <div class="form-group">
+                    <label for="dataHora">Data e hora</label>
+                    <input type="datetime-local" id="dataHora" name="dataHora" required>
+                </div>
 
-            <div class="form-group">
-                <label for="grupo">Grupo</label>
-                <input type="text" id="grupo" name="grupo" placeholder="G" maxlength="2" required>
-            </div>
+                <div class="form-group">
+                    <label for="fase">Fase</label>
+                    <select id="fase" name="fase" required>
+                        <option value="">Selecione</option>
+                        <option th:each="fase : ${fases}" th:value="${fase.name()}" th:text="${fase.descricao}">
+                            Fase de grupos
+                        </option>
+                    </select>
+                </div>
 
-            <div class="form-group">
-                <label for="estadio">Estádio</label>
-                <input type="text" id="estadio" name="estadio" placeholder="MetLife Stadium">
-            </div>
+                <div class="form-group">
+                    <label for="grupo">Grupo</label>
+                    <input type="text" id="grupo" name="grupo" placeholder="G" maxlength="2" required>
+                </div>
 
-            <div class="form-actions">
-                <a class="admin-button-secondary" th:href="@{/admin/partidas}">Cancelar</a>
-                <button type="submit" class="admin-button">Cadastrar partida</button>
-            </div>
-        </form>
-    </main>
-</div>
+                <div class="form-group">
+                    <label for="estadio">Estádio</label>
+                    <select id="estadio" name="estadio" required>
+                        <option value="">Selecione</option>
+                        <option th:each="estadio : ${estadios}" th:value="${estadio.name()}"
+                            th:text="${estadio.descricao}">
+                            Atlanta Stadium
+                        </option>
+                    </select>
+                </div>
 
-<script th:replace="~{fragments/admin-head :: scripts}"></script>
+                <div class="form-actions">
+                    <a class="admin-button-secondary" th:href="@{/admin/partidas}">Cancelar</a>
+                    <button type="submit" class="admin-button">Cadastrar partida</button>
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <script th:replace="~{fragments/admin-head :: scripts}"></script>
 </body>
 
 </html>
