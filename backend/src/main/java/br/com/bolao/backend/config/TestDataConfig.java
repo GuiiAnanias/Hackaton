@@ -1,6 +1,7 @@
 package br.com.bolao.backend.config;
 
 import br.com.bolao.backend.model.Partida;
+import br.com.bolao.backend.model.Perfil;
 import br.com.bolao.backend.model.Selecao;
 import br.com.bolao.backend.model.Usuario;
 import br.com.bolao.backend.repository.PartidaRepository;
@@ -9,6 +10,7 @@ import br.com.bolao.backend.repository.UsuarioRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 
@@ -19,17 +21,26 @@ public class TestDataConfig {
     public CommandLineRunner initDatabase(
             UsuarioRepository usuarioRepository,
             SelecaoRepository selecaoRepository,
-            PartidaRepository partidaRepository
+            PartidaRepository partidaRepository,
+            PasswordEncoder passwordEncoder
     ) {
         return args -> {
             if (usuarioRepository.count() == 0) {
                 Usuario usuario = new Usuario();
                 usuario.setNome("João Hackathon");
                 usuario.setEmail("joao@email.com");
-                usuario.setSenha("senha123");
+                usuario.setSenha(passwordEncoder.encode("senha123"));
+                usuario.setPerfil(Perfil.USER);
                 usuario.setAtivo(true);
-
                 usuarioRepository.save(usuario);
+
+                Usuario admin = new Usuario();
+                admin.setNome("Administrador");
+                admin.setEmail("admin@email.com");
+                admin.setSenha(passwordEncoder.encode("admin123"));
+                admin.setPerfil(Perfil.ADMIN);
+                admin.setAtivo(true);
+                usuarioRepository.save(admin);
             }
 
             if (selecaoRepository.count() == 0) {
@@ -49,41 +60,18 @@ public class TestDataConfig {
             }
 
             if (partidaRepository.count() == 0) {
-                Selecao brasil = selecaoRepository.findAll()
-                        .stream()
-                        .filter(selecao -> selecao.getCodigoFifa().equals("BRA"))
-                        .findFirst()
-                        .orElseThrow();
-
-                Selecao argentina = selecaoRepository.findAll()
-                        .stream()
-                        .filter(selecao -> selecao.getCodigoFifa().equals("ARG"))
-                        .findFirst()
-                        .orElseThrow();
-
-                Selecao franca = selecaoRepository.findAll()
-                        .stream()
-                        .filter(selecao -> selecao.getCodigoFifa().equals("FRA"))
-                        .findFirst()
-                        .orElseThrow();
-
-                Selecao alemanha = selecaoRepository.findAll()
-                        .stream()
-                        .filter(selecao -> selecao.getCodigoFifa().equals("ALE"))
-                        .findFirst()
-                        .orElseThrow();
-
-                Selecao espanha = selecaoRepository.findAll()
-                        .stream()
-                        .filter(selecao -> selecao.getCodigoFifa().equals("ESP"))
-                        .findFirst()
-                        .orElseThrow();
-
-                Selecao portugal = selecaoRepository.findAll()
-                        .stream()
-                        .filter(selecao -> selecao.getCodigoFifa().equals("POR"))
-                        .findFirst()
-                        .orElseThrow();
+                Selecao brasil = selecaoRepository.findAll().stream()
+                        .filter(s -> s.getCodigoFifa().equals("BRA")).findFirst().orElseThrow();
+                Selecao argentina = selecaoRepository.findAll().stream()
+                        .filter(s -> s.getCodigoFifa().equals("ARG")).findFirst().orElseThrow();
+                Selecao franca = selecaoRepository.findAll().stream()
+                        .filter(s -> s.getCodigoFifa().equals("FRA")).findFirst().orElseThrow();
+                Selecao alemanha = selecaoRepository.findAll().stream()
+                        .filter(s -> s.getCodigoFifa().equals("ALE")).findFirst().orElseThrow();
+                Selecao espanha = selecaoRepository.findAll().stream()
+                        .filter(s -> s.getCodigoFifa().equals("ESP")).findFirst().orElseThrow();
+                Selecao portugal = selecaoRepository.findAll().stream()
+                        .filter(s -> s.getCodigoFifa().equals("POR")).findFirst().orElseThrow();
 
                 partidaRepository.save(criarPartida(brasil, argentina, "Final", "MetLife Stadium", "G", LocalDateTime.of(2026, 7, 16, 16, 0), "AGENDADA", null, null));
                 partidaRepository.save(criarPartida(franca, alemanha, "Semifinal", "AT&T Stadium", "H", LocalDateTime.of(2026, 7, 12, 15, 0), "AGENDADA", null, null));
@@ -101,17 +89,9 @@ public class TestDataConfig {
         return selecao;
     }
 
-    private Partida criarPartida(
-            Selecao mandante,
-            Selecao visitante,
-            String fase,
-            String estadio,
-            String grupo,
-            LocalDateTime dataHora,
-            String status,
-            Integer golsMandante,
-            Integer golsVisitante
-    ) {
+    private Partida criarPartida(Selecao mandante, Selecao visitante, String fase, String estadio,
+                                 String grupo, LocalDateTime dataHora, String status,
+                                 Integer golsMandante, Integer golsVisitante) {
         Partida partida = new Partida();
         partida.setSelecaoMandante(mandante);
         partida.setSelecaoVisitante(visitante);
