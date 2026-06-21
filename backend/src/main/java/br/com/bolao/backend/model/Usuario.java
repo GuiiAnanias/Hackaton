@@ -3,6 +3,7 @@ package br.com.bolao.backend.model;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "usuarios")
 public class Usuario {
 
     @Id

@@ -13,23 +13,26 @@ public class AdminDashboardService {
     private final AdminRankingService adminRankingService;
     private final AdminPartidaService adminPartidaService;
     private final AdminMockDataService adminMockDataService;
+    private final AdminUsuarioService adminUsuarioService;
 
     public AdminDashboardService(
             AdminRankingService adminRankingService,
             AdminPartidaService adminPartidaService,
-            AdminMockDataService adminMockDataService
+            AdminMockDataService adminMockDataService,
+            AdminUsuarioService adminUsuarioService
     ) {
         this.adminRankingService = adminRankingService;
         this.adminPartidaService = adminPartidaService;
         this.adminMockDataService = adminMockDataService;
+        this.adminUsuarioService = adminUsuarioService;
     }
 
     public DashboardResumoDTO buscarResumo() {
         return new DashboardResumoDTO(
-                adminMockDataService.buscarTotalUsuarios(),
+                Math.toIntExact(adminUsuarioService.contarTodos()),
                 adminMockDataService.buscarTotalPalpites(),
                 adminPartidaService.contarPartidasPendentes(),
-                adminMockDataService.buscarUsuariosAtivos24h()
+                Math.toIntExact(adminUsuarioService.contarAtivos())
         );
     }
 
