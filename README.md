@@ -26,13 +26,16 @@ Tecnologias previstas:
 
 ```txt
 Java 21
-Spring Boot
+Spring Boot Web
 Spring Security
 JWT
 Spring Data JPA
-MySQL
+MySQL Driver
 Thymeleaf
 Bootstrap
+Lombok
+Spring Boot Dev Tools
+Validation
 ```
 
 ### App Mobile
@@ -420,5 +423,5 @@ A regra principal é:
 ```txt
 Trabalhar na própria branch
 Enviar para develop por Pull Request
-Enviar para main apenas quando estiver estável
+Enviar para main apenas quando estiver estável.
 ```

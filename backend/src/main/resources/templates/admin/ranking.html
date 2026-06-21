@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/admin-head :: head('Ranking Admin')}">
+    <meta charset="UTF-8">
+    <title>Ranking Geral</title>
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+
+<body>
+    <div class="admin-wrapper">
+        <aside class="admin-sidebar">
+            <h1>Bolão 2026</h1>
+            <nav>
+                <a th:href="@{/admin/dashboard}">Dashboard</a>
+                <a th:href="@{/admin/partidas}">Partidas</a>
+                <a th:href="@{/admin/ranking}">Ranking</a>
+            </nav>
+        </aside>
+
+        <main class="admin-content">
+            <section class="admin-header">
+                <h2>Ranking Geral</h2>
+                <p>Ordenação por pontuação total, placares exatos e data de cadastro.</p>
+            </section>
+            <section class="alert-success" th:if="${mensagemSucesso != null}">
+                <strong th:text="${mensagemSucesso}">Ação realizada com sucesso.</strong>
+                <span th:if="${mensagemDetalhe != null}" th:text="${mensagemDetalhe}">Detalhes da ação.</span>
+            </section>
+
+            <section class="alert-error" th:if="${mensagemErro != null}">
+                <strong th:text="${mensagemErro}">Erro ao carregar ranking.</strong>
+                <span th:if="${mensagemDetalhe != null}" th:text="${mensagemDetalhe}">Detalhes do erro.</span>
+            </section>
+            <div class="admin-table-responsive">
+                <table class="admin-table" th:if="${!rankingPagina.usuarios.isEmpty()}">
+                    <thead>
+                        <tr>
+                            <th>Posição</th>
+                            <th>Usuário</th>
+                            <th>Pontos</th>
+                            <th>Placares exatos</th>
+                            <th>Cadastro</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="usuario : ${rankingPagina.usuarios}">
+                            <td th:text="${usuario.posicao}">1</td>
+                            <td th:text="${usuario.nome}">Usuário</td>
+                            <td th:text="${usuario.pontuacaoTotal}">0</td>
+                            <td th:text="${usuario.placaresExatos}">0</td>
+                            <td th:text="${usuario.criadoEm}">00/00/0000</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <section class="empty-state" th:if="${rankingPagina.usuarios.isEmpty()}">
+                <strong>Nenhum usuário no ranking.</strong>
+                <span>O ranking será preenchido automaticamente quando os usuários começarem a pontuar.</span>
+            </section>
+
+            <div class="pagination" th:if="${rankingPagina.totalPaginas > 1 && !rankingPagina.usuarios.isEmpty()}">
+                <div th:if="${rankingPagina.exibirTodas}">
+                    <a th:each="pagina : ${#numbers.sequence(0, rankingPagina.totalPaginas - 1)}"
+                        th:classappend="${pagina == rankingPagina.paginaAtual} ? 'active' : ''"
+                        th:href="@{/admin/ranking(page=${pagina}, size=${rankingPagina.tamanhoPagina})}"
+                        th:text="${pagina + 1}">
+                        1
+                    </a>
+                </div>
+
+                <div th:if="${!rankingPagina.exibirTodas}">
+                    <a th:classappend="${rankingPagina.paginaAtual == 0} ? 'active' : ''"
+                        th:href="@{/admin/ranking(page=0, size=${rankingPagina.tamanhoPagina})}">
+                        1
+                    </a>
+
+                    <span class="pagination-ellipsis" th:if="${rankingPagina.exibirReticenciasInicio}">...</span>
+
+                    <a th:each="pagina : ${#numbers.sequence(rankingPagina.inicioJanela, rankingPagina.fimJanela)}"
+                        th:classappend="${pagina == rankingPagina.paginaAtual} ? 'active' : ''"
+                        th:href="@{/admin/ranking(page=${pagina}, size=${rankingPagina.tamanhoPagina})}"
+                        th:text="${pagina + 1}">
+                        2
+                    </a>
+
+                    <span class="pagination-ellipsis" th:if="${rankingPagina.exibirReticenciasFim}">...</span>
+
+                    <a th:classappend="${rankingPagina.paginaAtual == rankingPagina.totalPaginas - 1} ? 'active' : ''"
+                        th:href="@{/admin/ranking(page=${rankingPagina.totalPaginas - 1}, size=${rankingPagina.tamanhoPagina})}"
+                        th:text="${rankingPagina.totalPaginas}">
+                        Última
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script th:replace="~{fragments/admin-head :: scripts}"></script>
+</body>
+
+</html>

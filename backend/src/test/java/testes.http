@@ -1,0 +1,41 @@
+### 1. Login do ADMIN  (rode este primeiro - ele pega o token automaticamente)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@email.com",
+  "senha": "admin123"
+}
+
+> {%
+    client.global.set("token", response.body.token);
+%}
+
+### 2. Login de usuario comum
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "joao@email.com",
+  "senha": "senha123"
+}
+
+### 3. Listar Selecoes  (usa o token do login do admin)
+GET http://localhost:8080/api/admin/selecoes
+Authorization: Bearer {{token}}
+
+### 4. Criar uma nova Selecao  (precisa de token de ADMIN)
+POST http://localhost:8080/api/admin/selecoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nome": "Uruguai",
+  "codigoFifa": "URU",
+  "bandeira": "uruguai.png",
+  "grupo": "C"
+}
+
+### 5. Buscar Selecao por ID
+GET http://localhost:8080/api/admin/selecoes/1
+Authorization: Bearer {{token}}
