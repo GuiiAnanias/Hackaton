@@ -31,6 +31,11 @@ public class AdminPageController {
         this.adminPartidaService = adminPartidaService;
     }
 
+    @GetMapping("/login")
+    public String login() {
+        return "admin/login";
+    }
+
     @GetMapping({ "", "/", "/dashboard" })
     public String dashboard(Model model) {
         model.addAttribute("dashboard", adminDashboardService.buscarResumo());
