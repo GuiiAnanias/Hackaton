@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Login Admin</title>
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+
+<body class="login-page">
+    <div class="login-container">
+        <section class="login-card">
+            <div class="login-header">
+                <h1>Bolão 2026</h1>
+                <p>Painel administrativo</p>
+            </div>
+
+            <section class="alert-success" th:if="${mensagemSucesso != null}">
+                <strong th:text="${mensagemSucesso}">Ação realizada com sucesso.</strong>
+                <span th:if="${mensagemDetalhe != null}" th:text="${mensagemDetalhe}">Detalhes da ação.</span>
+            </section>
+
+            <section class="alert-error" th:if="${mensagemErro != null}">
+                <strong th:text="${mensagemErro}">Erro ao realizar login.</strong>
+                <span th:if="${mensagemDetalhe != null}" th:text="${mensagemDetalhe}">Detalhes do erro.</span>
+            </section>
+
+            <form class="login-form" method="get" th:action="@{/admin/dashboard}">
+                <div class="form-group">
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" name="email" placeholder="admin@email.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="senha">Senha</label>
+                    <input type="password" id="senha" name="senha" placeholder="Digite sua senha" required>
+                </div>
+
+                <button type="submit" class="login-button">Entrar</button>
+            </form>
+
+            <div class="login-footer">
+                <span>Autenticação real será integrada com Spring Security.</span>
+            </div>
+        </section>
+    </div>
+</body>
+
+</html>
