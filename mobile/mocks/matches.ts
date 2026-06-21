@@ -1,14 +1,105 @@
-export const matches = [
+import type { Match } from "../types";
+
+export const matches: Match[] = [
     {
         id: 1,
         teamA: "Brasil",
         teamB: "Argentina",
-        date: "20/06/2026 16:00",
+        date: "22/06/2026 16:00",
+        dateISO: "2026-06-22T16:00:00",
+        phase: "Grupos",
+        status: "AGENDADA",
+        stadium: "MetLife Stadium",
+        group: "A",
     },
     {
         id: 2,
         teamA: "França",
         teamB: "Alemanha",
-        date: "21/06/2026 13:00",
+        date: "23/06/2026 13:00",
+        dateISO: "2026-06-23T13:00:00",
+        phase: "Grupos",
+        status: "AGENDADA",
+        stadium: "SoFi Stadium",
+        group: "B",
     },
+    {
+        id: 3,
+        teamA: "Espanha",
+        teamB: "Portugal",
+        date: "24/06/2026 19:00",
+        dateISO: "2026-06-24T19:00:00",
+        phase: "Grupos",
+        status: "AGENDADA",
+        stadium: "AT&T Stadium",
+        group: "C",
+    },
+    {
+        id: 4,
+        teamA: "Inglaterra",
+        teamB: "Holanda",
+        date: "28/06/2026 17:00",
+        dateISO: "2026-06-28T17:00:00",
+        phase: "Oitavas de Final",
+        status: "AGENDADA",
+        stadium: "Mercedes-Benz Stadium",
+    },
+    {
+        id: 5,
+        teamA: "Brasil",
+        teamB: "França",
+        date: "05/07/2026 16:00",
+        dateISO: "2026-07-05T16:00:00",
+        phase: "Quartas de Final",
+        status: "AGENDADA",
+        stadium: "Hard Rock Stadium",
+    },
+    {
+        id: 6,
+        teamA: "França",
+        teamB: "Alemanha",
+        date: "10/06/2026 15:00",
+        dateISO: "2026-06-10T15:00:00",
+        phase: "Grupos",
+        status: "ENCERRADA",
+        stadium: "Levi's Stadium",
+        group: "A",
+        scoreA: 2,
+        scoreB: 1,
+    },
+    {
+        id: 7,
+        teamA: "Argentina",
+        teamB: "França",
+        date: "15/06/2026 20:00",
+        dateISO: "2026-06-15T20:00:00",
+        phase: "Grupos",
+        status: "EM_ANDAMENTO",
+        stadium: "Lumen Field",
+        group: "D",
+        scoreA: 1,
+        scoreB: 0,
+    },
+];
+
+export const MATCH_PHASES = [
+    "TODAS",
+    "Grupos",
+    "Oitavas de Final",
+    "Quartas de Final",
+    "Semifinal",
+    "Final",
+] as const;
+
+export const MATCH_STATUSES = ["TODOS", "AGENDADA", "EM_ANDAMENTO", "ENCERRADA"] as const;
+
+export const MATCH_DATES = [
+    { label: "Todas as datas", value: "" },
+    { label: "10/06/2026", value: "2026-06-10" },
+    { label: "15/06/2026", value: "2026-06-15" },
+    { label: "22/06/2026", value: "2026-06-22" },
+    { label: "23/06/2026", value: "2026-06-23" },
+    { label: "24/06/2026", value: "2026-06-24" },
+    { label: "28/06/2026", value: "2026-06-28" },
+    { label: "05/07/2026", value: "2026-07-05" },
 ];
