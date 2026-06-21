@@ -26,13 +26,16 @@ Tecnologias previstas:
 
 ```txt
 Java 21
-Spring Boot
+Spring Boot Web
 Spring Security
 JWT
 Spring Data JPA
 MySQL
 Thymeleaf
 Bootstrap
+Lombok
+Spring Boot Dev Tools
+Validation
 ```
 
 ### App Mobile
