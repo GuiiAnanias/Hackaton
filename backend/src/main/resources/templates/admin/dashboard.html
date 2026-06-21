@@ -45,14 +45,12 @@
                     <strong th:text="${dashboard.usuariosAtivos}">0</strong>
                 </div>
             </section>
-
             <section class="table-section">
                 <div class="section-title">
                     <h3>Top 5 Ranking</h3>
                     <a th:href="@{/admin/ranking}">Ver ranking completo</a>
                 </div>
-
-                <table class="admin-table">
+                <table class="admin-table" th:if="${!topRanking.isEmpty()}">
                     <thead>
                         <tr>
                             <th>Posição</th>
@@ -70,6 +68,10 @@
                         </tr>
                     </tbody>
                 </table>
+                <section class="empty-state" th:if="${topRanking.isEmpty()}">
+                    <strong>Nenhum usuário no ranking.</strong>
+                    <span>Os usuários aparecerão aqui quando começarem a pontuar no bolão.</span>
+                </section>
             </section>
             <section class="dashboard-section">
                 <div class="section-title-row">

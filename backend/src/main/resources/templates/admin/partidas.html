@@ -33,13 +33,12 @@
                     <h3>Lista de partidas</h3>
                 </div>
 
-                <table class="admin-table">
+                <table class="admin-table" th:if="${!partidas.isEmpty()}">
                     <thead>
                         <tr>
-                            <th>ID</th>
                             <th>Partida</th>
                             <th>Fase</th>
-                            <th>Data e hora</th>
+                            <th>Data</th>
                             <th>Status</th>
                             <th>Resultado</th>
                             <th>Ação</th>
@@ -47,11 +46,9 @@
                     </thead>
                     <tbody>
                         <tr th:each="partida : ${partidas}">
-                            <td th:text="${partida.id}">1</td>
                             <td>
-                                <span th:text="${partida.selecaoA}">Brasil</span>
-                                <span> x </span>
-                                <span th:text="${partida.selecaoB}">Argentina</span>
+                                <strong th:text="${partida.selecaoA + ' x ' + partida.selecaoB}">Brasil x
+                                    Argentina</strong>
                             </td>
                             <td th:text="${partida.fase}">Final</td>
                             <td th:text="${partida.dataHora}">16/07/2026 16:00</td>
@@ -61,12 +58,18 @@
                             <td th:text="${partida.resultado}">-</td>
                             <td>
                                 <a class="table-action" th:href="@{/admin/partidas/{id}/resultado(id=${partida.id})}">
-                                    Lançar resultado
+                                    <span th:if="${partida.status == 'Encerrada'}">Editar resultado</span>
+                                    <span th:if="${partida.status != 'Encerrada'}">Lançar resultado</span>
                                 </a>
                             </td>
                         </tr>
                     </tbody>
                 </table>
+
+                <section class="empty-state" th:if="${partidas.isEmpty()}">
+                    <strong>Nenhuma partida cadastrada.</strong>
+                    <span>As partidas aparecerão aqui quando forem cadastradas no sistema.</span>
+                </section>
             </section>
         </main>
     </div>

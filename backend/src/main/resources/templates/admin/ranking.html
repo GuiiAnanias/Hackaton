@@ -31,12 +31,12 @@
                 <strong th:text="${mensagemErro}">Erro ao carregar ranking.</strong>
             </section>
 
-            <table class="admin-table">
+            <table class="admin-table" th:if="${!rankingPagina.usuarios.isEmpty()}">
                 <thead>
                     <tr>
                         <th>Posição</th>
                         <th>Usuário</th>
-                        <th>Pontuação total</th>
+                        <th>Pontos</th>
                         <th>Placares exatos</th>
                         <th>Cadastro</th>
                     </tr>
@@ -52,7 +52,12 @@
                 </tbody>
             </table>
 
-            <div class="pagination" th:if="${rankingPagina.totalPaginas > 1}">
+            <section class="empty-state" th:if="${rankingPagina.usuarios.isEmpty()}">
+                <strong>Nenhum usuário no ranking.</strong>
+                <span>O ranking será preenchido automaticamente quando os usuários começarem a pontuar.</span>
+            </section>
+
+            <div class="pagination" th:if="${rankingPagina.totalPaginas > 1 && !rankingPagina.usuarios.isEmpty()}">
                 <div th:if="${rankingPagina.exibirTodas}">
                     <a th:each="pagina : ${#numbers.sequence(0, rankingPagina.totalPaginas - 1)}"
                         th:classappend="${pagina == rankingPagina.paginaAtual} ? 'active' : ''"
