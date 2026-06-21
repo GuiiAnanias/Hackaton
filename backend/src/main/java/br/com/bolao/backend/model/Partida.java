@@ -13,12 +13,11 @@ public class Partida {
 
     // Relacionamento com a Seleção Mandante
     @ManyToOne
-    @JoinColumn(name = "selecao_mandante_id", nullable = false)
+    @JoinColumn(name = "selecao_a_id", nullable = false)
     private Selecao selecaoMandante;
 
-    // Relacionamento com a Seleção Visitante
     @ManyToOne
-    @JoinColumn(name = "selecao_visitante_id", nullable = false)
+    @JoinColumn(name = "selecao_b_id", nullable = false)
     private Selecao selecaoVisitante;
 
     private LocalDateTime dataHora;
@@ -27,7 +26,10 @@ public class Partida {
     private String grupo;
 
     // Campos para o RF-043 e RF-044 (Resultados)
+    @Column(name = "gols_selecao_a")
     private Integer golsMandante;
+
+    @Column(name = "gols_selecao_b")
     private Integer golsVisitante;
 
     // Status: AGENDADA, EM_ANDAMENTO, ENCERRADA
