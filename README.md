@@ -423,5 +423,5 @@ A regra principal é:
 ```txt
 Trabalhar na própria branch
 Enviar para develop por Pull Request
-Enviar para main apenas quando estiver estável
+Enviar para main apenas quando estiver estável.
 ```
