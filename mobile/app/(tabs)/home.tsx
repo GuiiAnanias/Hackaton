@@ -3,6 +3,7 @@ import { ActivityIndicator, View, Text, FlatList, TouchableOpacity, StyleSheet }
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { listarPartidas, Partida } from "../../api";
+import { CopaTheme } from "../../constants/copa-theme";
 
 export default function HomeScreen() {
     const [matches, setMatches] = useState<Partida[]>([]);
@@ -11,7 +12,10 @@ export default function HomeScreen() {
 
     useEffect(() => {
         listarPartidas()
-            .then((partidas) => setMatches(partidas.filter((partida) => partida.status !== "ENCERRADA")))
+            .then((partidas) => setMatches(partidas
+                .filter((partida) => partida.status === "AGENDADA" && new Date(partida.dataHora).getTime() > Date.now())
+                .sort((a, b) => new Date(a.dataHora).getTime() - new Date(b.dataHora).getTime())
+                .slice(0, 5)))
             .catch((err) => setError(err instanceof Error ? err.message : "Erro ao carregar partidas"))
             .finally(() => setLoading(false));
     }, []);
@@ -34,7 +38,9 @@ export default function HomeScreen() {
                     renderItem={({ item }) => (
                         <View style={styles.card}>
                             <Text style={styles.matchTitle}>{item.mandante} x {item.visitante}</Text>
-                            <Text style={styles.matchDate}>{new Date(item.dataHora).toLocaleString("pt-BR")}</Text>
+                            <Text style={styles.matchDate}>
+                                {item.dataHoraFormatada ?? new Date(item.dataHora).toLocaleString("pt-BR")}
+                            </Text>
                             <Text style={styles.matchMeta}>{item.fase} • {item.estadio}</Text>
 
                             <View style={styles.actions}>
@@ -60,11 +66,11 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#f0fdf4",
+        backgroundColor: CopaTheme.background,
     },
     hero: {
         borderRadius: 18,
-        backgroundColor: "#16a34a",
+        backgroundColor: CopaTheme.primary,
         marginBottom: 16,
         padding: 18,
     },
@@ -79,9 +85,11 @@ const styles = StyleSheet.create({
     },
     card: {
         padding: 16,
-        backgroundColor: "#fff",
+        backgroundColor: CopaTheme.surface,
         marginBottom: 10,
         borderRadius: 14,
+        borderWidth: 1,
+        borderColor: CopaTheme.border,
     },
     matchTitle: {
         fontSize: 17,
@@ -105,7 +113,7 @@ const styles = StyleSheet.create({
         fontWeight: "800",
     },
     guessText: {
-        color: "#16a34a",
+        color: CopaTheme.primary,
         fontWeight: "800",
     },
     error: {

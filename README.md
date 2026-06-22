@@ -60,6 +60,94 @@ Tecnologia prevista:
 MySQL
 ```
 
+## Como Rodar Para Apresentação
+
+### 1. Backend Java + MySQL
+
+Pré-requisitos:
+
+```txt
+Java 21+
+MySQL rodando localmente
+Banco: bolao_copa_2026
+```
+
+Comando:
+
+```bash
+cd backend
+./mvnw spring-boot:run
+```
+
+No Windows:
+
+```bash
+cd backend
+.\mvnw.cmd spring-boot:run
+```
+
+Configuração padrão do banco:
+
+```txt
+URL: jdbc:mysql://localhost:3306/bolao_copa_2026
+Usuário: root
+Senha: vazia
+```
+
+Se a máquina usar outra senha ou usuário, configurar variáveis de ambiente:
+
+```txt
+DB_URL
+DB_USERNAME
+DB_PASSWORD
+JWT_SECRET
+JWT_EXPIRATION
+```
+
+Painel admin:
+
+```txt
+http://localhost:8080/admin/login
+```
+
+### 2. App Mobile React Native/Expo
+
+O app mobile não possui banco local. Todas as telas consomem a API do backend Java.
+
+Comandos:
+
+```bash
+cd mobile
+npm install
+npm run android
+```
+
+No emulador Android, o app usa:
+
+```txt
+http://10.0.2.2:8080
+```
+
+Em web/iOS local, usa:
+
+```txt
+http://localhost:8080
+```
+
+## Roteiro Sugerido De Demonstração
+
+```txt
+1. Abrir o backend e mostrar o painel admin.
+2. Cadastrar seleções e partidas ou usar os dados já existentes no MySQL.
+3. Abrir o app mobile e cadastrar/logar um usuário.
+4. Listar partidas, filtrar e abrir o detalhe de uma partida.
+5. Registrar ou editar um palpite antes do início da partida.
+6. No painel admin, lançar o resultado da partida.
+7. Voltar ao app e mostrar Meus Palpites com pontos e critério.
+8. Abrir Ranking e destacar a posição do usuário.
+9. Mostrar Perfil, logout e encerramento da sessão.
+```
+
 ## Organização das Branches
 
 O projeto utiliza um fluxo simples de branches para facilitar o desenvolvimento em equipe durante o hackathon.

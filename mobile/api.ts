@@ -25,6 +25,7 @@ export type Partida = {
     id: number;
     mandante: string;
     visitante: string;
+    dataHoraFormatada?: string;
     dataHora: string;
     fase: string;
     estadio: string;
@@ -44,6 +45,26 @@ export type Palpite = {
     golsVisitante: number;
     pontos: number | null;
     statusPartida: string;
+    criterio: "PLACAR_EXATO" | "VENCEDOR" | "ERRO" | null;
+};
+
+export type RankingUsuario = {
+    posicao: number;
+    usuarioId: number;
+    nome: string;
+    pontuacaoTotal: number;
+    placaresExatos: number;
+    criadoEm: string;
+    destaque: boolean;
+};
+
+export type RankingResponse = {
+    usuarios: RankingUsuario[];
+    usuarioLogado: RankingUsuario | null;
+    paginaAtual: number;
+    tamanhoPagina: number;
+    totalPaginas: number;
+    totalUsuarios: number;
 };
 
 type ApiOptions = {
@@ -72,7 +93,7 @@ async function apiRequest<T>(path: string, options: ApiOptions = {}): Promise<T>
     const data = text ? parseJson(text) : null;
 
     if (!response.ok) {
-        throw new Error(data?.erro ?? data?.detail ?? data?.message ?? "Erro ao conectar com a API");
+        throw new Error(data?.erro ?? data?.detail ?? data?.message ?? data?.error ?? "Erro ao conectar com a API");
     }
 
     return data as T;
@@ -164,4 +185,8 @@ export function atualizarPalpite(token: string, id: number, golsMandante: number
         token,
         body: { golsMandante, golsVisitante },
     });
+}
+
+export function listarRanking(token?: string, page = 0, size = 50) {
+    return apiRequest<RankingResponse>(`/api/ranking?page=${page}&size=${size}`, { token });
 }

@@ -5,6 +5,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { listarMeusPalpites, Palpite } from "../../api";
 import { useAuth } from "../../auth";
+import { CopaTheme, CRITERIA_LABELS } from "../../constants/copa-theme";
 
 export default function MyGuessesScreen() {
     const { user } = useAuth();
@@ -46,6 +47,9 @@ export default function MyGuessesScreen() {
                                 <Text style={styles.matchTitle}>{item.mandante} x {item.visitante}</Text>
                                 <Text style={styles.guessText}>Palpite: {item.golsMandante} x {item.golsVisitante}</Text>
                                 <Text style={styles.points}>{item.pontos ?? 0} pontos</Text>
+                                <Text style={styles.criteria}>
+                                    {CRITERIA_LABELS[item.criterio ?? "PENDENTE"] ?? "Aguardando resultado"}
+                                </Text>
                             </View>
                         </TouchableOpacity>
                     )}
@@ -57,7 +61,7 @@ export default function MyGuessesScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#f0fdf4",
+        backgroundColor: CopaTheme.background,
     },
     title: {
         fontSize: 24,
@@ -66,9 +70,11 @@ const styles = StyleSheet.create({
     },
     card: {
         padding: 16,
-        backgroundColor: "#fff",
+        backgroundColor: CopaTheme.surface,
         marginBottom: 10,
         borderRadius: 14,
+        borderWidth: 1,
+        borderColor: CopaTheme.border,
     },
     matchTitle: {
         fontSize: 17,
@@ -79,9 +85,14 @@ const styles = StyleSheet.create({
         marginTop: 6,
     },
     points: {
-        color: "#16a34a",
+        color: CopaTheme.primary,
         fontWeight: "800",
         marginTop: 6,
+    },
+    criteria: {
+        color: CopaTheme.textMuted,
+        fontSize: 12,
+        marginTop: 4,
     },
     error: {
         color: "#dc2626",

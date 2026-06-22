@@ -23,7 +23,9 @@ export type Match = {
 
 export type ScoreCriteria =
     | "PLACAR_EXATO"
+    | "VENCEDOR"
     | "VENCEDOR_EMPATE"
+    | "ERRO"
     | "ERRO_TOTAL"
     | "PENDENTE";
 

@@ -4,11 +4,12 @@ import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { API_BASE_URL } from "../api";
 import { useAuth } from "../auth";
+import { CopaTheme } from "../constants/copa-theme";
 
 export default function LoginScreen() {
     const { login } = useAuth();
-    const [email, setEmail] = useState("joao@email.com");
-    const [senha, setSenha] = useState("senha123");
+    const [email, setEmail] = useState("");
+    const [senha, setSenha] = useState("");
     const [loading, setLoading] = useState(false);
 
     async function handleLogin() {
@@ -71,22 +72,25 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: "center",
-        backgroundColor: "#ecfdf5",
+        backgroundColor: CopaTheme.background,
         padding: 20,
     },
     card: {
         gap: 12,
-        padding: 20,
-        borderRadius: 18,
-        backgroundColor: "#fff",
+        padding: 22,
+        borderRadius: 22,
+        backgroundColor: CopaTheme.surface,
+        borderWidth: 1,
+        borderColor: CopaTheme.border,
     },
     title: {
         fontSize: 28,
         fontWeight: "800",
         textAlign: "center",
+        color: CopaTheme.primaryDark,
     },
     subtitle: {
-        color: "#6b7280",
+        color: CopaTheme.textMuted,
         fontSize: 14,
         textAlign: "center",
     },
@@ -98,14 +102,15 @@ const styles = StyleSheet.create({
     },
     input: {
         borderWidth: 1,
-        borderColor: "#d1d5db",
+        borderColor: CopaTheme.border,
         borderRadius: 10,
+        backgroundColor: "#f8fafc",
         padding: 12,
     },
     button: {
         alignItems: "center",
         borderRadius: 10,
-        backgroundColor: "#16a34a",
+        backgroundColor: CopaTheme.primary,
         padding: 14,
     },
     buttonText: {
@@ -118,7 +123,7 @@ const styles = StyleSheet.create({
         textAlign: "center",
     },
     registerLink: {
-        color: "#15803d",
+        color: CopaTheme.primary,
         fontWeight: "800",
         textAlign: "center",
     },

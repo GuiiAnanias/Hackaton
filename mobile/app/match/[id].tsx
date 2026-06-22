@@ -3,6 +3,7 @@ import { ActivityIndicator, Alert, StyleSheet, Text, TouchableOpacity, View } fr
 import { router, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { buscarPartida, Partida } from "../../api";
+import { CopaTheme } from "../../constants/copa-theme";
 
 export default function MatchDetailsScreen() {
     const { id } = useLocalSearchParams();
@@ -29,14 +30,14 @@ export default function MatchDetailsScreen() {
         );
     }
 
-    const canGuess = match.status === "AGENDADA";
+    const canGuess = match.status === "AGENDADA" && new Date(match.dataHora).getTime() > Date.now();
 
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.card}>
                 <Text style={styles.badge}>{match.status}</Text>
                 <Text style={styles.title}>{match.mandante} x {match.visitante}</Text>
-                <Text style={styles.info}>Data: {new Date(match.dataHora).toLocaleString("pt-BR")}</Text>
+                <Text style={styles.info}>Data: {match.dataHoraFormatada ?? new Date(match.dataHora).toLocaleString("pt-BR")}</Text>
                 <Text style={styles.info}>Fase: {match.fase}</Text>
                 <Text style={styles.info}>Grupo: {match.grupo}</Text>
                 <Text style={styles.info}>Estádio: {match.estadio}</Text>
@@ -63,7 +64,7 @@ export default function MatchDetailsScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#f0f0f0",
+        backgroundColor: CopaTheme.background,
         padding: 20,
     },
     center: {
@@ -75,13 +76,15 @@ const styles = StyleSheet.create({
         gap: 10,
         padding: 20,
         borderRadius: 18,
-        backgroundColor: "#fff",
+        backgroundColor: CopaTheme.surface,
+        borderWidth: 1,
+        borderColor: CopaTheme.border,
     },
     badge: {
         alignSelf: "flex-start",
         borderRadius: 999,
-        backgroundColor: "#dcfce7",
-        color: "#166534",
+        backgroundColor: CopaTheme.primaryLight,
+        color: CopaTheme.primaryDark,
         fontWeight: "700",
         paddingHorizontal: 10,
         paddingVertical: 4,
@@ -101,7 +104,7 @@ const styles = StyleSheet.create({
     button: {
         alignItems: "center",
         borderRadius: 10,
-        backgroundColor: "#16a34a",
+        backgroundColor: CopaTheme.primary,
         padding: 14,
     },
     buttonText: {

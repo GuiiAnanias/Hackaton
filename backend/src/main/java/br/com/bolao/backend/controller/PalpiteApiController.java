@@ -3,9 +3,8 @@ package br.com.bolao.backend.controller;
 import br.com.bolao.backend.model.Palpite;
 import br.com.bolao.backend.model.Partida;
 import br.com.bolao.backend.model.Usuario;
-import br.com.bolao.backend.repository.PalpiteRepository;
-import br.com.bolao.backend.repository.PartidaRepository;
 import br.com.bolao.backend.repository.UsuarioRepository;
+import br.com.bolao.backend.service.PalpiteService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -25,23 +24,20 @@ import java.util.List;
 @RequestMapping("/api/palpites")
 public class PalpiteApiController {
 
-    private final PalpiteRepository palpiteRepository;
-    private final PartidaRepository partidaRepository;
     private final UsuarioRepository usuarioRepository;
+    private final PalpiteService palpiteService;
 
-    public PalpiteApiController(PalpiteRepository palpiteRepository,
-                                PartidaRepository partidaRepository,
-                                UsuarioRepository usuarioRepository) {
-        this.palpiteRepository = palpiteRepository;
-        this.partidaRepository = partidaRepository;
+    public PalpiteApiController(UsuarioRepository usuarioRepository,
+                                PalpiteService palpiteService) {
         this.usuarioRepository = usuarioRepository;
+        this.palpiteService = palpiteService;
     }
 
     @GetMapping("/me")
     public List<PalpiteResponse> listarMeus(Authentication authentication) {
         Usuario usuario = usuarioLogado(authentication);
 
-        return palpiteRepository.findByUsuarioId(usuario.getId())
+        return palpiteService.listarDoUsuario(usuario)
                 .stream()
                 .map(PalpiteResponse::from)
                 .toList();
@@ -51,38 +47,20 @@ public class PalpiteApiController {
     public ResponseEntity<PalpiteResponse> buscar(@PathVariable Long id, Authentication authentication) {
         Usuario usuario = usuarioLogado(authentication);
 
-        return palpiteRepository.findById(id)
-                .filter(palpite -> palpite.getUsuario().getId().equals(usuario.getId()))
-                .map(PalpiteResponse::from)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(PalpiteResponse.from(palpiteService.buscarDoUsuario(id, usuario)));
     }
 
     @PostMapping
     public ResponseEntity<PalpiteResponse> criarOuAtualizar(@RequestBody PalpiteRequest request,
                                                             Authentication authentication) {
         Usuario usuario = usuarioLogado(authentication);
-        if (request.partidaId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Partida e obrigatoria");
-        }
-        validarPlacar(request.golsMandante(), request.golsVisitante());
+        Palpite palpite = palpiteService.criarOuAtualizarDoUsuario(
+                usuario,
+                request.partidaId(),
+                request.golsMandante(),
+                request.golsVisitante());
 
-        Partida partida = partidaRepository.findById(request.partidaId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Partida nao encontrada"));
-
-        if (!"AGENDADA".equalsIgnoreCase(partida.getStatus())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nao e possivel palpitar em partida encerrada");
-        }
-
-        Palpite palpite = palpiteRepository.findByUsuarioIdAndPartidaId(usuario.getId(), partida.getId())
-                .orElseGet(Palpite::new);
-
-        palpite.setUsuario(usuario);
-        palpite.setPartida(partida);
-        palpite.setGolsMandante(request.golsMandante());
-        palpite.setGolsVisitante(request.golsVisitante());
-
-        return ResponseEntity.ok(PalpiteResponse.from(palpiteRepository.save(palpite)));
+        return ResponseEntity.ok(PalpiteResponse.from(palpite));
     }
 
     @PutMapping("/{id}")
@@ -90,20 +68,13 @@ public class PalpiteApiController {
                                                      @RequestBody PalpiteUpdateRequest request,
                                                      Authentication authentication) {
         Usuario usuario = usuarioLogado(authentication);
-        validarPlacar(request.golsMandante(), request.golsVisitante());
+        Palpite palpite = palpiteService.atualizarDoUsuario(
+                usuario,
+                id,
+                request.golsMandante(),
+                request.golsVisitante());
 
-        Palpite palpite = palpiteRepository.findById(id)
-                .filter(p -> p.getUsuario().getId().equals(usuario.getId()))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Palpite nao encontrado"));
-
-        if (!"AGENDADA".equalsIgnoreCase(palpite.getPartida().getStatus())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nao e possivel editar palpite de partida encerrada");
-        }
-
-        palpite.setGolsMandante(request.golsMandante());
-        palpite.setGolsVisitante(request.golsVisitante());
-
-        return ResponseEntity.ok(PalpiteResponse.from(palpiteRepository.save(palpite)));
+        return ResponseEntity.ok(PalpiteResponse.from(palpite));
     }
 
     private Usuario usuarioLogado(Authentication authentication) {
@@ -121,12 +92,6 @@ public class PalpiteApiController {
         return usuario;
     }
 
-    private void validarPlacar(Integer golsMandante, Integer golsVisitante) {
-        if (golsMandante == null || golsVisitante == null || golsMandante < 0 || golsVisitante < 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Placar invalido");
-        }
-    }
-
     public record PalpiteRequest(Long partidaId, Integer golsMandante, Integer golsVisitante) {
     }
 
@@ -142,7 +107,8 @@ public class PalpiteApiController {
             Integer golsMandante,
             Integer golsVisitante,
             Integer pontos,
-            String statusPartida
+            String statusPartida,
+            String criterio
     ) {
         static PalpiteResponse from(Palpite palpite) {
             Partida partida = palpite.getPartida();
@@ -156,7 +122,8 @@ public class PalpiteApiController {
                     palpite.getGolsMandante(),
                     palpite.getGolsVisitante(),
                     palpite.getPontos(),
-                    partida.getStatus()
+                    partida.getStatus(),
+                    palpite.getCriterio() == null ? null : palpite.getCriterio().name()
             );
         }
     }

@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ActivityIndicator, View, Text, TextInput, TouchableOpacity, Alert, StyleSheet } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { salvarPalpite } from "../../api";
+import { buscarPartida, Partida, salvarPalpite } from "../../api";
 import { useAuth } from "../../auth";
+import { CopaTheme } from "../../constants/copa-theme";
 
 export default function GuessScreen() {
     const { id } = useLocalSearchParams();
@@ -11,7 +12,21 @@ export default function GuessScreen() {
 
     const [teamA, setTeamA] = useState("");
     const [teamB, setTeamB] = useState("");
+    const [match, setMatch] = useState<Partida | null>(null);
+    const [loadingMatch, setLoadingMatch] = useState(true);
     const [loading, setLoading] = useState(false);
+
+    const partidaId = Number(Array.isArray(id) ? id[0] : id);
+
+    useEffect(() => {
+        buscarPartida(partidaId)
+            .then(setMatch)
+            .catch((error) => {
+                Alert.alert("Erro", error instanceof Error ? error.message : "Não foi possível carregar a partida.");
+                router.back();
+            })
+            .finally(() => setLoadingMatch(false));
+    }, [partidaId]);
 
     const saveGuess = async () => {
         if (!user) {
@@ -19,7 +34,6 @@ export default function GuessScreen() {
             return;
         }
 
-        const partidaId = Number(Array.isArray(id) ? id[0] : id);
         const golsMandante = Number(teamA);
         const golsVisitante = Number(teamB);
 
@@ -44,62 +58,39 @@ export default function GuessScreen() {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.back()}
-                    style={{
-                        marginBottom: 20,
-                    }}>
-                <Text
-                    style={{
-                        color: "#2563eb",
-                        fontSize: 16,
-                        fontWeight: "600",
-                    }}> Voltar </Text>
+                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                    <Text style={styles.backText}>Voltar</Text>
                 </TouchableOpacity>
-        
-                <Text style={{
-                        fontSize: 24,
-                        fontWeight: "bold",
-                        marginBottom: 20,
-                    }}> Registrar Palpite </Text>
-                    
+
+                <Text style={styles.title}>Registrar Palpite</Text>
+                {loadingMatch ? (
+                    <ActivityIndicator color={CopaTheme.primary} />
+                ) : (
+                    <Text style={styles.matchTitle}>{match?.mandante} x {match?.visitante}</Text>
+                )}
+
                 <TextInput
-                    placeholder="Gols Time A"
+                    placeholder={`Gols ${match?.mandante ?? "mandante"}`}
                     keyboardType="numeric"
                     value={teamA}
                     onChangeText={setTeamA}
-                    style={{
-                        borderWidth: 1,
-                        padding: 10,
-                        marginBottom: 10,
-                    }}
+                    style={styles.input}
                 />
                 <TextInput
-                    placeholder="Gols Time B"
+                    placeholder={`Gols ${match?.visitante ?? "visitante"}`}
                     keyboardType="numeric"
                     value={teamB}
                     onChangeText={setTeamB}
-                    style={{
-                        borderWidth: 1,
-                        padding: 10,
-                        marginBottom: 20,
-                    }}
+                    style={styles.input}
                 />
                 <TouchableOpacity
-                    disabled={loading}
+                    disabled={loading || loadingMatch}
                     onPress={saveGuess}
-                    style={{
-                        backgroundColor: "green",
-                        padding: 15,
-                        borderRadius: 8,
-                    }}>
+                    style={styles.button}>
                     {loading ? (
                         <ActivityIndicator color="#fff" />
                     ) : (
-                        <Text
-                            style={{
-                                color: "#fff",
-                                textAlign: "center",
-                            }}> Salvar </Text>
+                        <Text style={styles.buttonText}>Salvar palpite</Text>
                     )}
                 </TouchableOpacity>
             </View>
@@ -109,14 +100,50 @@ export default function GuessScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#f0f0f0",
+        backgroundColor: CopaTheme.background,
         padding: 20
     },
     header: {
         padding: 20,
-        backgroundColor: '#FFFFFF',
-        borderBottomWidth: 1,
-        borderBottomColor: '#EAEAEA',
-        borderRadius: 20
+        backgroundColor: CopaTheme.surface,
+        borderWidth: 1,
+        borderColor: CopaTheme.border,
+        borderRadius: 20,
+        gap: 12,
+    },
+    backButton: {
+        alignSelf: "flex-start",
+    },
+    backText: {
+        color: CopaTheme.info,
+        fontSize: 16,
+        fontWeight: "700",
+    },
+    title: {
+        color: CopaTheme.primaryDark,
+        fontSize: 24,
+        fontWeight: "900",
+    },
+    matchTitle: {
+        color: CopaTheme.primaryDark,
+        fontSize: 18,
+        fontWeight: "800",
+    },
+    input: {
+        borderWidth: 1,
+        borderColor: CopaTheme.border,
+        borderRadius: 12,
+        backgroundColor: "#f8fafc",
+        padding: 12,
+    },
+    button: {
+        alignItems: "center",
+        backgroundColor: CopaTheme.primary,
+        padding: 15,
+        borderRadius: 12,
+    },
+    buttonText: {
+        color: CopaTheme.textLight,
+        fontWeight: "800",
     },
 });

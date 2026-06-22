@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, View, Text, TextInput, TouchableOpacity, Alert, StyleSheet} from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { atualizarPalpite, buscarPalpite } from "../../api";
+import { atualizarPalpite, buscarPalpite, Palpite } from "../../api";
 import { useAuth } from "../../auth";
+import { CopaTheme } from "../../constants/copa-theme";
 
 export default function EditGuessScreen() {
     const { id } = useLocalSearchParams();
@@ -11,6 +12,7 @@ export default function EditGuessScreen() {
 
     const [teamA, setTeamA] = useState("");
     const [teamB, setTeamB] = useState("");
+    const [palpite, setPalpite] = useState<Palpite | null>(null);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
 
@@ -25,6 +27,7 @@ export default function EditGuessScreen() {
         setLoading(true);
         buscarPalpite(user.token, palpiteId)
             .then((palpite) => {
+                setPalpite(palpite);
                 setTeamA(String(palpite.golsMandante));
                 setTeamB(String(palpite.golsVisitante));
             })
@@ -65,62 +68,42 @@ export default function EditGuessScreen() {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.back()}
-                    style={{
-                        marginBottom: 20,
-                    }}>
-                <Text
-                    style={{
-                        color: "#2563eb",
-                        fontSize: 16,
-                        fontWeight: "600",
-                    }}> Voltar </Text>
+                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                    <Text style={styles.backText}>Voltar</Text>
                 </TouchableOpacity>
 
-                <Text style={{
-                        fontSize: 24,
-                        fontWeight: "bold",
-                        marginBottom: 20,
-                    }}> Editar Palpite </Text>
+                <Text style={styles.title}>Editar Palpite</Text>
+                {palpite ? (
+                    <>
+                        <Text style={styles.matchTitle}>{palpite.mandante} x {palpite.visitante}</Text>
+                        <Text style={styles.meta}>Pontuação atual: {palpite.pontos ?? 0} pontos</Text>
+                    </>
+                ) : null}
 
-                {loading && <ActivityIndicator color="#2563eb" />}
+                {loading && <ActivityIndicator color={CopaTheme.info} />}
 
                 <TextInput
+                    placeholder={`Gols ${palpite?.mandante ?? "mandante"}`}
                     value={teamA}
                     onChangeText={setTeamA}
                     keyboardType="numeric"
-                    style={{
-                        borderWidth: 1,
-                        padding: 10,
-                        marginBottom: 10,
-                    }}
+                    style={styles.input}
                 />
                 <TextInput
+                    placeholder={`Gols ${palpite?.visitante ?? "visitante"}`}
                     value={teamB}
                     onChangeText={setTeamB}
                     keyboardType="numeric"
-                    style={{
-                        borderWidth: 1,
-                        padding: 10,
-                        marginBottom: 20,
-                    }}
+                    style={styles.input}
                 />
                 <TouchableOpacity
                     disabled={saving || loading}
                     onPress={updateGuess}
-                    style={{
-                        backgroundColor: "#2563eb",
-                        padding: 15,
-                        borderRadius: 8,
-                    }}>
+                    style={styles.button}>
                     {saving ? (
                         <ActivityIndicator color="#fff" />
                     ) : (
-                        <Text
-                            style={{
-                                color: "#fff",
-                                textAlign: "center",
-                            }}> Atualizar </Text>
+                        <Text style={styles.buttonText}>Atualizar palpite</Text>
                     )}
                 </TouchableOpacity>
             </View>
@@ -130,14 +113,53 @@ export default function EditGuessScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#f0f0f0",
+        backgroundColor: CopaTheme.background,
         padding: 20,
     },
     header: {
         padding: 20,
-        backgroundColor: '#FFFFFF',
-        borderBottomWidth: 1,
-        borderBottomColor: '#EAEAEA',
-        borderRadius: 20
+        backgroundColor: CopaTheme.surface,
+        borderWidth: 1,
+        borderColor: CopaTheme.border,
+        borderRadius: 20,
+        gap: 12,
+    },
+    backButton: {
+        alignSelf: "flex-start",
+    },
+    backText: {
+        color: CopaTheme.info,
+        fontSize: 16,
+        fontWeight: "700",
+    },
+    title: {
+        color: CopaTheme.primaryDark,
+        fontSize: 24,
+        fontWeight: "900",
+    },
+    matchTitle: {
+        color: CopaTheme.primaryDark,
+        fontSize: 18,
+        fontWeight: "800",
+    },
+    meta: {
+        color: CopaTheme.textMuted,
+    },
+    input: {
+        borderWidth: 1,
+        borderColor: CopaTheme.border,
+        borderRadius: 12,
+        backgroundColor: "#f8fafc",
+        padding: 12,
+    },
+    button: {
+        alignItems: "center",
+        backgroundColor: CopaTheme.info,
+        padding: 15,
+        borderRadius: 12,
+    },
+    buttonText: {
+        color: CopaTheme.textLight,
+        fontWeight: "800",
     },
 });

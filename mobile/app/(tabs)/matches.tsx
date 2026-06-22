@@ -3,6 +3,7 @@ import { ActivityIndicator, View, Text, FlatList, StyleSheet, TextInput, Touchab
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { listarPartidas, Partida } from "../../api";
+import { CopaTheme } from "../../constants/copa-theme";
 
 export default function MatchesScreen() {
     const [matches, setMatches] = useState<Partida[]>([]);
@@ -76,10 +77,12 @@ export default function MatchesScreen() {
                             onPress={() => router.push({ pathname: "/match/[id]", params: { id: String(item.id) } })}
                             style={styles.card}
                         >
-                            <Text> {item.mandante} x {item.visitante}</Text>
-                            <Text>{new Date(item.dataHora).toLocaleString("pt-BR")}</Text>
-                            <Text>Status: {item.status}</Text>
-                            <Text>Fase: {item.fase}</Text>
+                            <Text style={styles.matchTitle}>{item.mandante} x {item.visitante}</Text>
+                            <Text style={styles.meta}>
+                                {item.dataHoraFormatada ?? new Date(item.dataHora).toLocaleString("pt-BR")}
+                            </Text>
+                            <Text style={styles.meta}>Status: {item.status}</Text>
+                            <Text style={styles.meta}>Fase: {item.fase}</Text>
                         </TouchableOpacity>
                     )}
                 />
@@ -90,7 +93,7 @@ export default function MatchesScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#f0fdf4",
+        backgroundColor: CopaTheme.background,
     },
     title: {
         fontSize: 24,
@@ -113,16 +116,16 @@ const styles = StyleSheet.create({
     },
     filterChip: {
         borderWidth: 1,
-        borderColor: "#16a34a",
+        borderColor: CopaTheme.primary,
         borderRadius: 999,
         paddingHorizontal: 10,
         paddingVertical: 6,
     },
     filterChipActive: {
-        backgroundColor: "#16a34a",
+        backgroundColor: CopaTheme.primary,
     },
     filterText: {
-        color: "#15803d",
+        color: CopaTheme.primary,
         fontSize: 12,
         fontWeight: "700",
     },
@@ -131,9 +134,21 @@ const styles = StyleSheet.create({
     },
     card: {
         padding: 16,
-        backgroundColor: "#fff",
+        backgroundColor: CopaTheme.surface,
         marginBottom: 10,
         borderRadius: 12,
+        borderWidth: 1,
+        borderColor: CopaTheme.border,
+    },
+    matchTitle: {
+        color: CopaTheme.primaryDark,
+        fontSize: 16,
+        fontWeight: "900",
+        marginBottom: 4,
+    },
+    meta: {
+        color: CopaTheme.textMuted,
+        marginTop: 2,
     },
     error: {
         color: "#dc2626",
