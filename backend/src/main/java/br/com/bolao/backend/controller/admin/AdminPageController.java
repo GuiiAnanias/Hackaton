@@ -145,4 +145,41 @@ public class AdminPageController {
             return "redirect:/admin/selecoes/nova";
         }
     }
+
+    @GetMapping("/selecoes/{id}/editar")
+    public String formularioEditarSelecao(@PathVariable Long id, Model model) {
+        model.addAttribute("selecao", adminSelecaoService.buscarSelecao(id));
+        return "admin/selecaoForm";
+    }
+
+    @PostMapping("/selecoes/{id}/editar")
+    public String editarSelecao(
+            @PathVariable Long id,
+            @RequestParam String nome,
+            @RequestParam String codigoFifa,
+            @RequestParam String grupo,
+            RedirectAttributes redirectAttributes) {
+        try {
+            adminSelecaoService.editarSelecao(id, nome, codigoFifa, grupo);
+            redirectAttributes.addFlashAttribute("mensagemSucesso", "Seleção atualizada com sucesso.");
+            return "redirect:/admin/selecoes";
+        } catch (AdminException exception) {
+            redirectAttributes.addFlashAttribute("mensagemErro", exception.getMessage());
+            return "redirect:/admin/selecoes/" + id + "/editar";
+        }
+    }
+
+    @PostMapping("/selecoes/{id}/excluir")
+    public String excluirSelecao(
+            @PathVariable Long id,
+            RedirectAttributes redirectAttributes) {
+        try {
+            adminSelecaoService.excluirSelecao(id);
+            redirectAttributes.addFlashAttribute("mensagemSucesso", "Seleção excluída com sucesso.");
+        } catch (AdminException exception) {
+            redirectAttributes.addFlashAttribute("mensagemErro", exception.getMessage());
+        }
+
+        return "redirect:/admin/selecoes";
+    }
 }
