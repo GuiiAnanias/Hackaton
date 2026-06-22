@@ -1,63 +1,64 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{fragments/admin-head :: head('Lançar Resultado')}">
-    <meta charset="UTF-8">
-    <title>Lançar Resultado</title>
-    <link rel="stylesheet" th:href="@{/css/admin.css}">
-</head>
+<head th:replace="~{fragments/admin-head :: head('Lançar Resultado')}"></head>
 
 <body>
-    <div class="admin-wrapper">
-        <aside class="admin-sidebar">
-            <h1>Bolão 2026</h1>
-            <nav>
-                <a th:href="@{/admin/dashboard}">Dashboard</a>
-                <a th:href="@{/admin/partidas}">Partidas</a>
-                <a th:href="@{/admin/ranking}">Ranking</a>
-            </nav>
-        </aside>
+<div class="admin-wrapper">
+    <aside th:replace="~{fragments/admin-sidebar :: sidebar('partidas')}"></aside>
 
-        <main class="admin-content">
-            <section class="admin-header">
+    <main class="admin-content">
+        <section class="admin-hero">
+            <div>
+                <span class="hero-badge">Resultado</span>
                 <h2>Lançar Resultado</h2>
-                <p>Informe o placar final da partida.</p>
-            </section>
+                <p>Informe o placar final para recalcular automaticamente os pontos dos palpites.</p>
+            </div>
+        </section>
 
-            <section class="alert-success" th:if="${mensagemSucesso != null}">
-                <strong th:text="${mensagemSucesso}">Ação realizada com sucesso.</strong>
-                <span th:if="${mensagemDetalhe != null}" th:text="${mensagemDetalhe}">Detalhes da ação.</span>
-            </section>
+        <section class="alert-success" th:if="${mensagemSucesso != null}">
+            <strong th:text="${mensagemSucesso}">Ação realizada com sucesso.</strong>
+            <span th:if="${mensagemDetalhe != null}" th:text="${mensagemDetalhe}">Detalhes da ação.</span>
+        </section>
 
-            <section class="alert-error" th:if="${mensagemErro != null}">
-                <strong th:text="${mensagemErro}">Erro ao lançar resultado.</strong>
-                <span th:if="${mensagemDetalhe != null}" th:text="${mensagemDetalhe}">Detalhes do erro.</span>
-            </section>
+        <section class="alert-error" th:if="${mensagemErro != null}">
+            <strong th:text="${mensagemErro}">Erro ao lançar resultado.</strong>
+            <span th:if="${mensagemDetalhe != null}" th:text="${mensagemDetalhe}">Detalhes do erro.</span>
+        </section>
 
-            <form class="admin-form" method="post" th:action="@{/admin/partidas/{id}/resultado(id=${partida.id})}">
-                <div class="match-info">
-                    <strong th:text="${partida.selecaoA}">Seleção A</strong>
-                    <span>x</span>
-                    <strong th:text="${partida.selecaoB}">Seleção B</strong>
+        <form class="admin-form score-form" method="post" th:action="@{/admin/partidas/{id}/resultado(id=${partida.id})}">
+            <div class="score-card">
+                <div class="team-name" th:text="${partida.selecaoA}">Seleção A</div>
+                <span class="versus">x</span>
+                <div class="team-name" th:text="${partida.selecaoB}">Seleção B</div>
+            </div>
+
+            <p class="form-note">
+                <span th:text="${partida.fase}">Fase</span>
+                <span> • </span>
+                <span th:text="${partida.dataHora}">Data</span>
+            </p>
+
+            <div class="score-inputs">
+                <div class="form-group">
+                    <label for="golsA" th:text="'Gols ' + ${partida.selecaoA}">Gols A</label>
+                    <input type="number" id="golsA" name="golsA" min="0" max="20" required>
                 </div>
 
-                <p>
-                    <span th:text="${partida.fase}">Fase</span>
-                    <span> - </span>
-                    <span th:text="${partida.dataHora}">Data</span>
-                </p>
+                <div class="form-group">
+                    <label for="golsB" th:text="'Gols ' + ${partida.selecaoB}">Gols B</label>
+                    <input type="number" id="golsB" name="golsB" min="0" max="20" required>
+                </div>
+            </div>
 
-                <label for="golsA" th:text="'Gols ' + ${partida.selecaoA}">Gols A</label>
-                <input type="number" id="golsA" name="golsA" min="0" max="20" required>
-
-                <label for="golsB" th:text="'Gols ' + ${partida.selecaoB}">Gols B</label>
-                <input type="number" id="golsB" name="golsB" min="0" max="20" required>
-
-                <button class="admin-button" type="submit">Salvar Resultado</button>
-            </form>
-        </main>
-    </div>
-    <script th:replace="~{fragments/admin-head :: scripts}"></script>
+            <div class="form-actions">
+                <a class="admin-button-secondary" th:href="@{/admin/partidas}">Cancelar</a>
+                <button class="admin-button" type="submit">Salvar resultado</button>
+            </div>
+        </form>
+    </main>
+</div>
+<script th:replace="~{fragments/admin-head :: scripts}"></script>
 </body>
 
 </html>

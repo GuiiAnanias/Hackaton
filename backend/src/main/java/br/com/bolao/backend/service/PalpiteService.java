@@ -24,8 +24,7 @@ public class PalpiteService {
     public PalpiteService(
             PalpiteRepository palpiteRepository,
             UsuarioRepository usuarioRepository,
-            PartidaRepository partidaRepository
-    ) {
+            PartidaRepository partidaRepository) {
         this.palpiteRepository = palpiteRepository;
         this.usuarioRepository = usuarioRepository;
         this.partidaRepository = partidaRepository;
@@ -150,6 +149,10 @@ public class PalpiteService {
     private void validarPartidaAberta(Partida partida) {
         String status = partida.getStatus();
 
+        if (partida.getGolsMandante() != null || partida.getGolsVisitante() != null) {
+            throw new AdminException("Não é possível apostar em uma partida com resultado lançado.");
+        }
+
         if (status != null && (status.equalsIgnoreCase("ENCERRADA") || status.equalsIgnoreCase("EM_ANDAMENTO"))) {
             throw new AdminException("Não é possível apostar em uma partida que já começou ou foi encerrada.");
         }
@@ -198,8 +201,7 @@ public class PalpiteService {
                 palpite.getPontos(),
                 palpite.getCriterio() == null ? null : palpite.getCriterio().name(),
                 palpite.getCriadoEm(),
-                palpite.getAtualizadoEm()
-        );
+                palpite.getAtualizadoEm());
     }
 
     private String obterNomeMandante(Partida partida) {
