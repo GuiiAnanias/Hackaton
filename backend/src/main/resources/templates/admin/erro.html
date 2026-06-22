@@ -1,31 +1,30 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{fragments/admin-head :: head('Erro no Painel')}">
-    <meta charset="UTF-8">
-    <title>Erro no Painel</title>
-    <link rel="stylesheet" th:href="@{/css/admin.css}">
-</head>
+<head th:replace="~{fragments/admin-head :: head('Erro no Painel')}"></head>
 
 <body>
-    <div class="admin-wrapper">
-        <aside th:replace="~{fragments/admin-sidebar :: sidebar('dashboard')}"></aside>
+<div class="admin-wrapper">
+    <aside th:replace="~{fragments/admin-sidebar :: sidebar('dashboard')}"></aside>
 
-        <main class="admin-content">
-            <section class="admin-header">
+    <main class="admin-content">
+        <section class="admin-hero danger-hero">
+            <div>
+                <span class="hero-badge">Erro</span>
                 <h2 th:text="${tituloErro}">Erro</h2>
                 <p>O painel encontrou um problema ao executar esta ação.</p>
-            </section>
+            </div>
+        </section>
 
-            <section class="alert-error">
-                <strong th:text="${mensagemErro}">Ocorreu um erro.</strong>
-                <span>Volte para uma das telas do painel e tente novamente.</span>
-            </section>
+        <section class="alert-error">
+            <strong th:text="${mensagemErro}">Ocorreu um erro.</strong>
+            <span>Volte para uma das telas do painel e tente novamente.</span>
+        </section>
 
-            <a class="admin-button-link" th:href="@{/admin/dashboard}">Voltar para o dashboard</a>
-        </main>
-    </div>
-    <script th:replace="~{fragments/admin-head :: scripts}"></script>
+        <a class="admin-button-link" th:href="@{/admin/dashboard}">Voltar para o dashboard</a>
+    </main>
+</div>
+<script th:replace="~{fragments/admin-head :: scripts}"></script>
 </body>
 
 </html>
