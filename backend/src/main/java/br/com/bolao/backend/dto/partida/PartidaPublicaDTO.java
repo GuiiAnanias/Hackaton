@@ -2,15 +2,15 @@ package br.com.bolao.backend.dto.partida;
 
 public record PartidaPublicaDTO(
         Long id,
-        String teamA,
-        String teamB,
-        String date,
-        String dateISO,
-        String phase,
+        String mandante,
+        String visitante,
+        String dataHoraFormatada,
+        String dataHora,
+        String fase,
         String status,
-        String stadium,
-        String group,
-        Integer scoreA,
-        Integer scoreB
+        String estadio,
+        String grupo,
+        Integer golsMandante,
+        Integer golsVisitante
 ) {
 }

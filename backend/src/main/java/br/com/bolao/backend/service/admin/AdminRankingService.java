@@ -24,10 +24,7 @@ public class AdminRankingService {
     }
 
     public List<RankingLinhaDTO> listarRanking() {
-        List<Usuario> usuariosOrdenados = usuarioRepository.findAll()
-                .stream()
-                .sorted(criarOrdenacaoRanking())
-                .toList();
+        List<Usuario> usuariosOrdenados = listarUsuariosOrdenados();
 
         List<RankingLinhaDTO> ranking = new ArrayList<>();
 
@@ -44,6 +41,13 @@ public class AdminRankingService {
         }
 
         return ranking;
+    }
+
+    public List<Usuario> listarUsuariosOrdenados() {
+        return usuarioRepository.findAll()
+                .stream()
+                .sorted(criarOrdenacaoRanking())
+                .toList();
     }
 
     public RankingPaginaDTO listarRankingPaginado(int page, int size) {

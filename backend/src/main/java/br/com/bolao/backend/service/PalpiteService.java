@@ -9,7 +9,9 @@ import br.com.bolao.backend.model.Usuario;
 import br.com.bolao.backend.repository.PalpiteRepository;
 import br.com.bolao.backend.repository.PartidaRepository;
 import br.com.bolao.backend.repository.UsuarioRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,8 +26,7 @@ public class PalpiteService {
     public PalpiteService(
             PalpiteRepository palpiteRepository,
             UsuarioRepository usuarioRepository,
-            PartidaRepository partidaRepository
-    ) {
+            PartidaRepository partidaRepository) {
         this.palpiteRepository = palpiteRepository;
         this.usuarioRepository = usuarioRepository;
         this.partidaRepository = partidaRepository;
@@ -36,6 +37,58 @@ public class PalpiteService {
                 .stream()
                 .map(this::converterParaResponse)
                 .toList();
+    }
+
+    public List<Palpite> listarDoUsuario(Usuario usuario) {
+        return palpiteRepository.findByUsuarioId(usuario.getId());
+    }
+
+    public Palpite buscarDoUsuario(Long id, Usuario usuario) {
+        return palpiteRepository.findById(id)
+                .filter(palpite -> palpite.getUsuario().getId().equals(usuario.getId()))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Palpite nao encontrado"));
+    }
+
+    public Palpite criarOuAtualizarDoUsuario(
+            Usuario usuario,
+            Long partidaId,
+            Integer golsMandante,
+            Integer golsVisitante
+    ) {
+        Partida partida = buscarPartidaApi(partidaId);
+        validarPlacarApi(golsMandante, golsVisitante);
+        validarPartidaAbertaApi(partida);
+
+        Palpite palpite = palpiteRepository.findByUsuarioIdAndPartidaId(usuario.getId(), partida.getId())
+                .orElseGet(Palpite::new);
+
+        palpite.setUsuario(usuario);
+        palpite.setPartida(partida);
+        palpite.setGolsMandante(golsMandante);
+        palpite.setGolsVisitante(golsVisitante);
+        palpite.setPontos(0);
+        palpite.setCriterio(null);
+
+        return palpiteRepository.save(palpite);
+    }
+
+    public Palpite atualizarDoUsuario(
+            Usuario usuario,
+            Long palpiteId,
+            Integer golsMandante,
+            Integer golsVisitante
+    ) {
+        Palpite palpite = buscarDoUsuario(palpiteId, usuario);
+
+        validarPlacarApi(golsMandante, golsVisitante);
+        validarPartidaAbertaApi(palpite.getPartida());
+
+        palpite.setGolsMandante(golsMandante);
+        palpite.setGolsVisitante(golsVisitante);
+        palpite.setPontos(0);
+        palpite.setCriterio(null);
+
+        return palpiteRepository.save(palpite);
     }
 
     public List<PalpiteResponseDTO> listarPorUsuario(Long usuarioId) {
@@ -121,6 +174,39 @@ public class PalpiteService {
         return palpiteRepository.count();
     }
 
+    private Partida buscarPartidaApi(Long partidaId) {
+        if (partidaId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Partida e obrigatoria");
+        }
+
+        return partidaRepository.findById(partidaId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Partida nao encontrada"));
+    }
+
+    private void validarPlacarApi(Integer golsMandante, Integer golsVisitante) {
+        if (golsMandante == null || golsVisitante == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Informe os gols das duas selecoes");
+        }
+
+        if (golsMandante < 0 || golsVisitante < 0 || golsMandante > 20 || golsVisitante > 20) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Informe um placar valido entre 0 e 20 gols");
+        }
+    }
+
+    private void validarPartidaAbertaApi(Partida partida) {
+        if (partida.getDataHora() != null && !LocalDateTime.now().isBefore(partida.getDataHora())) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+                    "Palpites ficam bloqueados apos o inicio da partida");
+        }
+
+        if (partida.getGolsMandante() != null || partida.getGolsVisitante() != null
+                || "ENCERRADA".equalsIgnoreCase(partida.getStatus())
+                || "EM_ANDAMENTO".equalsIgnoreCase(partida.getStatus())) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+                    "Nao e possivel palpitar em partida iniciada ou encerrada");
+        }
+    }
+
     private Usuario buscarUsuario(Long usuarioId) {
         if (usuarioId == null) {
             throw new AdminException("Informe o usuário do palpite.");
@@ -149,6 +235,10 @@ public class PalpiteService {
 
     private void validarPartidaAberta(Partida partida) {
         String status = partida.getStatus();
+
+        if (partida.getGolsMandante() != null || partida.getGolsVisitante() != null) {
+            throw new AdminException("Não é possível apostar em uma partida com resultado lançado.");
+        }
 
         if (status != null && (status.equalsIgnoreCase("ENCERRADA") || status.equalsIgnoreCase("EM_ANDAMENTO"))) {
             throw new AdminException("Não é possível apostar em uma partida que já começou ou foi encerrada.");
@@ -198,8 +288,7 @@ public class PalpiteService {
                 palpite.getPontos(),
                 palpite.getCriterio() == null ? null : palpite.getCriterio().name(),
                 palpite.getCriadoEm(),
-                palpite.getAtualizadoEm()
-        );
+                palpite.getAtualizadoEm());
     }
 
     private String obterNomeMandante(Partida partida) {

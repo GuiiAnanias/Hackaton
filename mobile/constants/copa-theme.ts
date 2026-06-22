@@ -20,7 +20,9 @@ export const CopaTheme = {
     },
     criteria: {
         PLACAR_EXATO: "#15803d",
+        VENCEDOR: "#2563eb",
         VENCEDOR_EMPATE: "#2563eb",
+        ERRO: "#dc2626",
         ERRO_TOTAL: "#dc2626",
         PENDENTE: "#94a3b8",
     },
@@ -28,7 +30,9 @@ export const CopaTheme = {
 
 export const CRITERIA_LABELS: Record<string, string> = {
     PLACAR_EXATO: "Placar exato",
+    VENCEDOR: "Vencedor/empate",
     VENCEDOR_EMPATE: "Vencedor/empate",
+    ERRO: "Errou",
     ERRO_TOTAL: "Errou",
     PENDENTE: "Aguardando resultado",
 };

@@ -28,7 +28,7 @@ public class PartidaPublicaController {
         this.partidaRepository = partidaRepository;
     }
 
-    // RF-010: lista todas as partidas
+    // RF-010: lista todas as partidas para o app mobile
     @GetMapping
     public List<PartidaPublicaDTO> listar() {
         return partidaRepository.findAll().stream()
@@ -38,7 +38,7 @@ public class PartidaPublicaController {
                 .toList();
     }
 
-    // RF-013: proximas partidas em que ainda da pra palpitar
+    // RF-013: proximas partidas em que ainda da para palpitar
     @GetMapping("/proximas")
     public List<PartidaPublicaDTO> proximas() {
         LocalDateTime agora = LocalDateTime.now();

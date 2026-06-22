@@ -1,93 +1,123 @@
-import { View, FlatList, StyleSheet, Text } from "react-native";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native";
+import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { matches } from "../../mocks/matches";
-import { getUpcomingMatches } from "../../utils/match-utils";
-import { useAuth } from "../../contexts/AuthContext";
-import { MatchCard } from "../../components/MatchCard";
-import { ScreenHeader } from "../../components/ScreenHeader";
+import { listarPartidas, Partida } from "../../api";
 import { CopaTheme } from "../../constants/copa-theme";
 
 export default function HomeScreen() {
-    const { user } = useAuth();
-    const upcomingMatches = getUpcomingMatches(matches, 5);
+    const [matches, setMatches] = useState<Partida[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        listarPartidas()
+            .then((partidas) => setMatches(partidas
+                .filter((partida) => partida.status === "AGENDADA" && new Date(partida.dataHora).getTime() > Date.now())
+                .sort((a, b) => new Date(a.dataHora).getTime() - new Date(b.dataHora).getTime())
+                .slice(0, 5)))
+            .catch((err) => setError(err instanceof Error ? err.message : "Erro ao carregar partidas"))
+            .finally(() => setLoading(false));
+    }, []);
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.content}>
-                <ScreenHeader
-                    title={`Olá, ${user?.name?.split(" ")[0] ?? "Torcedor"}!`}
-                    subtitle="Confira as próximas partidas e registre seus palpites a tempo."
-                />
-
-                <View style={styles.banner}>
-                    <Text style={styles.bannerTitle}>Copa do Mundo 2026</Text>
-                    <Text style={styles.bannerText}>
-                        {upcomingMatches.length} partida(s) disponível(is) para palpite
-                    </Text>
+            <View style={{ flex: 1, padding: 20 }}>
+                <View style={styles.hero}>
+                    <Text style={styles.heroTitle}>Próximas Partidas</Text>
+                    <Text style={styles.heroText}>Escolha um jogo, confira os detalhes e registre seu palpite.</Text>
                 </View>
 
-                <Text style={styles.sectionTitle}>Próximas Partidas</Text>
+                {loading && <ActivityIndicator color="green" />}
+                {error && <Text style={styles.error}>{error}</Text>}
 
                 <FlatList
-                    data={upcomingMatches}
+                    data={matches}
                     keyExtractor={(item) => item.id.toString()}
-                    showsVerticalScrollIndicator={false}
-                    ListEmptyComponent={
-                        <View style={styles.empty}>
-                            <Text style={styles.emptyText}>
-                                Nenhuma partida disponível para palpite no momento.
+                    ListEmptyComponent={!loading ? <Text>Nenhuma partida disponível.</Text> : null}
+                    renderItem={({ item }) => (
+                        <View style={styles.card}>
+                            <Text style={styles.matchTitle}>{item.mandante} x {item.visitante}</Text>
+                            <Text style={styles.matchDate}>
+                                {item.dataHoraFormatada ?? new Date(item.dataHora).toLocaleString("pt-BR")}
                             </Text>
+                            <Text style={styles.matchMeta}>{item.fase} • {item.estadio}</Text>
+
+                            <View style={styles.actions}>
+                                <TouchableOpacity onPress={() =>
+                                        router.push({ pathname: "/match/[id]", params: { id: String(item.id) } })
+                                    }>
+                                    <Text style={styles.detailsText}>Detalhes</Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity onPress={() =>
+                                    router.push({ pathname: "/guess/[id]", params: { id: String(item.id) } })
+                                }>
+                                    <Text style={styles.guessText}>Palpitar</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
-                    }
-                    renderItem={({ item, index }) => (
-                        <MatchCard match={item} highlight={index === 0} showGuessAction />
                     )}
                 />
             </View>
         </SafeAreaView>
     );
 }
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: CopaTheme.background,
     },
-    content: {
-        flex: 1,
-        padding: 20,
+    hero: {
+        borderRadius: 18,
+        backgroundColor: CopaTheme.primary,
+        marginBottom: 16,
+        padding: 18,
     },
-    banner: {
-        backgroundColor: CopaTheme.primaryDark,
-        borderRadius: 16,
+    heroTitle: {
+        color: "#fff",
+        fontSize: 26,
+        fontWeight: "800",
+    },
+    heroText: {
+        color: "#dcfce7",
+        marginTop: 4,
+    },
+    card: {
         padding: 16,
-        marginBottom: 20,
-    },
-    bannerTitle: {
-        color: CopaTheme.textLight,
-        fontSize: 18,
-        fontWeight: "800",
-    },
-    bannerText: {
-        color: CopaTheme.primaryLight,
-        marginTop: 6,
-        fontWeight: "600",
-    },
-    sectionTitle: {
-        fontSize: 18,
-        fontWeight: "800",
-        color: CopaTheme.primaryDark,
-        marginBottom: 12,
-    },
-    empty: {
         backgroundColor: CopaTheme.surface,
-        borderRadius: 16,
-        padding: 20,
+        marginBottom: 10,
+        borderRadius: 14,
         borderWidth: 1,
         borderColor: CopaTheme.border,
     },
-    emptyText: {
-        textAlign: "center",
-        color: CopaTheme.textMuted,
+    matchTitle: {
+        fontSize: 17,
+        fontWeight: "800",
+    },
+    matchDate: {
+        color: "#374151",
+        marginTop: 4,
+    },
+    matchMeta: {
+        color: "#6b7280",
+        marginTop: 2,
+    },
+    actions: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginTop: 12,
+    },
+    detailsText: {
+        color: "#2563eb",
+        fontWeight: "800",
+    },
+    guessText: {
+        color: CopaTheme.primary,
+        fontWeight: "800",
+    },
+    error: {
+        color: "#dc2626",
+        marginBottom: 12,
     },
 });

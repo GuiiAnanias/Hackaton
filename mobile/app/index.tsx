@@ -1,31 +1,17 @@
-import { ActivityIndicator, View, StyleSheet } from "react-native";
 import { Redirect } from "expo-router";
-import { useAuth } from "../contexts/AuthContext";
-import { CopaTheme } from "../constants/copa-theme";
+import { ActivityIndicator, View } from "react-native";
+import { useAuth } from "../auth";
 
 export default function Index() {
-    const { user, isLoading } = useAuth();
+    const { isAuthenticated, isLoading } = useAuth();
 
     if (isLoading) {
         return (
-            <View style={styles.loading}>
-                <ActivityIndicator size="large" color={CopaTheme.primary} />
+            <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+                <ActivityIndicator color="#16a34a" />
             </View>
         );
     }
 
-    if (!user) {
-        return <Redirect href="/(auth)/login" />;
-    }
-
-    return <Redirect href="/(tabs)/home" />;
+    return <Redirect href={isAuthenticated ? "/(tabs)/home" : "/login"} />;
 }
-
-const styles = StyleSheet.create({
-    loading: {
-        flex: 1,
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: CopaTheme.background,
-    },
-});

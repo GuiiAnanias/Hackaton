@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<body>
+<aside class="admin-sidebar" th:fragment="sidebar(activePage)">
+    <div class="sidebar-brand">
+        <span class="sidebar-logo">⚽</span>
+        <div>
+            <h1>Bolão 2026</h1>
+            <p>Painel administrativo</p>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav">
+        <a th:href="@{/admin/dashboard}" th:classappend="${activePage == 'dashboard'} ? 'active' : ''">
+            <span>Dashboard</span>
+        </a>
+        <a th:href="@{/admin/partidas}" th:classappend="${activePage == 'partidas'} ? 'active' : ''">
+            <span>Partidas</span>
+        </a>
+        <a th:href="@{/admin/selecoes}" th:classappend="${activePage == 'selecoes'} ? 'active' : ''">
+            <span>Seleções</span>
+        </a>
+        <a th:href="@{/admin/ranking}" th:classappend="${activePage == 'ranking'} ? 'active' : ''">
+            <span>Ranking</span>
+        </a>
+        <a th:href="@{/admin/logout}">
+            <span>Sair</span>
+        </a>
+    </nav>
+
+    <div class="sidebar-actions">
+        <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
+            <span data-theme-icon>🌙</span>
+            <span data-theme-label>Modo escuro</span>
+        </button>
+    </div>
+</aside>
+</body>
+
+</html>

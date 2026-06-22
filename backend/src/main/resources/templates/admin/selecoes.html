@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/admin-head :: head('Seleções Admin')}"></head>
+
+<body>
+<div class="admin-wrapper">
+    <aside th:replace="~{fragments/admin-sidebar :: sidebar('selecoes')}"></aside>
+
+    <main class="admin-content">
+        <section class="admin-hero">
+            <div>
+                <span class="hero-badge">Equipes</span>
+                <h2>Seleções</h2>
+                <p>Gerencie as seleções disponíveis para criação das partidas do bolão.</p>
+            </div>
+            <div class="hero-actions">
+                <a class="admin-button-link" th:href="@{/admin/selecoes/nova}">Nova seleção</a>
+            </div>
+        </section>
+
+        <section class="alert-success" th:if="${mensagemSucesso != null}">
+            <strong th:text="${mensagemSucesso}">Ação realizada com sucesso.</strong>
+        </section>
+
+        <section class="alert-error" th:if="${mensagemErro != null}">
+            <strong th:text="${mensagemErro}">Erro ao carregar seleções.</strong>
+        </section>
+
+        <section class="panel-card">
+            <div class="section-title-row">
+                <div>
+                    <h3>Seleções cadastradas</h3>
+                    <p>Lista de seleções disponíveis para criação de partidas.</p>
+                </div>
+            </div>
+
+            <div class="empty-state" th:if="${selecoes.isEmpty()}">
+                <strong>Nenhuma seleção cadastrada.</strong>
+                <span>Cadastre uma seleção para criar partidas.</span>
+                <a class="admin-button-link" th:href="@{/admin/selecoes/nova}">Cadastrar seleção</a>
+            </div>
+
+            <div class="admin-table-responsive" th:if="${!selecoes.isEmpty()}">
+                <table class="admin-table">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Código FIFA</th>
+                        <th>Grupo</th>
+                        <th>Ações</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="selecao : ${selecoes}">
+                        <td th:text="${selecao.id}">1</td>
+                        <td>
+                            <strong th:text="${selecao.nome}">Brasil</strong>
+                        </td>
+                        <td th:text="${selecao.codigoFifa}">BRA</td>
+                        <td>
+                            <span class="status-badge" th:text="${selecao.grupo}">G</span>
+                        </td>
+                        <td>
+                            <div class="table-actions">
+                                <a class="table-action table-action-secondary" th:href="@{/admin/selecoes/{id}/editar(id=${selecao.id})}">Editar</a>
+                                <form method="post" th:action="@{/admin/selecoes/{id}/excluir(id=${selecao.id})}">
+                                    <button type="submit" class="table-action table-action-danger" onclick="return confirm('Deseja excluir esta seleção?')">Excluir</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script th:replace="~{fragments/admin-head :: scripts}"></script>
+</body>
+
+</html>

@@ -1,141 +1,157 @@
-import { useMemo, useState } from "react";
-import { View, FlatList, StyleSheet, Text, ScrollView } from "react-native";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, View, Text, FlatList, StyleSheet, TextInput, TouchableOpacity } from "react-native";
+import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { matches, MATCH_DATES, MATCH_PHASES, MATCH_STATUSES } from "../../mocks/matches";
-import { filterMatches } from "../../utils/match-utils";
-import { MatchCard } from "../../components/MatchCard";
-import { FilterChip } from "../../components/FilterChip";
-import { ScreenHeader } from "../../components/ScreenHeader";
-import { CopaTheme, STATUS_LABELS } from "../../constants/copa-theme";
+import { listarPartidas, Partida } from "../../api";
+import { CopaTheme } from "../../constants/copa-theme";
 
 export default function MatchesScreen() {
-    const [selectedPhase, setSelectedPhase] = useState<(typeof MATCH_PHASES)[number]>("TODAS");
-    const [selectedStatus, setSelectedStatus] = useState<(typeof MATCH_STATUSES)[number]>("TODOS");
-    const [selectedDate, setSelectedDate] = useState("");
+    const [matches, setMatches] = useState<Partida[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [statusFilter, setStatusFilter] = useState("TODAS");
+    const [phaseFilter, setPhaseFilter] = useState("TODAS");
+    const [dateFilter, setDateFilter] = useState("");
 
-    const filteredMatches = useMemo(
-        () =>
-            filterMatches(matches, {
-                phase: selectedPhase,
-                status: selectedStatus,
-                date: selectedDate || undefined,
-            }),
-        [selectedPhase, selectedStatus, selectedDate]
-    );
+    useEffect(() => {
+        listarPartidas()
+            .then(setMatches)
+            .catch((err) => setError(err instanceof Error ? err.message : "Erro ao carregar partidas"))
+            .finally(() => setLoading(false));
+    }, []);
+
+    const phases = Array.from(new Set(matches.map((match) => match.fase))).filter(Boolean);
+    const filteredMatches = matches.filter((match) => {
+        const matchDate = new Date(match.dataHora).toLocaleDateString("pt-BR");
+        const statusOk = statusFilter === "TODAS" || match.status === statusFilter;
+        const phaseOk = phaseFilter === "TODAS" || match.fase === phaseFilter;
+        const dateOk = !dateFilter || matchDate.includes(dateFilter);
+
+        return statusOk && phaseOk && dateOk;
+    });
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.content}>
-                <ScreenHeader
-                    title="Partidas"
-                    subtitle="Filtre por data, fase e status para encontrar jogos específicos."
+            <View style={{ flex: 1, padding: 20 }}>
+                <Text style={styles.title}>Partidas</Text>
+                {loading && <ActivityIndicator color="green" />}
+                {error && <Text style={styles.error}>{error}</Text>}
+
+                <TextInput
+                    placeholder="Filtrar por data (ex: 16/07)"
+                    value={dateFilter}
+                    onChangeText={setDateFilter}
+                    style={styles.input}
                 />
 
-                <Text style={styles.filterLabel}>Fase</Text>
-                <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.filterRowContent}>
-                    {MATCH_PHASES.map((phase) => (
-                        <FilterChip
-                            key={phase}
-                            label={phase}
-                            selected={selectedPhase === phase}
-                            onPress={() => setSelectedPhase(phase)}
-                        />
-                    ))}
-                </ScrollView>
-
-                <Text style={styles.filterLabel}>Status</Text>
-                <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.filterRowContent}>
-                    {MATCH_STATUSES.map((status) => (
-                        <FilterChip
+                <View style={styles.filterRow}>
+                    {["TODAS", "AGENDADA", "ENCERRADA"].map((status) => (
+                        <TouchableOpacity
                             key={status}
-                            label={status === "TODOS" ? "Todos" : STATUS_LABELS[status]}
-                            selected={selectedStatus === status}
-                            onPress={() => setSelectedStatus(status)}
-                        />
+                            onPress={() => setStatusFilter(status)}
+                            style={[styles.filterChip, statusFilter === status && styles.filterChipActive]}
+                        >
+                            <Text style={[styles.filterText, statusFilter === status && styles.filterTextActive]}>{status}</Text>
+                        </TouchableOpacity>
                     ))}
-                </ScrollView>
+                </View>
 
-                <Text style={styles.filterLabel}>Data</Text>
-                <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.filterRowContent}>
-                    {MATCH_DATES.map((dateOption) => (
-                        <FilterChip
-                            key={dateOption.value || "all"}
-                            label={dateOption.label}
-                            selected={selectedDate === dateOption.value}
-                            onPress={() => setSelectedDate(dateOption.value)}
-                        />
+                <View style={styles.filterRow}>
+                    {["TODAS", ...phases].map((phase) => (
+                        <TouchableOpacity
+                            key={phase}
+                            onPress={() => setPhaseFilter(phase)}
+                            style={[styles.filterChip, phaseFilter === phase && styles.filterChipActive]}
+                        >
+                            <Text style={[styles.filterText, phaseFilter === phase && styles.filterTextActive]}>{phase}</Text>
+                        </TouchableOpacity>
                     ))}
-                </ScrollView>
-
-                <Text style={styles.resultCount}>
-                    {filteredMatches.length} partida(s) encontrada(s)
-                </Text>
+                </View>
 
                 <FlatList
                     data={filteredMatches}
                     keyExtractor={(item) => item.id.toString()}
-                    showsVerticalScrollIndicator={false}
-                    ListEmptyComponent={
-                        <View style={styles.empty}>
-                            <Text style={styles.emptyText}>
-                                Nenhuma partida encontrada com os filtros selecionados.
+                    ListEmptyComponent={!loading ? <Text>Nenhuma partida cadastrada.</Text> : null}
+                    renderItem={({ item }) => (
+                        <TouchableOpacity
+                            onPress={() => router.push({ pathname: "/match/[id]", params: { id: String(item.id) } })}
+                            style={styles.card}
+                        >
+                            <Text style={styles.matchTitle}>{item.mandante} x {item.visitante}</Text>
+                            <Text style={styles.meta}>
+                                {item.dataHoraFormatada ?? new Date(item.dataHora).toLocaleString("pt-BR")}
                             </Text>
-                        </View>
-                    }
-                    renderItem={({ item }) => <MatchCard match={item} />}
+                            <Text style={styles.meta}>Status: {item.status}</Text>
+                            <Text style={styles.meta}>Fase: {item.fase}</Text>
+                        </TouchableOpacity>
+                    )}
                 />
             </View>
         </SafeAreaView>
     );
 }
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: CopaTheme.background,
     },
-    content: {
-        flex: 1,
-        padding: 20,
+    title: {
+        fontSize: 24,
+        fontWeight: "800",
+        marginBottom: 14,
     },
-    filterLabel: {
-        fontSize: 13,
-        fontWeight: "700",
-        color: CopaTheme.primaryDark,
-        marginBottom: 8,
-        marginTop: 4,
+    input: {
+        borderWidth: 1,
+        borderColor: "#d1d5db",
+        borderRadius: 10,
+        backgroundColor: "#fff",
+        marginBottom: 10,
+        padding: 12,
     },
-    filterRowContent: {
+    filterRow: {
         flexDirection: "row",
-        alignItems: "center",
-        paddingRight: 12,
-        marginBottom: 8,
+        flexWrap: "wrap",
+        gap: 8,
+        marginBottom: 10,
     },
-    resultCount: {
-        fontSize: 13,
-        color: CopaTheme.textMuted,
-        fontWeight: "600",
-        marginBottom: 12,
-        marginTop: 4,
+    filterChip: {
+        borderWidth: 1,
+        borderColor: CopaTheme.primary,
+        borderRadius: 999,
+        paddingHorizontal: 10,
+        paddingVertical: 6,
     },
-    empty: {
+    filterChipActive: {
+        backgroundColor: CopaTheme.primary,
+    },
+    filterText: {
+        color: CopaTheme.primary,
+        fontSize: 12,
+        fontWeight: "700",
+    },
+    filterTextActive: {
+        color: "#fff",
+    },
+    card: {
+        padding: 16,
         backgroundColor: CopaTheme.surface,
-        borderRadius: 16,
-        padding: 20,
+        marginBottom: 10,
+        borderRadius: 12,
         borderWidth: 1,
         borderColor: CopaTheme.border,
     },
-    emptyText: {
-        textAlign: "center",
+    matchTitle: {
+        color: CopaTheme.primaryDark,
+        fontSize: 16,
+        fontWeight: "900",
+        marginBottom: 4,
+    },
+    meta: {
         color: CopaTheme.textMuted,
+        marginTop: 2,
+    },
+    error: {
+        color: "#dc2626",
+        marginBottom: 12,
     },
 });

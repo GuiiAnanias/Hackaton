@@ -1,100 +1,101 @@
-import { View, FlatList, StyleSheet, Text } from "react-native";
+import { useCallback, useState } from "react";
+import { ActivityIndicator, View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native";
 import { router } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { matches } from "../../mocks/matches";
-import { getMatchById, isMatchLocked } from "../../utils/match-utils";
-import { useGuesses } from "../../contexts/GuessesContext";
-import { GuessCard } from "../../components/GuessCard";
-import { ScreenHeader } from "../../components/ScreenHeader";
-import { CopaTheme } from "../../constants/copa-theme";
+import { listarMeusPalpites, Palpite } from "../../api";
+import { useAuth } from "../../auth";
+import { CopaTheme, CRITERIA_LABELS } from "../../constants/copa-theme";
 
 export default function MyGuessesScreen() {
-    const { guesses, isLoading } = useGuesses();
-    const totalPoints = guesses.reduce((sum, guess) => sum + guess.points, 0);
+    const { user } = useAuth();
+    const [guesses, setGuesses] = useState<Palpite[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useFocusEffect(useCallback(() => {
+        if (!user) {
+            return;
+        }
+
+        setLoading(true);
+        setError(null);
+        listarMeusPalpites(user.token)
+            .then(setGuesses)
+            .catch((err) => setError(err instanceof Error ? err.message : "Erro ao carregar palpites"))
+            .finally(() => setLoading(false));
+    }, [user]));
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.content}>
-                <ScreenHeader
-                    title="Meus Palpites"
-                    subtitle="Acompanhe seus palpites e a pontuação individual de cada partida."
-                />
+            <View style={{ flex: 1, padding: 20 }}>
+                <Text style={styles.title}>Meus Palpites</Text>
 
-                <View style={styles.summaryCard}>
-                    <Text style={styles.summaryValue}>{totalPoints}</Text>
-                    <Text style={styles.summaryLabel}>Pontos totais acumulados</Text>
-                </View>
+                {loading && <ActivityIndicator color="green" />}
+                {error && <Text style={styles.error}>{error}</Text>}
 
                 <FlatList
                     data={guesses}
-                    keyExtractor={(item) => item.id}
-                    showsVerticalScrollIndicator={false}
-                    ListEmptyComponent={
-                        <View style={styles.empty}>
-                            <Text style={styles.emptyText}>
-                                {isLoading
-                                    ? "Carregando palpites..."
-                                    : "Você ainda não registrou nenhum palpite."}
-                            </Text>
-                        </View>
-                    }
-                    renderItem={({ item }) => {
-                        const match = getMatchById(matches, item.matchId);
-                        const locked = match ? isMatchLocked(match) : false;
-
-                        return (
-                            <GuessCard
-                                guess={item}
-                                match={match}
-                                onPress={
-                                    locked
-                                        ? undefined
-                                        : () => router.push(`/edit-guess/${item.id}`)
-                                }
-                            />
-                        );
-                    }}
+                    keyExtractor={(item) => item.id.toString()}
+                    ListEmptyComponent={!loading ? <Text>Você ainda não registrou palpites.</Text> : null}
+                    renderItem={({ item }) => (
+                        <TouchableOpacity
+                            onPress={() =>
+                                router.push({ pathname: "/edit-guess/[id]", params: { id: String(item.id) } })
+                            }>
+                            <View style={styles.card}>
+                                <Text style={styles.matchTitle}>{item.mandante} x {item.visitante}</Text>
+                                <Text style={styles.guessText}>Palpite: {item.golsMandante} x {item.golsVisitante}</Text>
+                                <Text style={styles.points}>{item.pontos ?? 0} pontos</Text>
+                                <Text style={styles.criteria}>
+                                    {CRITERIA_LABELS[item.criterio ?? "PENDENTE"] ?? "Aguardando resultado"}
+                                </Text>
+                            </View>
+                        </TouchableOpacity>
+                    )}
                 />
             </View>
         </SafeAreaView>
     );
 }
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: CopaTheme.background,
     },
-    content: {
-        flex: 1,
-        padding: 20,
-    },
-    summaryCard: {
-        backgroundColor: CopaTheme.primaryDark,
-        borderRadius: 16,
-        padding: 18,
-        marginBottom: 16,
-        alignItems: "center",
-    },
-    summaryValue: {
-        fontSize: 32,
+    title: {
+        fontSize: 24,
         fontWeight: "800",
-        color: CopaTheme.textLight,
+        marginBottom: 20,
     },
-    summaryLabel: {
-        marginTop: 4,
-        color: CopaTheme.primaryLight,
-        fontWeight: "600",
-    },
-    empty: {
+    card: {
+        padding: 16,
         backgroundColor: CopaTheme.surface,
-        borderRadius: 16,
-        padding: 20,
+        marginBottom: 10,
+        borderRadius: 14,
         borderWidth: 1,
         borderColor: CopaTheme.border,
     },
-    emptyText: {
-        textAlign: "center",
+    matchTitle: {
+        fontSize: 17,
+        fontWeight: "800",
+    },
+    guessText: {
+        color: "#374151",
+        marginTop: 6,
+    },
+    points: {
+        color: CopaTheme.primary,
+        fontWeight: "800",
+        marginTop: 6,
+    },
+    criteria: {
         color: CopaTheme.textMuted,
+        fontSize: 12,
+        marginTop: 4,
+    },
+    error: {
+        color: "#dc2626",
+        marginBottom: 12,
     },
 });
