@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/admin-head :: head('Seleções Admin')}"></head>
+
+<body>
+<div class="admin-wrapper">
+    <aside th:replace="~{fragments/admin-sidebar :: sidebar('selecoes')}"></aside>
+
+    <main class="admin-content">
+        <section class="admin-header">
+            <h2>Seleções</h2>
+            <p>Gerencie as seleções cadastradas no sistema.</p>
+        </section>
+
+        <section class="alert-success" th:if="${mensagemSucesso != null}">
+            <strong th:text="${mensagemSucesso}">Ação realizada com sucesso.</strong>
+        </section>
+
+        <section class="alert-error" th:if="${mensagemErro != null}">
+            <strong th:text="${mensagemErro}">Erro ao carregar seleções.</strong>
+        </section>
+
+        <section class="dashboard-section">
+            <div class="section-title-row">
+                <div>
+                    <h3>Seleções cadastradas</h3>
+                    <p>Lista de seleções disponíveis para criação de partidas.</p>
+                </div>
+                <a class="admin-button-link" th:href="@{/admin/selecoes/nova}">Nova seleção</a>
+            </div>
+
+            <div class="empty-state" th:if="${selecoes.isEmpty()}">
+                <strong>Nenhuma seleção cadastrada.</strong>
+                <span>Cadastre uma seleção para criar partidas.</span>
+            </div>
+
+            <div class="admin-table-responsive" th:if="${!selecoes.isEmpty()}">
+                <table class="admin-table">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Código FIFA</th>
+                        <th>Grupo</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="selecao : ${selecoes}">
+                        <td th:text="${selecao.id}">1</td>
+                        <td th:text="${selecao.nome}">Brasil</td>
+                        <td th:text="${selecao.codigoFifa}">BRA</td>
+                        <td th:text="${selecao.grupo}">G</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script th:replace="~{fragments/admin-head :: scripts}"></script>
+</body>
+
+</html>

@@ -9,14 +9,7 @@
 
 <body>
     <div class="admin-wrapper">
-        <aside class="admin-sidebar">
-            <h1>Bolão 2026</h1>
-            <nav>
-                <a th:href="@{/admin/dashboard}">Dashboard</a>
-                <a th:href="@{/admin/partidas}">Partidas</a>
-                <a th:href="@{/admin/ranking}">Ranking</a>
-            </nav>
-        </aside>
+        <aside th:replace="~{fragments/admin-sidebar :: sidebar('dashboard')}"></aside>
 
         <main class="admin-content">
             <section class="admin-header">
