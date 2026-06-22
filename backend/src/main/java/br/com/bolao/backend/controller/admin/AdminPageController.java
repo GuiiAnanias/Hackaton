@@ -55,9 +55,8 @@ public class AdminPageController {
     @GetMapping("/ranking")
     public String ranking(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size,
             Model model) {
-        model.addAttribute("rankingPagina", adminRankingService.listarRankingPaginado(page, size));
+        model.addAttribute("rankingPagina", adminRankingService.listarRankingPaginado(page, 50));
         return "admin/ranking";
     }
 

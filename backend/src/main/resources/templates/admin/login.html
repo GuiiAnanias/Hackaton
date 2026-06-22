@@ -1,56 +1,52 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{fragments/admin-head :: head('Login Admin')}">
-    <meta charset="UTF-8">
-    <title>Login Admin</title>
-    <link rel="stylesheet" th:href="@{/css/admin.css}">
-</head>
+<head th:replace="~{fragments/admin-head :: head('Login Admin')}"></head>
 
 <body class="login-page">
+<button type="button" class="theme-toggle login-theme-toggle" data-theme-toggle aria-pressed="false">
+    <span data-theme-icon>🌙</span>
+    <span data-theme-label>Modo escuro</span>
+</button>
 
-    <button type="button" class="theme-toggle login-theme-toggle" data-theme-toggle aria-pressed="false">
-        <span data-theme-icon>🌙</span>
-        <span data-theme-label>Modo escuro</span>
-    </button>
-    
-    <div class="login-container">
-        <section class="login-card">
-            <div class="login-header">
-                <h1>Bolão 2026</h1>
-                <p>Painel administrativo</p>
-            </div>
+<div class="login-container">
+    <section class="login-card">
+        <div class="login-header">
+            <span class="login-badge">Painel administrativo</span>
+            <h1>Bolão 2026</h1>
+            <p>Acesso restrito para gerenciamento do bolão.</p>
+        </div>
 
-            <section class="alert-error" th:if="${param.error != null}">
-                <strong>Não foi possível entrar.</strong>
-                <span>Confira o e-mail, a senha e se o usuário possui perfil ADMIN.</span>
-            </section>
-
-            <section class="alert-success" th:if="${param.logout != null}">
-                <strong>Logout realizado com sucesso.</strong>
-                <span>Você saiu do painel administrativo.</span>
-            </section>
-
-            <form class="login-form" method="post" th:action="@{/admin/login}">
-                <div class="form-group">
-                    <label for="username">E-mail</label>
-                    <input type="email" id="username" name="username" placeholder="admin@email.com" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="password">Senha</label>
-                    <input type="password" id="password" name="password" placeholder="Digite sua senha" required>
-                </div>
-
-                <button type="submit" class="login-button">Entrar</button>
-            </form>
-
-            <div class="login-footer">
-                <span>Acesso restrito a usuários administradores.</span>
-            </div>
+        <section class="alert-error" th:if="${param.error != null}">
+            <strong>Não foi possível entrar.</strong>
+            <span>Confira o e-mail, a senha e se o usuário possui perfil ADMIN.</span>
         </section>
-    </div>
-    <script th:replace="~{fragments/admin-head :: scripts}"></script>
+
+        <section class="alert-success" th:if="${param.logout != null}">
+            <strong>Logout realizado com sucesso.</strong>
+            <span>Você saiu do painel administrativo.</span>
+        </section>
+
+        <form class="login-form" method="post" th:action="@{/admin/login}">
+            <div class="form-group">
+                <label for="username">E-mail</label>
+                <input type="email" id="username" name="username" placeholder="admin@email.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Senha</label>
+                <input type="password" id="password" name="password" placeholder="Digite sua senha" required>
+            </div>
+
+            <button type="submit" class="login-button">Entrar</button>
+        </form>
+
+        <div class="login-footer">
+            <span>Use uma conta ativa com perfil de administrador.</span>
+        </div>
+    </section>
+</div>
+<script th:replace="~{fragments/admin-head :: scripts}"></script>
 </body>
 
 </html>
