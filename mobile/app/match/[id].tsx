@@ -1,237 +1,115 @@
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert } from "react-native";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import type { ComponentProps } from "react";
-import { matches } from "../../mocks/matches";
-import { getMatchById, isMatchLocked } from "../../utils/match-utils";
-import { useGuesses } from "../../contexts/GuessesContext";
-import { PrimaryButton } from "../../components/PrimaryButton";
-import { CopaTheme, STATUS_LABELS } from "../../constants/copa-theme";
+import { buscarPartida, Partida } from "../../api";
 
-export default function MatchDetailScreen() {
-    const { id } = useLocalSearchParams<{ id: string }>();
-    const matchId = Number(id);
-    const match = getMatchById(matches, matchId);
-    const { getGuessByMatch } = useGuesses();
-    const existingGuess = getGuessByMatch(matchId);
-    const locked = match ? isMatchLocked(match) : true;
+export default function MatchDetailsScreen() {
+    const { id } = useLocalSearchParams();
+    const [match, setMatch] = useState<Partida | null>(null);
+    const [loading, setLoading] = useState(true);
 
-    if (!match) {
+    const partidaId = Number(Array.isArray(id) ? id[0] : id);
+
+    useEffect(() => {
+        buscarPartida(partidaId)
+            .then(setMatch)
+            .catch((error) => {
+                Alert.alert("Erro", error instanceof Error ? error.message : "Não foi possível carregar a partida.");
+                router.back();
+            })
+            .finally(() => setLoading(false));
+    }, [partidaId]);
+
+    if (loading || !match) {
         return (
-            <SafeAreaView style={styles.container}>
-                <View style={styles.content}>
-                    <Text style={styles.title}>Partida não encontrada</Text>
-                    <PrimaryButton label="Voltar" onPress={() => router.back()} />
-                </View>
+            <SafeAreaView style={styles.center}>
+                <ActivityIndicator color="#16a34a" />
             </SafeAreaView>
         );
     }
 
-    const handleGuessAction = () => {
-        if (locked) {
-            Alert.alert("Palpite bloqueado", "Não é possível palpitar após o início da partida.");
-            return;
-        }
-        if (existingGuess) {
-            router.push(`/edit-guess/${existingGuess.id}`);
-            return;
-        }
-        router.push(`/guess/${match.id}`);
-    };
+    const canGuess = match.status === "AGENDADA";
 
     return (
         <SafeAreaView style={styles.container}>
-            <ScrollView contentContainerStyle={styles.content}>
-                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                    <Text style={styles.backText}>Voltar</Text>
-                </TouchableOpacity>
+            <View style={styles.card}>
+                <Text style={styles.badge}>{match.status}</Text>
+                <Text style={styles.title}>{match.mandante} x {match.visitante}</Text>
+                <Text style={styles.info}>Data: {new Date(match.dataHora).toLocaleString("pt-BR")}</Text>
+                <Text style={styles.info}>Fase: {match.fase}</Text>
+                <Text style={styles.info}>Grupo: {match.grupo}</Text>
+                <Text style={styles.info}>Estádio: {match.estadio}</Text>
 
-                <View style={styles.heroCard}>
-                    <Text style={styles.phase}>{match.phase}</Text>
-                    <Text style={styles.teams}>
-                        {match.teamA} <Text style={styles.vs}>x</Text> {match.teamB}
-                    </Text>
-                    <View
-                        style={[
-                            styles.statusBadge,
-                            { backgroundColor: `${CopaTheme.status[match.status]}22` },
-                        ]}>
-                        <Text
-                            style={[
-                                styles.statusText,
-                                { color: CopaTheme.status[match.status] },
-                            ]}>
-                            {STATUS_LABELS[match.status]}
-                        </Text>
-                    </View>
-                </View>
+                {match.golsMandante !== null && match.golsVisitante !== null && (
+                    <Text style={styles.score}>Resultado: {match.golsMandante} x {match.golsVisitante}</Text>
+                )}
 
-                <View style={styles.infoCard}>
-                    <InfoRow icon="calendar" label="Data e hora" value={match.date} />
-                    <InfoRow icon="map-marker" label="Estádio" value={match.stadium} />
-                    {match.group ? (
-                        <InfoRow icon="users" label="Grupo" value={`Grupo ${match.group}`} />
-                    ) : null}
-                    {match.status !== "AGENDADA" ? (
-                        <InfoRow
-                            icon="futbol-o"
-                            label="Placar oficial"
-                            value={`${match.scoreA ?? 0} x ${match.scoreB ?? 0}`}
-                        />
-                    ) : null}
-                </View>
-
-                {existingGuess ? (
-                    <View style={styles.guessCard}>
-                        <Text style={styles.guessTitle}>Seu palpite</Text>
-                        <Text style={styles.guessScore}>
-                            {existingGuess.goalsA} x {existingGuess.goalsB}
-                        </Text>
-                        <Text style={styles.guessPoints}>
-                            Pontuação: {existingGuess.points} pts
-                        </Text>
-                    </View>
-                ) : null}
-
-                <PrimaryButton
-                    label={
-                        locked
-                            ? "Palpite bloqueado"
-                            : existingGuess
-                              ? "Editar palpite"
-                              : "Registrar palpite"
-                    }
-                    onPress={handleGuessAction}
-                    disabled={locked}
-                />
-            </ScrollView>
-        </SafeAreaView>
-    );
-}
-
-function InfoRow({
-    icon,
-    label,
-    value,
-}: {
-    icon: ComponentProps<typeof FontAwesome>["name"];
-    label: string;
-    value: string;
-}) {
-    return (
-        <View style={styles.infoRow}>
-            <FontAwesome name={icon} size={16} color={CopaTheme.primary} />
-            <View style={styles.infoTextWrap}>
-                <Text style={styles.infoLabel}>{label}</Text>
-                <Text style={styles.infoValue}>{value}</Text>
+                {canGuess ? (
+                    <TouchableOpacity
+                        onPress={() => router.push({ pathname: "/guess/[id]", params: { id: String(match.id) } })}
+                        style={styles.button}
+                    >
+                        <Text style={styles.buttonText}>Registrar Palpite</Text>
+                    </TouchableOpacity>
+                ) : (
+                    <Text style={styles.closed}>Palpites bloqueados para esta partida.</Text>
+                )}
             </View>
-        </View>
+        </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: CopaTheme.background,
-    },
-    content: {
+        backgroundColor: "#f0f0f0",
         padding: 20,
-        paddingBottom: 32,
     },
-    backButton: {
-        marginBottom: 16,
-    },
-    backText: {
-        color: CopaTheme.info,
-        fontWeight: "600",
-        fontSize: 16,
-    },
-    heroCard: {
-        backgroundColor: CopaTheme.primaryDark,
-        borderRadius: 20,
-        padding: 24,
-        marginBottom: 16,
-    },
-    phase: {
-        color: CopaTheme.primaryLight,
-        fontWeight: "700",
-        marginBottom: 8,
-    },
-    teams: {
-        fontSize: 28,
-        fontWeight: "800",
-        color: CopaTheme.textLight,
-        marginBottom: 12,
-    },
-    vs: {
-        color: "#86efac",
-    },
-    statusBadge: {
-        alignSelf: "flex-start",
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 12,
-    },
-    statusText: {
-        fontWeight: "700",
-        fontSize: 12,
-    },
-    infoCard: {
-        backgroundColor: CopaTheme.surface,
-        borderRadius: 16,
-        padding: 16,
-        borderWidth: 1,
-        borderColor: CopaTheme.border,
-        marginBottom: 16,
-        gap: 14,
-    },
-    infoRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 12,
-    },
-    infoTextWrap: {
+    center: {
         flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
     },
-    infoLabel: {
-        fontSize: 12,
-        color: CopaTheme.textMuted,
-        fontWeight: "600",
+    card: {
+        gap: 10,
+        padding: 20,
+        borderRadius: 18,
+        backgroundColor: "#fff",
     },
-    infoValue: {
-        fontSize: 15,
-        color: CopaTheme.primaryDark,
+    badge: {
+        alignSelf: "flex-start",
+        borderRadius: 999,
+        backgroundColor: "#dcfce7",
+        color: "#166534",
         fontWeight: "700",
-        marginTop: 2,
-    },
-    guessCard: {
-        backgroundColor: "#fffbeb",
-        borderRadius: 16,
-        padding: 16,
-        borderWidth: 1,
-        borderColor: CopaTheme.accent,
-        marginBottom: 16,
-    },
-    guessTitle: {
-        fontSize: 13,
-        fontWeight: "700",
-        color: CopaTheme.accentDark,
-        marginBottom: 6,
-    },
-    guessScore: {
-        fontSize: 24,
-        fontWeight: "800",
-        color: CopaTheme.primaryDark,
-    },
-    guessPoints: {
-        marginTop: 6,
-        color: CopaTheme.textMuted,
-        fontWeight: "600",
+        paddingHorizontal: 10,
+        paddingVertical: 4,
     },
     title: {
-        fontSize: 20,
+        fontSize: 26,
+        fontWeight: "800",
+    },
+    info: {
+        color: "#374151",
+        fontSize: 15,
+    },
+    score: {
+        fontSize: 18,
+        fontWeight: "800",
+    },
+    button: {
+        alignItems: "center",
+        borderRadius: 10,
+        backgroundColor: "#16a34a",
+        padding: 14,
+    },
+    buttonText: {
+        color: "#fff",
         fontWeight: "700",
-        marginBottom: 16,
+    },
+    closed: {
+        color: "#dc2626",
+        fontWeight: "700",
     },
 });
