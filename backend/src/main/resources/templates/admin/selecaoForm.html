@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/admin-head :: head(${selecao == null ? 'Nova Seleção' : 'Editar Seleção'})}"></head>
+
+<body>
+<div class="admin-wrapper">
+    <aside th:replace="~{fragments/admin-sidebar :: sidebar('selecoes')}"></aside>
+
+    <main class="admin-content">
+        <section class="admin-hero">
+            <div>
+                <span class="hero-badge">Equipes</span>
+                <h2 th:text="${selecao == null ? 'Nova Seleção' : 'Editar Seleção'}">Nova Seleção</h2>
+                <p>Cadastre ou atualize uma seleção disponível no sistema.</p>
+            </div>
+        </section>
+
+        <section class="alert-error" th:if="${mensagemErro != null}">
+            <strong th:text="${mensagemErro}">Erro ao cadastrar seleção.</strong>
+        </section>
+
+        <form class="admin-form" method="post" th:action="${selecao == null ? '/admin/selecoes' : '/admin/selecoes/' + selecao.id + '/editar'}">
+            <div class="form-group">
+                <label for="nome">Nome da seleção</label>
+                <input type="text" id="nome" name="nome" placeholder="Brasil" th:value="${selecao == null ? '' : selecao.nome}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="codigoFifa">Código FIFA</label>
+                <input type="text" id="codigoFifa" name="codigoFifa" placeholder="BRA" maxlength="5" th:value="${selecao == null ? '' : selecao.codigoFifa}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="grupo">Grupo</label>
+                <input type="text" id="grupo" name="grupo" placeholder="G" maxlength="2" th:value="${selecao == null ? '' : selecao.grupo}" required>
+            </div>
+
+            <div class="form-actions">
+                <a class="admin-button-secondary" th:href="@{/admin/selecoes}">Cancelar</a>
+                <button type="submit" class="admin-button" th:text="${selecao == null ? 'Cadastrar seleção' : 'Salvar alterações'}">Cadastrar seleção</button>
+            </div>
+        </form>
+    </main>
+</div>
+
+<script th:replace="~{fragments/admin-head :: scripts}"></script>
+</body>
+
+</html>

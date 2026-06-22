@@ -1,72 +1,123 @@
-import { useState } from "react";
-import {
-    View,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    StyleSheet,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-} from "react-native";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useAuth } from "../contexts/AuthContext";
-import { PrimaryButton } from "../components/PrimaryButton";
-import { CopaTheme } from "../constants/copa-theme";
+import { alterarSenha, atualizarPerfil, buscarPerfil } from "../api";
+import { useAuth } from "../auth";
 
 export default function EditProfileScreen() {
-    const { user, updateProfile } = useAuth();
-    const [name, setName] = useState(user?.name ?? "");
-    const [email, setEmail] = useState(user?.email ?? "");
-    const [loading, setLoading] = useState(false);
+    const { user, updateUser } = useAuth();
+    const [nome, setNome] = useState("");
+    const [email, setEmail] = useState("");
+    const [senhaAtual, setSenhaAtual] = useState("");
+    const [novaSenha, setNovaSenha] = useState("");
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
 
-    const handleSave = async () => {
-        if (!name.trim() || !email.trim()) {
-            Alert.alert("Atenção", "Preencha nome e e-mail.");
+    useEffect(() => {
+        if (!user) {
+            router.replace("/login");
             return;
         }
-        setLoading(true);
-        try {
-            await updateProfile({ name, email });
-            Alert.alert("Sucesso", "Perfil atualizado com sucesso.", [
-                { text: "OK", onPress: () => router.back() },
-            ]);
-        } catch (error) {
-            Alert.alert("Erro", error instanceof Error ? error.message : "Falha ao atualizar.");
-        } finally {
-            setLoading(false);
+
+        buscarPerfil(user.token)
+            .then((profile) => {
+                setNome(profile.nome);
+                setEmail(profile.email);
+            })
+            .catch((error) => Alert.alert("Erro", error instanceof Error ? error.message : "Não foi possível carregar o perfil."))
+            .finally(() => setLoading(false));
+    }, [user]);
+
+    async function handleSaveProfile() {
+        if (!user) {
+            return;
         }
-    };
+
+        try {
+            setSaving(true);
+            const profile = await atualizarPerfil(user.token, nome, email);
+            updateUser(profile);
+            Alert.alert("Perfil atualizado", "Seus dados foram salvos.");
+            router.back();
+        } catch (error) {
+            Alert.alert("Erro", error instanceof Error ? error.message : "Não foi possível atualizar o perfil.");
+        } finally {
+            setSaving(false);
+        }
+    }
+
+    async function handleChangePassword() {
+        if (!user) {
+            return;
+        }
+
+        if (!senhaAtual || !novaSenha) {
+            Alert.alert("Atenção", "Informe a senha atual e a nova senha.");
+            return;
+        }
+
+        try {
+            setSaving(true);
+            await alterarSenha(user.token, senhaAtual, novaSenha);
+            setSenhaAtual("");
+            setNovaSenha("");
+            Alert.alert("Senha alterada", "Sua senha foi atualizada.");
+        } catch (error) {
+            Alert.alert("Erro", error instanceof Error ? error.message : "Não foi possível alterar a senha.");
+        } finally {
+            setSaving(false);
+        }
+    }
+
+    if (loading) {
+        return (
+            <SafeAreaView style={styles.center}>
+                <ActivityIndicator color="#16a34a" />
+            </SafeAreaView>
+        );
+    }
 
     return (
         <SafeAreaView style={styles.container}>
-            <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : undefined}
-                style={styles.content}>
-                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                    <Text style={styles.backText}>Voltar</Text>
+            <View style={styles.card}>
+                <Text style={styles.title}>Editar Perfil</Text>
+
+                <TextInput placeholder="Nome" value={nome} onChangeText={setNome} style={styles.input} />
+                <TextInput
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                    placeholder="E-mail"
+                    value={email}
+                    onChangeText={setEmail}
+                    style={styles.input}
+                />
+
+                <TouchableOpacity disabled={saving} onPress={handleSaveProfile} style={styles.button}>
+                    <Text style={styles.buttonText}>{saving ? "Salvando..." : "Salvar Perfil"}</Text>
                 </TouchableOpacity>
+            </View>
 
-                <Text style={styles.title}>Editar perfil</Text>
-                <Text style={styles.subtitle}>Atualize seus dados pessoais.</Text>
-
-                <View style={styles.form}>
-                    <Text style={styles.label}>Nome completo</Text>
-                    <TextInput value={name} onChangeText={setName} style={styles.input} />
-
-                    <Text style={styles.label}>E-mail</Text>
-                    <TextInput
-                        value={email}
-                        onChangeText={setEmail}
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                        style={styles.input}
-                    />
-
-                    <PrimaryButton label="Salvar alterações" onPress={handleSave} loading={loading} />
-                </View>
-            </KeyboardAvoidingView>
+            <View style={styles.card}>
+                <Text style={styles.sectionTitle}>Alterar Senha</Text>
+                <TextInput
+                    placeholder="Senha atual"
+                    secureTextEntry
+                    value={senhaAtual}
+                    onChangeText={setSenhaAtual}
+                    style={styles.input}
+                />
+                <TextInput
+                    placeholder="Nova senha"
+                    secureTextEntry
+                    value={novaSenha}
+                    onChangeText={setNovaSenha}
+                    style={styles.input}
+                />
+                <TouchableOpacity disabled={saving} onPress={handleChangePassword} style={styles.secondaryButton}>
+                    <Text style={styles.secondaryButtonText}>Alterar Senha</Text>
+                </TouchableOpacity>
+            </View>
         </SafeAreaView>
     );
 }
@@ -74,51 +125,54 @@ export default function EditProfileScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: CopaTheme.background,
-    },
-    content: {
-        flex: 1,
+        gap: 16,
+        backgroundColor: "#f0f0f0",
         padding: 20,
     },
-    backButton: {
-        marginBottom: 16,
+    center: {
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
     },
-    backText: {
-        color: CopaTheme.info,
-        fontWeight: "600",
-        fontSize: 16,
+    card: {
+        gap: 12,
+        padding: 18,
+        borderRadius: 16,
+        backgroundColor: "#fff",
     },
     title: {
-        fontSize: 26,
+        fontSize: 24,
         fontWeight: "800",
-        color: CopaTheme.primaryDark,
-        marginBottom: 8,
     },
-    subtitle: {
-        color: CopaTheme.textMuted,
-        marginBottom: 20,
-    },
-    form: {
-        backgroundColor: CopaTheme.surface,
-        borderRadius: 20,
-        padding: 20,
-        borderWidth: 1,
-        borderColor: CopaTheme.border,
-    },
-    label: {
-        fontSize: 14,
+    sectionTitle: {
+        fontSize: 18,
         fontWeight: "700",
-        color: CopaTheme.primaryDark,
-        marginBottom: 8,
     },
     input: {
         borderWidth: 1,
-        borderColor: CopaTheme.border,
-        backgroundColor: "#f8fafc",
-        borderRadius: 12,
-        paddingHorizontal: 14,
-        paddingVertical: 12,
-        marginBottom: 16,
-        fontSize: 15,
+        borderColor: "#d1d5db",
+        borderRadius: 10,
+        padding: 12,
+    },
+    button: {
+        alignItems: "center",
+        borderRadius: 10,
+        backgroundColor: "#16a34a",
+        padding: 14,
+    },
+    buttonText: {
+        color: "#fff",
+        fontWeight: "700",
+    },
+    secondaryButton: {
+        alignItems: "center",
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: "#2563eb",
+        padding: 14,
+    },
+    secondaryButtonText: {
+        color: "#2563eb",
+        fontWeight: "700",
     },
 });

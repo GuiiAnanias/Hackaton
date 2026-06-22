@@ -1,38 +1,30 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{fragments/admin-head :: head('Erro')}">
-    <meta charset="UTF-8">
-    <title>Erro</title>
-    <link rel="stylesheet" th:href="@{/css/admin.css}">
-</head>
+<head th:replace="~{fragments/admin-head :: head('Erro')}"></head>
 
 <body>
-    <div class="admin-wrapper">
-        <aside class="admin-sidebar">
-            <h1>Bolão 2026</h1>
-            <nav>
-                <a th:href="@{/admin/dashboard}">Dashboard</a>
-                <a th:href="@{/admin/partidas}">Partidas</a>
-                <a th:href="@{/admin/ranking}">Ranking</a>
-            </nav>
-        </aside>
+<div class="admin-wrapper">
+    <aside th:replace="~{fragments/admin-sidebar :: sidebar('error')}"></aside>
 
-        <main class="admin-content">
-            <section class="admin-header">
+    <main class="admin-content">
+        <section class="admin-hero danger-hero">
+            <div>
+                <span class="hero-badge">Erro</span>
                 <h2>Algo deu errado</h2>
                 <p>Não foi possível carregar a página solicitada.</p>
-            </section>
+            </div>
+        </section>
 
-            <section class="alert-error">
-                <strong>Verifique o endereço acessado ou tente novamente.</strong>
-                <span th:if="${status != null}">Código do erro: <span th:text="${status}">500</span></span>
-            </section>
+        <section class="alert-error">
+            <strong>Verifique o endereço acessado ou tente novamente.</strong>
+            <span th:if="${status != null}">Código do erro: <span th:text="${status}">500</span></span>
+        </section>
 
-            <a class="admin-button-link" th:href="@{/admin/dashboard}">Voltar para o dashboard</a>
-        </main>
-    </div>
-    <script th:replace="~{fragments/admin-head :: scripts}"></script>
+        <a class="admin-button-link" th:href="@{/admin/dashboard}">Voltar para o dashboard</a>
+    </main>
+</div>
+<script th:replace="~{fragments/admin-head :: scripts}"></script>
 </body>
 
 </html>
