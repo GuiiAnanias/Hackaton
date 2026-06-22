@@ -2,6 +2,8 @@ package br.com.bolao.backend.controller.admin;
 
 import br.com.bolao.backend.model.EstadioCopa;
 import br.com.bolao.backend.model.FaseCopa;
+import br.com.bolao.backend.model.EstadioCopa;
+import br.com.bolao.backend.model.FaseCopa;
 import br.com.bolao.backend.exception.AdminException;
 import br.com.bolao.backend.service.admin.AdminDashboardService;
 import br.com.bolao.backend.service.admin.AdminPartidaService;
@@ -119,6 +121,50 @@ public class AdminPageController {
         }
     }
 
+    @GetMapping("/partidas/{id}/editar")
+    public String formularioEditarPartida(@PathVariable Long id, Model model) {
+        model.addAttribute("partida", adminPartidaService.buscarParaFormulario(id));
+        model.addAttribute("selecoes", adminSelecaoService.listarSelecoes());
+        model.addAttribute("fases", FaseCopa.values());
+        model.addAttribute("estadios", EstadioCopa.values());
+        return "admin/partidaForm";
+    }
+
+    @PostMapping("/partidas/{id}/editar")
+    public String editarPartida(
+            @PathVariable Long id,
+            @RequestParam Long selecaoMandanteId,
+            @RequestParam Long selecaoVisitanteId,
+            @RequestParam String dataHora,
+            @RequestParam String fase,
+            @RequestParam String estadio,
+            @RequestParam String grupo,
+            RedirectAttributes redirectAttributes) {
+        try {
+            adminPartidaService.editarPartida(id, selecaoMandanteId, selecaoVisitanteId, dataHora, fase, estadio,
+                    grupo);
+            redirectAttributes.addFlashAttribute("mensagemSucesso", "Partida atualizada com sucesso.");
+            return "redirect:/admin/partidas";
+        } catch (AdminException exception) {
+            redirectAttributes.addFlashAttribute("mensagemErro", exception.getMessage());
+            return "redirect:/admin/partidas/" + id + "/editar";
+        }
+    }
+
+    @PostMapping("/partidas/{id}/excluir")
+    public String excluirPartida(
+            @PathVariable Long id,
+            RedirectAttributes redirectAttributes) {
+        try {
+            adminPartidaService.excluirPartida(id);
+            redirectAttributes.addFlashAttribute("mensagemSucesso", "Partida excluída com sucesso.");
+        } catch (AdminException exception) {
+            redirectAttributes.addFlashAttribute("mensagemErro", exception.getMessage());
+        }
+
+        return "redirect:/admin/partidas";
+    }
+
     @GetMapping("/selecoes")
     public String selecoes(Model model) {
         model.addAttribute("selecoes", adminSelecaoService.listarSelecoes());
@@ -144,5 +190,42 @@ public class AdminPageController {
             redirectAttributes.addFlashAttribute("mensagemErro", exception.getMessage());
             return "redirect:/admin/selecoes/nova";
         }
+    }
+
+    @GetMapping("/selecoes/{id}/editar")
+    public String formularioEditarSelecao(@PathVariable Long id, Model model) {
+        model.addAttribute("selecao", adminSelecaoService.buscarSelecao(id));
+        return "admin/selecaoForm";
+    }
+
+    @PostMapping("/selecoes/{id}/editar")
+    public String editarSelecao(
+            @PathVariable Long id,
+            @RequestParam String nome,
+            @RequestParam String codigoFifa,
+            @RequestParam String grupo,
+            RedirectAttributes redirectAttributes) {
+        try {
+            adminSelecaoService.editarSelecao(id, nome, codigoFifa, grupo);
+            redirectAttributes.addFlashAttribute("mensagemSucesso", "Seleção atualizada com sucesso.");
+            return "redirect:/admin/selecoes";
+        } catch (AdminException exception) {
+            redirectAttributes.addFlashAttribute("mensagemErro", exception.getMessage());
+            return "redirect:/admin/selecoes/" + id + "/editar";
+        }
+    }
+
+    @PostMapping("/selecoes/{id}/excluir")
+    public String excluirSelecao(
+            @PathVariable Long id,
+            RedirectAttributes redirectAttributes) {
+        try {
+            adminSelecaoService.excluirSelecao(id);
+            redirectAttributes.addFlashAttribute("mensagemSucesso", "Seleção excluída com sucesso.");
+        } catch (AdminException exception) {
+            redirectAttributes.addFlashAttribute("mensagemErro", exception.getMessage());
+        }
+
+        return "redirect:/admin/selecoes";
     }
 }

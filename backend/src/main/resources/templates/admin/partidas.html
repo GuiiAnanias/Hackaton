@@ -4,81 +4,97 @@
 <head th:replace="~{fragments/admin-head :: head('Partidas Admin')}"></head>
 
 <body>
-<div class="admin-wrapper">
-    <aside th:replace="~{fragments/admin-sidebar :: sidebar('partidas')}"></aside>
+    <div class="admin-wrapper">
+        <aside th:replace="~{fragments/admin-sidebar :: sidebar('partidas')}"></aside>
 
-    <main class="admin-content">
-        <section class="admin-header">
-            <h2>Partidas</h2>
-            <p>Gerencie partidas e resultados do bolão.</p>
-        </section>
+        <main class="admin-content">
+            <section class="admin-header">
+                <h2>Partidas</h2>
+                <p>Gerencie partidas e resultados do bolão.</p>
+            </section>
 
-        <section class="alert-success" th:if="${mensagemSucesso != null}">
-            <strong th:text="${mensagemSucesso}">Ação realizada com sucesso.</strong>
-            <span th:if="${mensagemDetalhe != null}" th:text="${mensagemDetalhe}">Detalhes da ação.</span>
-        </section>
+            <section class="alert-success" th:if="${mensagemSucesso != null}">
+                <strong th:text="${mensagemSucesso}">Ação realizada com sucesso.</strong>
+                <span th:if="${mensagemDetalhe != null}" th:text="${mensagemDetalhe}">Detalhes da ação.</span>
+            </section>
 
-        <section class="alert-error" th:if="${mensagemErro != null}">
-            <strong th:text="${mensagemErro}">Erro ao carregar partidas.</strong>
-            <span th:if="${mensagemDetalhe != null}" th:text="${mensagemDetalhe}">Detalhes do erro.</span>
-        </section>
+            <section class="alert-error" th:if="${mensagemErro != null}">
+                <strong th:text="${mensagemErro}">Erro ao carregar partidas.</strong>
+                <span th:if="${mensagemDetalhe != null}" th:text="${mensagemDetalhe}">Detalhes do erro.</span>
+            </section>
 
-        <section class="dashboard-section">
-            <div class="section-title-row">
-                <div>
-                    <h3>Partidas cadastradas</h3>
-                    <p>Visualize, cadastre e gerencie os resultados das partidas.</p>
+            <section class="dashboard-section">
+                <div class="section-title-row">
+                    <div>
+                        <h3>Partidas cadastradas</h3>
+                        <p>Visualize, cadastre e gerencie os resultados das partidas.</p>
+                    </div>
+                    <a class="admin-button-link" th:href="@{/admin/partidas/nova}">Nova partida</a>
                 </div>
-                <a class="admin-button-link" th:href="@{/admin/partidas/nova}">Nova partida</a>
-            </div>
 
-            <div class="empty-state" th:if="${partidas.isEmpty()}">
-                <strong>Nenhuma partida cadastrada.</strong>
-                <span>Cadastre uma partida para começar a gerenciar o calendário.</span>
-            </div>
+                <div class="empty-state" th:if="${partidas.isEmpty()}">
+                    <strong>Nenhuma partida cadastrada.</strong>
+                    <span>Cadastre uma partida para começar a gerenciar o calendário.</span>
+                </div>
 
-            <div class="admin-table-responsive" th:if="${!partidas.isEmpty()}">
-                <table class="admin-table">
-                    <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Partida</th>
-                        <th>Fase</th>
-                        <th>Data e hora</th>
-                        <th>Status</th>
-                        <th>Resultado</th>
-                        <th>Ação</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="partida : ${partidas}">
-                        <td th:text="${partida.id}">1</td>
-                        <td>
-                            <strong th:text="${partida.selecaoA}">Brasil</strong>
-                            <span> x </span>
-                            <strong th:text="${partida.selecaoB}">Argentina</strong>
-                        </td>
-                        <td th:text="${partida.fase}">Fase de grupos</td>
-                        <td th:text="${partida.dataHora}">10/06/2026 16:00</td>
-                        <td>
-                            <span class="status-badge" th:text="${partida.status}">Pendente</span>
-                        </td>
-                        <td th:text="${partida.resultado}">-</td>
-                        <td>
-                            <a class="table-action" th:href="@{/admin/partidas/{id}/resultado(id=${partida.id})}">
-                                <span th:if="${partida.status == 'Encerrada'}">Editar resultado</span>
-                                <span th:if="${partida.status != 'Encerrada'}">Lançar resultado</span>
-                            </a>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-    </main>
-</div>
+                <div class="admin-table-responsive" th:if="${!partidas.isEmpty()}">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Partida</th>
+                                <th>Fase</th>
+                                <th>Data e hora</th>
+                                <th>Status</th>
+                                <th>Resultado</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="partida : ${partidas}">
+                                <td th:text="${partida.id}">1</td>
+                                <td>
+                                    <strong th:text="${partida.selecaoA}">Brasil</strong>
+                                    <span> x </span>
+                                    <strong th:text="${partida.selecaoB}">Argentina</strong>
+                                </td>
+                                <td th:text="${partida.fase}">Fase de grupos</td>
+                                <td th:text="${partida.dataHora}">10/06/2026 16:00</td>
+                                <td>
+                                    <span class="status-badge" th:text="${partida.status}">Pendente</span>
+                                </td>
+                                <td th:text="${partida.resultado}">-</td>
+                                <td>
+                                    <div class="table-actions">
+                                        <a class="table-action"
+                                            th:href="@{/admin/partidas/{id}/resultado(id=${partida.id})}">
+                                            <span th:if="${partida.status == 'Encerrada'}">Editar resultado</span>
+                                            <span th:if="${partida.status != 'Encerrada'}">Lançar resultado</span>
+                                        </a>
 
-<script th:replace="~{fragments/admin-head :: scripts}"></script>
+                                        <a class="table-action table-action-secondary"
+                                            th:href="@{/admin/partidas/{id}/editar(id=${partida.id})}">
+                                            Editar
+                                        </a>
+
+                                        <form method="post"
+                                            th:action="@{/admin/partidas/{id}/excluir(id=${partida.id})}">
+                                            <button type="submit" class="table-action table-action-danger"
+                                                onclick="return confirm('Deseja excluir esta partida?')">
+                                                Excluir
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script th:replace="~{fragments/admin-head :: scripts}"></script>
 </body>
 
 </html>

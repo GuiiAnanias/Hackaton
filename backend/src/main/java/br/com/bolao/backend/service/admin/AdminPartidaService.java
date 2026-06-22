@@ -1,12 +1,14 @@
 package br.com.bolao.backend.service.admin;
 
 import br.com.bolao.backend.dto.admin.PartidaAdminDTO;
+import br.com.bolao.backend.dto.admin.PartidaFormDTO;
 import br.com.bolao.backend.dto.admin.PartidaResultadoDTO;
 import br.com.bolao.backend.exception.AdminException;
 import br.com.bolao.backend.model.EstadioCopa;
 import br.com.bolao.backend.model.FaseCopa;
 import br.com.bolao.backend.model.Partida;
 import br.com.bolao.backend.model.Selecao;
+import br.com.bolao.backend.repository.PalpiteRepository;
 import br.com.bolao.backend.repository.SelecaoRepository;
 import org.springframework.stereotype.Service;
 
@@ -23,10 +25,16 @@ public class AdminPartidaService {
 
     private final PartidaService partidaService;
     private final SelecaoRepository selecaoRepository;
+    private final PalpiteRepository palpiteRepository;
 
-    public AdminPartidaService(PartidaService partidaService, SelecaoRepository selecaoRepository) {
+    public AdminPartidaService(
+            PartidaService partidaService,
+            SelecaoRepository selecaoRepository,
+            PalpiteRepository palpiteRepository
+    ) {
         this.partidaService = partidaService;
         this.selecaoRepository = selecaoRepository;
+        this.palpiteRepository = palpiteRepository;
     }
 
     public List<PartidaAdminDTO> listarPartidas() {
@@ -35,6 +43,21 @@ public class AdminPartidaService {
                 .sorted(Comparator.comparing(Partida::getDataHora, Comparator.nullsLast(Comparator.naturalOrder())))
                 .map(this::converterParaDTO)
                 .toList();
+    }
+
+    public PartidaFormDTO buscarParaFormulario(Long id) {
+        Partida partida = partidaService.buscarPorId(id)
+                .orElseThrow(() -> new AdminException("Partida não encontrada."));
+
+        return new PartidaFormDTO(
+                partida.getId(),
+                partida.getSelecaoMandante() == null ? null : partida.getSelecaoMandante().getId(),
+                partida.getSelecaoVisitante() == null ? null : partida.getSelecaoVisitante().getId(),
+                partida.getDataHora(),
+                partida.getFase(),
+                partida.getEstadio(),
+                partida.getGrupo()
+        );
     }
 
     public void criarPartida(
@@ -69,6 +92,56 @@ public class AdminPartidaService {
         partida.setGolsVisitante(null);
 
         partidaService.salvar(partida);
+    }
+
+    public void editarPartida(
+            Long id,
+            Long selecaoMandanteId,
+            Long selecaoVisitanteId,
+            String dataHora,
+            String fase,
+            String estadio,
+            String grupo
+    ) {
+        Partida partida = partidaService.buscarPorId(id)
+                .orElseThrow(() -> new AdminException("Partida não encontrada."));
+
+        validarPartidaEditavel(partida);
+
+        Selecao selecaoMandante = buscarSelecao(selecaoMandanteId, "Informe a seleção mandante.");
+        Selecao selecaoVisitante = buscarSelecao(selecaoVisitanteId, "Informe a seleção visitante.");
+        LocalDateTime dataHoraConvertida = converterDataHora(dataHora);
+        FaseCopa faseCopa = converterFase(fase);
+        EstadioCopa estadioCopa = converterEstadio(estadio);
+
+        if (selecaoMandante.getId().equals(selecaoVisitante.getId())) {
+            throw new AdminException("A partida precisa ter duas seleções diferentes.");
+        }
+
+        validarTexto(grupo, "Informe o grupo da partida.");
+
+        partida.setSelecaoMandante(selecaoMandante);
+        partida.setSelecaoVisitante(selecaoVisitante);
+        partida.setDataHora(dataHoraConvertida);
+        partida.setFase(faseCopa.getDescricao());
+        partida.setEstadio(estadioCopa.getDescricao());
+        partida.setGrupo(grupo.trim().toUpperCase());
+        partida.setStatus(definirStatusInicial(dataHoraConvertida));
+
+        partidaService.salvar(partida);
+    }
+
+    public void excluirPartida(Long id) {
+        Partida partida = partidaService.buscarPorId(id)
+                .orElseThrow(() -> new AdminException("Partida não encontrada."));
+
+        validarPartidaExcluivel(partida);
+
+        try {
+            partidaService.deletar(id);
+        } catch (RuntimeException exception) {
+            throw new AdminException("Não foi possível excluir a partida.");
+        }
     }
 
     public PartidaResultadoDTO buscarParaResultado(Long id) {
@@ -111,6 +184,26 @@ public class AdminPartidaService {
             }
 
             throw new AdminException("Não foi possível lançar o resultado da partida.");
+        }
+    }
+
+    private void validarPartidaEditavel(Partida partida) {
+        if (partida.getGolsMandante() != null || partida.getGolsVisitante() != null) {
+            throw new AdminException("Não é possível editar uma partida com resultado lançado.");
+        }
+
+        if (!palpiteRepository.findByPartidaId(partida.getId()).isEmpty()) {
+            throw new AdminException("Não é possível editar uma partida que já possui palpites.");
+        }
+    }
+
+    private void validarPartidaExcluivel(Partida partida) {
+        if (partida.getGolsMandante() != null || partida.getGolsVisitante() != null) {
+            throw new AdminException("Não é possível excluir uma partida com resultado lançado.");
+        }
+
+        if (!palpiteRepository.findByPartidaId(partida.getId()).isEmpty()) {
+            throw new AdminException("Não é possível excluir uma partida que já possui palpites.");
         }
     }
 

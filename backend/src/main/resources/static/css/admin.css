@@ -35,6 +35,10 @@
     --radius-sm: 10px;
     --radius-md: 14px;
     --radius-lg: 20px;
+    --danger: #dc2626;
+    --danger-hover: #b91c1c;
+    --muted-action: #e5e7eb;
+    --muted-action-hover: #d1d5db;
 }
 
 :root.dark-mode {
@@ -92,6 +96,10 @@ body {
 .dark-mode body,
 body.dark-mode {
     background: radial-gradient(circle at top left, rgba(59, 130, 246, 0.12), transparent 32%), var(--bg-page);
+    --danger: #ef4444;
+    --danger-hover: #dc2626;
+    --muted-action: #334155;
+    --muted-action-hover: #475569;
 }
 
 .admin-wrapper {
@@ -824,4 +832,32 @@ option {
     .admin-button-secondary {
         width: 100%;
     }
+}
+
+.table-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.table-actions form {
+    margin: 0;
+}
+
+.table-action-secondary {
+    background-color: var(--muted-action);
+    color: var(--text-main);
+}
+
+.table-action-secondary:hover {
+    background-color: var(--muted-action-hover);
+}
+
+.table-action-danger {
+    background-color: var(--danger);
+}
+
+.table-action-danger:hover {
+    background-color: var(--danger-hover);
 }

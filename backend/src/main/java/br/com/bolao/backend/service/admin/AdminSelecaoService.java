@@ -26,10 +26,15 @@ public class AdminSelecaoService {
                 .toList();
     }
 
+    public SelecaoAdminDTO buscarSelecao(Long id) {
+        Selecao selecao = selecaoRepository.findById(id)
+                .orElseThrow(() -> new AdminException("Seleção não encontrada."));
+
+        return converterParaDTO(selecao);
+    }
+
     public void criarSelecao(String nome, String codigoFifa, String grupo) {
-        validarTexto(nome, "Informe o nome da seleção.");
-        validarTexto(codigoFifa, "Informe o código FIFA da seleção.");
-        validarTexto(grupo, "Informe o grupo da seleção.");
+        validarDados(nome, codigoFifa, grupo);
 
         Selecao selecao = new Selecao();
         selecao.setNome(nome.trim());
@@ -37,6 +42,44 @@ public class AdminSelecaoService {
         selecao.setGrupo(grupo.trim().toUpperCase());
 
         selecaoRepository.save(selecao);
+    }
+
+    public void editarSelecao(Long id, String nome, String codigoFifa, String grupo) {
+        validarDados(nome, codigoFifa, grupo);
+
+        Selecao selecao = selecaoRepository.findById(id)
+                .orElseThrow(() -> new AdminException("Seleção não encontrada."));
+
+        selecao.setNome(nome.trim());
+        selecao.setCodigoFifa(codigoFifa.trim().toUpperCase());
+        selecao.setGrupo(grupo.trim().toUpperCase());
+
+        selecaoRepository.save(selecao);
+    }
+
+    public void excluirSelecao(Long id) {
+        Selecao selecao = selecaoRepository.findById(id)
+                .orElseThrow(() -> new AdminException("Seleção não encontrada."));
+
+        try {
+            selecaoRepository.delete(selecao);
+        } catch (RuntimeException exception) {
+            throw new AdminException("Não é possível excluir uma seleção vinculada a uma partida.");
+        }
+    }
+
+    private void validarDados(String nome, String codigoFifa, String grupo) {
+        validarTexto(nome, "Informe o nome da seleção.");
+        validarTexto(codigoFifa, "Informe o código FIFA da seleção.");
+        validarTexto(grupo, "Informe o grupo da seleção.");
+
+        if (codigoFifa.trim().length() < 2 || codigoFifa.trim().length() > 5) {
+            throw new AdminException("Informe um código FIFA válido.");
+        }
+
+        if (grupo.trim().length() > 2) {
+            throw new AdminException("Informe um grupo válido.");
+        }
     }
 
     private SelecaoAdminDTO converterParaDTO(Selecao selecao) {
