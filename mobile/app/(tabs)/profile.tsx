@@ -1,83 +1,93 @@
-import { View, Text, StyleSheet, Alert, ScrollView } from "react-native";
+import { useCallback, useState } from "react";
+import { ActivityIndicator, Alert, Text, TouchableOpacity, View, StyleSheet } from "react-native";
 import { router } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { useAuth } from "../../contexts/AuthContext";
-import { useGuesses } from "../../contexts/GuessesContext";
-import { ScreenHeader } from "../../components/ScreenHeader";
-import { PrimaryButton } from "../../components/PrimaryButton";
-import { CopaTheme } from "../../constants/copa-theme";
+import { buscarPerfil, excluirConta, UserProfile } from "../../api";
+import { useAuth } from "../../auth";
 
 export default function ProfileScreen() {
-    const { user, logout, deleteAccount } = useAuth();
-    const { guesses } = useGuesses();
+    const { user, logout } = useAuth();
+    const [profile, setProfile] = useState<UserProfile | null>(null);
+    const [loading, setLoading] = useState(true);
 
-    const totalPoints = guesses.reduce((sum, guess) => sum + guess.points, 0);
+    useFocusEffect(useCallback(() => {
+        if (!user) {
+            return;
+        }
 
-    const handleLogout = async () => {
-        await logout();
-        router.replace("/(auth)/login");
-    };
+        setLoading(true);
+        buscarPerfil(user.token)
+            .then(setProfile)
+            .catch((error) => Alert.alert("Erro", error instanceof Error ? error.message : "Não foi possível carregar o perfil."))
+            .finally(() => setLoading(false));
+    }, [user]));
 
-    const handleDeleteAccount = () => {
-        Alert.alert(
-            "Excluir conta",
-            "Esta ação é permanente. Deseja realmente excluir sua conta?",
-            [
-                { text: "Cancelar", style: "cancel" },
-                {
-                    text: "Excluir",
-                    style: "destructive",
-                    onPress: async () => {
-                        await deleteAccount();
-                        router.replace("/(auth)/login");
-                    },
+    function handleLogout() {
+        logout();
+        router.replace("/login");
+    }
+
+    function handleDeleteAccount() {
+        if (!user) {
+            return;
+        }
+
+        Alert.alert("Excluir conta", "Sua conta será desativada e você sairá do app. Deseja continuar?", [
+            { text: "Cancelar", style: "cancel" },
+            {
+                text: "Excluir",
+                style: "destructive",
+                onPress: async () => {
+                    try {
+                        await excluirConta(user.token);
+                        logout();
+                        router.replace("/login");
+                    } catch (error) {
+                        Alert.alert("Erro", error instanceof Error ? error.message : "Não foi possível excluir a conta.");
+                    }
                 },
-            ]
-        );
-    };
+            },
+        ]);
+    }
 
     return (
         <SafeAreaView style={styles.container}>
-            <ScrollView contentContainerStyle={styles.content}>
-                <ScreenHeader
-                    title="Meu Perfil"
-                    subtitle="Gerencie seus dados e acompanhe seu desempenho no bolão."
-                />
+            <View style={styles.card}>
+                <Text style={styles.title}>Perfil</Text>
+                {loading ? (
+                    <ActivityIndicator color="#16a34a" />
+                ) : (
+                    <>
+                        <Text style={styles.name}>{profile?.nome ?? user?.nome}</Text>
+                        <Text style={styles.info}>E-mail: {profile?.email}</Text>
+                        <Text style={styles.info}>Perfil: {profile?.perfil ?? user?.perfil}</Text>
 
-                <View style={styles.profileCard}>
-                    <View style={styles.avatar}>
-                        <FontAwesome name="user" size={32} color={CopaTheme.textLight} />
-                    </View>
-                    <Text style={styles.name}>{user?.name}</Text>
-                    <Text style={styles.email}>{user?.email}</Text>
-                </View>
+                        <View style={styles.stats}>
+                            <View style={styles.statBox}>
+                                <Text style={styles.statNumber}>{profile?.pontuacaoTotal ?? 0}</Text>
+                                <Text style={styles.statLabel}>pontos</Text>
+                            </View>
+                            <View style={styles.statBox}>
+                                <Text style={styles.statNumber}>{profile?.placaresExatos ?? 0}</Text>
+                                <Text style={styles.statLabel}>placares exatos</Text>
+                            </View>
+                        </View>
+                    </>
+                )}
 
-                <View style={styles.statsRow}>
-                    <View style={styles.statCard}>
-                        <Text style={styles.statValue}>{guesses.length}</Text>
-                        <Text style={styles.statLabel}>Palpites</Text>
-                    </View>
-                    <View style={styles.statCard}>
-                        <Text style={styles.statValue}>{totalPoints}</Text>
-                        <Text style={styles.statLabel}>Pontos</Text>
-                    </View>
-                </View>
+                <TouchableOpacity onPress={() => router.push("/edit-profile")} style={styles.editButton}>
+                    <Text style={styles.editButtonText}>Editar Perfil</Text>
+                </TouchableOpacity>
 
-                <View style={styles.actions}>
-                    <PrimaryButton
-                        label="Editar perfil"
-                        variant="outline"
-                        onPress={() => router.push("/edit-profile")}
-                    />
-                    <PrimaryButton label="Sair da conta" onPress={handleLogout} />
-                    <PrimaryButton
-                        label="Excluir conta"
-                        variant="danger"
-                        onPress={handleDeleteAccount}
-                    />
-                </View>
-            </ScrollView>
+                <TouchableOpacity onPress={handleLogout} style={styles.button}>
+                    <Text style={styles.buttonText}>Sair</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={handleDeleteAccount}>
+                    <Text style={styles.deleteText}>Excluir conta</Text>
+                </TouchableOpacity>
+            </View>
         </SafeAreaView>
     );
 }
@@ -85,64 +95,69 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: CopaTheme.background,
-    },
-    content: {
+        backgroundColor: "#ecfdf5",
         padding: 20,
-        paddingBottom: 32,
     },
-    profileCard: {
-        backgroundColor: CopaTheme.surface,
-        borderRadius: 20,
-        padding: 24,
-        alignItems: "center",
-        borderWidth: 1,
-        borderColor: CopaTheme.border,
-        marginBottom: 16,
-    },
-    avatar: {
-        width: 72,
-        height: 72,
-        borderRadius: 36,
-        backgroundColor: CopaTheme.primary,
-        alignItems: "center",
-        justifyContent: "center",
-        marginBottom: 12,
-    },
-    name: {
-        fontSize: 22,
-        fontWeight: "800",
-        color: CopaTheme.primaryDark,
-    },
-    email: {
-        marginTop: 4,
-        color: CopaTheme.textMuted,
-    },
-    statsRow: {
-        flexDirection: "row",
+    card: {
         gap: 12,
-        marginBottom: 20,
-    },
-    statCard: {
-        flex: 1,
-        backgroundColor: CopaTheme.surface,
+        padding: 20,
         borderRadius: 16,
-        padding: 16,
-        alignItems: "center",
-        borderWidth: 1,
-        borderColor: CopaTheme.border,
+        backgroundColor: "#fff",
     },
-    statValue: {
+    title: {
         fontSize: 24,
         fontWeight: "800",
-        color: CopaTheme.primary,
+    },
+    name: {
+        fontSize: 18,
+        fontWeight: "700",
+    },
+    info: {
+        color: "#4b5563",
+    },
+    stats: {
+        flexDirection: "row",
+        gap: 10,
+    },
+    statBox: {
+        flex: 1,
+        borderRadius: 12,
+        backgroundColor: "#dcfce7",
+        padding: 12,
+    },
+    statNumber: {
+        color: "#166534",
+        fontSize: 22,
+        fontWeight: "800",
     },
     statLabel: {
-        marginTop: 4,
-        color: CopaTheme.textMuted,
-        fontWeight: "600",
+        color: "#166534",
+        fontSize: 12,
     },
-    actions: {
-        gap: 12,
+    editButton: {
+        alignItems: "center",
+        borderRadius: 8,
+        backgroundColor: "#16a34a",
+        padding: 14,
+    },
+    editButtonText: {
+        color: "#fff",
+        fontWeight: "700",
+    },
+    button: {
+        alignItems: "center",
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: "#dc2626",
+        padding: 14,
+    },
+    buttonText: {
+        color: "#dc2626",
+        fontWeight: "700",
+    },
+    deleteText: {
+        color: "#991b1b",
+        fontWeight: "700",
+        textAlign: "center",
     },
 });
