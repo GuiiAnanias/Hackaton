@@ -12,6 +12,13 @@
         <a th:href="@{/admin/ranking}" th:classappend="${activePage == 'ranking'} ? 'active' : ''">Ranking</a>
         <a th:href="@{/admin/logout}">Sair</a>
     </nav>
+
+    <div class="sidebar-actions">
+        <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
+            <span data-theme-icon>🌙</span>
+            <span data-theme-label>Modo escuro</span>
+        </button>
+    </div>
 </aside>
 </body>
 
