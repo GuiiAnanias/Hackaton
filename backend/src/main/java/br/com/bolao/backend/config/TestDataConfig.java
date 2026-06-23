@@ -14,10 +14,64 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Configuration
 public class TestDataConfig {
+
+    private static final String FLAG_CDN_BASE_URL = "https://flagcdn.com/w80/";
+
+    private static final Map<String, String> FLAG_CDN_CODES = Map.ofEntries(
+            Map.entry("MEX", "mx"),
+            Map.entry("RSA", "za"),
+            Map.entry("KOR", "kr"),
+            Map.entry("CZE", "cz"),
+            Map.entry("CAN", "ca"),
+            Map.entry("BIH", "ba"),
+            Map.entry("QAT", "qa"),
+            Map.entry("SUI", "ch"),
+            Map.entry("BRA", "br"),
+            Map.entry("MAR", "ma"),
+            Map.entry("HAI", "ht"),
+            Map.entry("SCO", "gb-sct"),
+            Map.entry("USA", "us"),
+            Map.entry("PAR", "py"),
+            Map.entry("AUS", "au"),
+            Map.entry("TUR", "tr"),
+            Map.entry("GER", "de"),
+            Map.entry("CUW", "cw"),
+            Map.entry("CIV", "ci"),
+            Map.entry("ECU", "ec"),
+            Map.entry("NED", "nl"),
+            Map.entry("JPN", "jp"),
+            Map.entry("SWE", "se"),
+            Map.entry("TUN", "tn"),
+            Map.entry("BEL", "be"),
+            Map.entry("EGY", "eg"),
+            Map.entry("IRN", "ir"),
+            Map.entry("NZL", "nz"),
+            Map.entry("ESP", "es"),
+            Map.entry("CPV", "cv"),
+            Map.entry("KSA", "sa"),
+            Map.entry("URU", "uy"),
+            Map.entry("FRA", "fr"),
+            Map.entry("SEN", "sn"),
+            Map.entry("IRQ", "iq"),
+            Map.entry("NOR", "no"),
+            Map.entry("ARG", "ar"),
+            Map.entry("ALG", "dz"),
+            Map.entry("AUT", "at"),
+            Map.entry("JOR", "jo"),
+            Map.entry("POR", "pt"),
+            Map.entry("COD", "cd"),
+            Map.entry("UZB", "uz"),
+            Map.entry("COL", "co"),
+            Map.entry("ENG", "gb-eng"),
+            Map.entry("CRO", "hr"),
+            Map.entry("GHA", "gh"),
+            Map.entry("PAN", "pa")
+    );
 
     @Bean
     public CommandLineRunner initDatabase(
@@ -134,9 +188,18 @@ public class TestDataConfig {
         selecao.setNome(seed.nome());
         selecao.setCodigoFifa(seed.codigoFifa());
         selecao.setGrupo(seed.grupo());
-        selecao.setBandeira(seed.bandeira());
+        selecao.setBandeira(obterUrlBandeira(seed));
 
         selecaoRepository.save(selecao);
+    }
+
+    private String obterUrlBandeira(SeedSelecao seed) {
+        String flagCdnCode = FLAG_CDN_CODES.get(seed.codigoFifa());
+        if (flagCdnCode == null) {
+            return seed.bandeira();
+        }
+
+        return FLAG_CDN_BASE_URL + flagCdnCode + ".png";
     }
 
     private Partida criarPartida(Selecao mandante, Selecao visitante, String fase, String estadio,
