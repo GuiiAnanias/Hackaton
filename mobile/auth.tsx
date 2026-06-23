@@ -58,6 +58,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
                     id: profile.id,
                     nome: profile.nome,
                     perfil: profile.perfil,
+                    avatarUrl: profile.avatarUrl,
                 };
 
                 AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));

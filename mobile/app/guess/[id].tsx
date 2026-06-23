@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { ActivityIndicator, View, Text, TextInput, TouchableOpacity, Alert, StyleSheet } from "react-native";
+import { ActivityIndicator, View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { buscarPartida, Partida, salvarPalpite } from "../../api";
 import { useAuth } from "../../auth";
 import { CopaTheme } from "../../constants/copa-theme";
+import { showAppAlert } from "../../utils/app-alert";
 
 export default function GuessScreen() {
     const { id } = useLocalSearchParams();
@@ -22,7 +23,7 @@ export default function GuessScreen() {
         buscarPartida(partidaId)
             .then(setMatch)
             .catch((error) => {
-                Alert.alert("Erro", error instanceof Error ? error.message : "Não foi possível carregar a partida.");
+                showAppAlert("Erro", error instanceof Error ? error.message : "Não foi possível carregar a partida.");
                 router.back();
             })
             .finally(() => setLoadingMatch(false));
@@ -39,17 +40,18 @@ export default function GuessScreen() {
 
         if (!Number.isInteger(golsMandante) || !Number.isInteger(golsVisitante)
             || golsMandante < 0 || golsVisitante < 0) {
-            Alert.alert("Atenção", "Informe placares válidos.");
+            showAppAlert("Atenção", "Informe placares válidos.");
             return;
         }
 
         try {
             setLoading(true);
             await salvarPalpite(user.token, partidaId, golsMandante, golsVisitante);
-            Alert.alert("Sucesso", "Palpite salvo.");
-            router.replace("/(tabs)/guesses");
+            showAppAlert("Palpite salvo", "Seu palpite foi registrado com sucesso.", [
+                { text: "Ver meus palpites", onPress: () => router.replace("/(tabs)/guesses") },
+            ]);
         } catch (error) {
-            Alert.alert("Erro", error instanceof Error ? error.message : "Não foi possível salvar o palpite.");
+            showAppAlert("Erro", error instanceof Error ? error.message : "Não foi possível salvar o palpite.");
         } finally {
             setLoading(false);
         }
@@ -104,20 +106,29 @@ const styles = StyleSheet.create({
         padding: 20
     },
     header: {
-        padding: 20,
+        padding: 22,
         backgroundColor: CopaTheme.surface,
         borderWidth: 1,
         borderColor: CopaTheme.border,
-        borderRadius: 20,
+        borderRadius: 24,
         gap: 12,
+        ...CopaTheme.shadow,
     },
     backButton: {
         alignSelf: "flex-start",
+        minHeight: 42,
+        justifyContent: "center",
+        borderRadius: 14,
+        borderWidth: 1,
+        borderColor: "#bfdbfe",
+        backgroundColor: "#eff6ff",
+        paddingHorizontal: 14,
+        paddingVertical: 9,
     },
     backText: {
         color: CopaTheme.info,
-        fontSize: 16,
-        fontWeight: "700",
+        fontSize: 14,
+        fontWeight: "900",
     },
     title: {
         color: CopaTheme.primaryDark,
@@ -132,15 +143,15 @@ const styles = StyleSheet.create({
     input: {
         borderWidth: 1,
         borderColor: CopaTheme.border,
-        borderRadius: 12,
-        backgroundColor: "#f8fafc",
-        padding: 12,
+        borderRadius: 14,
+        backgroundColor: CopaTheme.surfaceAlt,
+        padding: 14,
     },
     button: {
         alignItems: "center",
         backgroundColor: CopaTheme.primary,
         padding: 15,
-        borderRadius: 12,
+        borderRadius: 14,
     },
     buttonText: {
         color: CopaTheme.textLight,

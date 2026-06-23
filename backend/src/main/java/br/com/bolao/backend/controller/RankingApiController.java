@@ -78,6 +78,7 @@ public class RankingApiController {
         }
 
         return usuarioRepository.findByEmail(authentication.getName())
+                .filter(Usuario::isAtivo)
                 .map(Usuario::getId)
                 .orElse(null);
     }

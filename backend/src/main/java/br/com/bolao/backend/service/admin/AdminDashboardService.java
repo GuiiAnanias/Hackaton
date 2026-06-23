@@ -33,7 +33,7 @@ public class AdminDashboardService {
                 converterParaInt(adminUsuarioService.contarTodos()),
                 converterParaInt(palpiteService.contarTodos()),
                 adminPartidaService.contarPartidasPendentes(),
-                converterParaInt(adminUsuarioService.contarAtivos())
+                converterParaInt(adminUsuarioService.contarAtivosUltimas24h())
         );
     }
 

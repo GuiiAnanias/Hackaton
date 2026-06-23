@@ -2,6 +2,7 @@ package br.com.bolao.backend.service.admin;
 
 import br.com.bolao.backend.dto.admin.RankingLinhaDTO;
 import br.com.bolao.backend.dto.admin.RankingPaginaDTO;
+import br.com.bolao.backend.model.Perfil;
 import br.com.bolao.backend.model.Usuario;
 import br.com.bolao.backend.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
@@ -46,6 +47,8 @@ public class AdminRankingService {
     public List<Usuario> listarUsuariosOrdenados() {
         return usuarioRepository.findAll()
                 .stream()
+                .filter(Usuario::isAtivo)
+                .filter(usuario -> usuario.getPerfil() == Perfil.USER)
                 .sorted(criarOrdenacaoRanking())
                 .toList();
     }

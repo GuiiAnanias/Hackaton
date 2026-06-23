@@ -65,9 +65,10 @@ const styles = StyleSheet.create({
         padding: 16,
         backgroundColor: CopaTheme.surface,
         marginBottom: 12,
-        borderRadius: 16,
+        borderRadius: 18,
         borderWidth: 1,
         borderColor: CopaTheme.border,
+        ...CopaTheme.shadow,
     },
     headerRow: {
         flexDirection: "row",

@@ -97,14 +97,10 @@ const styles = StyleSheet.create({
         padding: 16,
         backgroundColor: CopaTheme.surface,
         marginBottom: 12,
-        borderRadius: 16,
+        borderRadius: 18,
         borderWidth: 1,
         borderColor: CopaTheme.border,
-        shadowColor: "#14532d",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
-        shadowRadius: 8,
-        elevation: 2,
+        ...CopaTheme.shadow,
     },
     highlightCard: {
         borderColor: CopaTheme.accent,
@@ -174,9 +170,11 @@ const styles = StyleSheet.create({
     },
     guessButton: {
         marginTop: 14,
+        minHeight: 46,
+        justifyContent: "center",
         backgroundColor: CopaTheme.primary,
         paddingVertical: 12,
-        borderRadius: 10,
+        borderRadius: 14,
         alignItems: "center",
     },
     guessButtonDisabled: {
@@ -184,7 +182,7 @@ const styles = StyleSheet.create({
     },
     guessButtonText: {
         color: CopaTheme.textLight,
-        fontWeight: "700",
+        fontWeight: "900",
         fontSize: 14,
     },
 });

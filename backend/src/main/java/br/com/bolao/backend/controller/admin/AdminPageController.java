@@ -2,13 +2,12 @@ package br.com.bolao.backend.controller.admin;
 
 import br.com.bolao.backend.model.EstadioCopa;
 import br.com.bolao.backend.model.FaseCopa;
-import br.com.bolao.backend.model.EstadioCopa;
-import br.com.bolao.backend.model.FaseCopa;
 import br.com.bolao.backend.exception.AdminException;
 import br.com.bolao.backend.service.admin.AdminDashboardService;
 import br.com.bolao.backend.service.admin.AdminPartidaService;
 import br.com.bolao.backend.service.admin.AdminRankingService;
 import br.com.bolao.backend.service.admin.AdminSelecaoService;
+import br.com.bolao.backend.service.admin.AdminUsuarioService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,16 +25,19 @@ public class AdminPageController {
     private final AdminRankingService adminRankingService;
     private final AdminPartidaService adminPartidaService;
     private final AdminSelecaoService adminSelecaoService;
+    private final AdminUsuarioService adminUsuarioService;
 
     public AdminPageController(
             AdminDashboardService adminDashboardService,
             AdminRankingService adminRankingService,
             AdminPartidaService adminPartidaService,
-            AdminSelecaoService adminSelecaoService) {
+            AdminSelecaoService adminSelecaoService,
+            AdminUsuarioService adminUsuarioService) {
         this.adminDashboardService = adminDashboardService;
         this.adminRankingService = adminRankingService;
         this.adminPartidaService = adminPartidaService;
         this.adminSelecaoService = adminSelecaoService;
+        this.adminUsuarioService = adminUsuarioService;
     }
 
     @GetMapping("/login")
@@ -58,6 +60,46 @@ public class AdminPageController {
             Model model) {
         model.addAttribute("rankingPagina", adminRankingService.listarRankingPaginado(page, 50));
         return "admin/ranking";
+    }
+
+    @GetMapping("/usuarios")
+    public String usuarios(
+            @RequestParam(required = false) String busca,
+            Model model) {
+        model.addAttribute("usuarios", adminUsuarioService.listarParaAdmin(busca));
+        model.addAttribute("busca", busca == null ? "" : busca);
+        return "admin/usuarios";
+    }
+
+    @GetMapping("/usuarios/{id}")
+    public String usuarioDetalhe(
+            @PathVariable Long id,
+            @RequestParam(required = false) String busca,
+            Model model) {
+        model.addAttribute("usuarios", adminUsuarioService.listarParaAdmin(busca));
+        model.addAttribute("busca", busca == null ? "" : busca);
+
+        try {
+            model.addAttribute("usuarioDetalhe", adminUsuarioService.buscarDetalhe(id));
+        } catch (AdminException exception) {
+            model.addAttribute("mensagemErro", exception.getMessage());
+        }
+
+        return "admin/usuarios";
+    }
+
+    @PostMapping("/usuarios/{id}/bloqueio")
+    public String alternarBloqueioUsuario(
+            @PathVariable Long id,
+            RedirectAttributes redirectAttributes) {
+        try {
+            adminUsuarioService.alternarBloqueio(id);
+            redirectAttributes.addFlashAttribute("mensagemSucesso", "Status do usuario atualizado com sucesso.");
+        } catch (AdminException exception) {
+            redirectAttributes.addFlashAttribute("mensagemErro", exception.getMessage());
+        }
+
+        return "redirect:/admin/usuarios/" + id;
     }
 
     @GetMapping("/partidas")

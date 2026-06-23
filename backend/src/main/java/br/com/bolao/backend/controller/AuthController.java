@@ -14,11 +14,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+    private static final int TOKEN_EXPIRACAO_MINUTOS = 30;
 
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
@@ -52,11 +58,14 @@ public class AuthController {
                     .body(Map.of("erro", "Usuario bloqueado"));
         }
 
+        usuario.setUltimoAcessoEm(LocalDateTime.now());
+        usuarioRepository.save(usuario);
+
         String token = jwtService.gerarToken(usuario);
 
         LoginResponse response = new LoginResponse(
                 token, "Bearer", usuario.getId(),
-                usuario.getNome(), usuario.getPerfil().name());
+                usuario.getNome(), usuario.getPerfil().name(), usuario.getAvatarUrl());
 
         return ResponseEntity.ok(response);
     }
@@ -87,19 +96,47 @@ public class AuthController {
         usuario.setSenha(passwordEncoder.encode(request.senha()));
         usuario.setPerfil(Perfil.USER);
         usuario.setAtivo(true);
+        usuario.setUltimoAcessoEm(LocalDateTime.now());
         usuarioRepository.save(usuario);
 
         String token = jwtService.gerarToken(usuario);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new LoginResponse(token, "Bearer", usuario.getId(), usuario.getNome(), usuario.getPerfil().name()));
+                .body(new LoginResponse(token, "Bearer", usuario.getId(), usuario.getNome(), usuario.getPerfil().name(), usuario.getAvatarUrl()));
     }
 
     @PostMapping("/recuperar-senha")
-    public ResponseEntity<?> recuperarSenha(@RequestBody RecuperarSenhaRequest request) {
+    public ResponseEntity<?> solicitarRecuperacaoSenha(@RequestBody RecuperarSenhaRequest request) {
+        if (request.email() == null || request.email().isBlank()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("erro", "E-mail e obrigatorio"));
+        }
+
+        Usuario usuario = usuarioRepository.findByEmail(request.email().trim().toLowerCase()).orElse(null);
+        if (usuario == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("erro", "Usuario nao encontrado"));
+        }
+
+        String tokenRecuperacao = gerarTokenRecuperacao();
+        LocalDateTime expiraEm = LocalDateTime.now().plusMinutes(TOKEN_EXPIRACAO_MINUTOS);
+
+        usuario.setTokenRecuperacaoSenha(tokenRecuperacao);
+        usuario.setTokenRecuperacaoExpiraEm(expiraEm);
+        usuarioRepository.save(usuario);
+
+        return ResponseEntity.ok(Map.of(
+                "mensagem", "Token de recuperacao gerado com sucesso",
+                "token", tokenRecuperacao,
+                "expiraEm", expiraEm.toString()));
+    }
+
+    @PostMapping("/recuperar-senha/confirmar")
+    public ResponseEntity<?> confirmarRecuperacaoSenha(@RequestBody ConfirmarRecuperacaoSenhaRequest request) {
         if (request.email() == null || request.email().isBlank()
+                || request.token() == null || request.token().isBlank()
                 || request.novaSenha() == null || request.novaSenha().isBlank()) {
             return ResponseEntity.badRequest()
-                    .body(Map.of("erro", "E-mail e nova senha sao obrigatorios"));
+                    .body(Map.of("erro", "E-mail, token e nova senha sao obrigatorios"));
         }
 
         if (request.novaSenha().length() < 6) {
@@ -113,15 +150,34 @@ public class AuthController {
                     .body(Map.of("erro", "Usuario nao encontrado"));
         }
 
+        if (usuario.getTokenRecuperacaoSenha() == null
+                || usuario.getTokenRecuperacaoExpiraEm() == null
+                || usuario.getTokenRecuperacaoExpiraEm().isBefore(LocalDateTime.now())
+                || !usuario.getTokenRecuperacaoSenha().equals(request.token().trim())) {
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                    .body(Map.of("erro", "Token de recuperacao invalido ou expirado"));
+        }
+
         usuario.setSenha(passwordEncoder.encode(request.novaSenha()));
+        usuario.setTokenRecuperacaoSenha(null);
+        usuario.setTokenRecuperacaoExpiraEm(null);
         usuarioRepository.save(usuario);
 
         return ResponseEntity.ok(Map.of("mensagem", "Senha atualizada com sucesso"));
     }
 
+    private String gerarTokenRecuperacao() {
+        byte[] bytes = new byte[32];
+        SECURE_RANDOM.nextBytes(bytes);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+    }
+
     public record CadastroRequest(String nome, String email, String senha) {
     }
 
-    public record RecuperarSenhaRequest(String email, String novaSenha) {
+    public record RecuperarSenhaRequest(String email) {
+    }
+
+    public record ConfirmarRecuperacaoSenhaRequest(String email, String token, String novaSenha) {
     }
 }

@@ -20,6 +20,18 @@ public class Usuario {
 
     private boolean ativo = true;
 
+    @Column(name = "avatar_url")
+    private String avatarUrl;
+
+    @Column(name = "ultimo_acesso_em")
+    private LocalDateTime ultimoAcessoEm;
+
+    @Column(name = "token_recuperacao_senha", length = 120)
+    private String tokenRecuperacaoSenha;
+
+    @Column(name = "token_recuperacao_expira_em")
+    private LocalDateTime tokenRecuperacaoExpiraEm;
+
     // --- Campos do Integrante 1 (seguranca + pontuacao) ---
 
     @Enumerated(EnumType.STRING)
@@ -59,6 +71,18 @@ public class Usuario {
 
     public boolean isAtivo() { return ativo; }
     public void setAtivo(boolean ativo) { this.ativo = ativo; }
+
+    public String getAvatarUrl() { return avatarUrl; }
+    public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
+
+    public LocalDateTime getUltimoAcessoEm() { return ultimoAcessoEm; }
+    public void setUltimoAcessoEm(LocalDateTime ultimoAcessoEm) { this.ultimoAcessoEm = ultimoAcessoEm; }
+
+    public String getTokenRecuperacaoSenha() { return tokenRecuperacaoSenha; }
+    public void setTokenRecuperacaoSenha(String tokenRecuperacaoSenha) { this.tokenRecuperacaoSenha = tokenRecuperacaoSenha; }
+
+    public LocalDateTime getTokenRecuperacaoExpiraEm() { return tokenRecuperacaoExpiraEm; }
+    public void setTokenRecuperacaoExpiraEm(LocalDateTime tokenRecuperacaoExpiraEm) { this.tokenRecuperacaoExpiraEm = tokenRecuperacaoExpiraEm; }
 
     public Perfil getPerfil() { return perfil; }
     public void setPerfil(Perfil perfil) { this.perfil = perfil; }

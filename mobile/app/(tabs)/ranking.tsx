@@ -44,10 +44,10 @@ export default function RankingScreen() {
         <SafeAreaView style={styles.container}>
             <View style={styles.content}>
                 <View style={styles.hero}>
-                    <Text style={styles.heroBadge}>Classificacao geral</Text>
-                    <Text style={styles.heroTitle}>Ranking do Bolao</Text>
+                    <Text style={styles.heroBadge}>Classificação geral</Text>
+                    <Text style={styles.heroTitle}>Ranking do Bolão</Text>
                     <Text style={styles.heroText}>
-                        {totalUsuarios} usuarios competindo por pontos na Copa 2026.
+                        {totalUsuarios} usuários competindo por pontos na Copa 2026.
                     </Text>
                 </View>
 
@@ -55,7 +55,7 @@ export default function RankingScreen() {
                     <View style={styles.myPosition}>
                         <FontAwesome name="user" size={16} color={CopaTheme.primaryDark} />
                         <Text style={styles.myPositionText}>
-                            Sua posicao: #{usuarioLogado.posicao} com {usuarioLogado.pontuacaoTotal} pontos
+                            Sua posição: #{usuarioLogado.posicao} com {usuarioLogado.pontuacaoTotal} pontos
                         </Text>
                     </View>
                 ) : null}
@@ -69,7 +69,7 @@ export default function RankingScreen() {
                     refreshControl={
                         <RefreshControl refreshing={refreshing} onRefresh={() => carregarRanking(true)} />
                     }
-                    ListEmptyComponent={!loading ? <Text style={styles.empty}>Nenhum usuario no ranking.</Text> : null}
+                    ListEmptyComponent={!loading ? <Text style={styles.empty}>Nenhum usuário no ranking.</Text> : null}
                     renderItem={({ item }) => <RankingCard item={item} />}
                     contentContainerStyle={styles.listContent}
                 />
@@ -108,10 +108,11 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     hero: {
-        borderRadius: 22,
+        borderRadius: 26,
         backgroundColor: CopaTheme.primary,
-        marginBottom: 14,
-        padding: 20,
+        marginBottom: 16,
+        padding: 22,
+        ...CopaTheme.shadow,
     },
     heroBadge: {
         alignSelf: "flex-start",
@@ -137,7 +138,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         gap: 8,
-        borderRadius: 14,
+        borderRadius: 18,
         backgroundColor: "#fef3c7",
         marginBottom: 12,
         padding: 12,
@@ -154,10 +155,11 @@ const styles = StyleSheet.create({
         alignItems: "center",
         borderWidth: 1,
         borderColor: CopaTheme.border,
-        borderRadius: 16,
+        borderRadius: 18,
         backgroundColor: CopaTheme.surface,
-        marginBottom: 10,
+        marginBottom: 12,
         padding: 14,
+        ...CopaTheme.shadow,
     },
     highlightCard: {
         borderColor: CopaTheme.accent,

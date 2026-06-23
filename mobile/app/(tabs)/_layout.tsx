@@ -2,14 +2,15 @@ import { Redirect, Tabs } from "expo-router";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { ActivityIndicator, View } from "react-native";
 import { useAuth } from "../../auth";
+import { CopaTheme } from "../../constants/copa-theme";
 
 export default function TabLayout() {
     const { isAuthenticated, isLoading } = useAuth();
 
     if (isLoading) {
         return (
-            <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-                <ActivityIndicator color="#16a34a" />
+            <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: CopaTheme.background }}>
+                <ActivityIndicator color={CopaTheme.primary} />
             </View>
         );
     }
@@ -20,7 +21,29 @@ export default function TabLayout() {
 
     return (
         <Tabs screenOptions={{
-                headerShown: false, tabBarActiveTintColor: "#16a34a", tabBarInactiveTintColor: "#9ca3af",
+                headerShown: false,
+                tabBarActiveTintColor: CopaTheme.primary,
+                tabBarInactiveTintColor: CopaTheme.textSoft,
+                tabBarLabelStyle: { fontSize: 11, fontWeight: "800" },
+                tabBarItemStyle: {
+                    borderRadius: 16,
+                    marginHorizontal: 3,
+                },
+                tabBarStyle: {
+                    height: 70,
+                    paddingTop: 8,
+                    paddingBottom: 12,
+                    backgroundColor: CopaTheme.surface,
+                    borderTopWidth: 1,
+                    borderTopColor: CopaTheme.border,
+                    borderTopLeftRadius: 24,
+                    borderTopRightRadius: 24,
+                    shadowColor: "#0f172a",
+                    shadowOffset: { width: 0, height: -8 },
+                    shadowOpacity: 0.08,
+                    shadowRadius: 18,
+                    elevation: 12,
+                },
             }}>
             <Tabs.Screen name="home" options={{
                 title: "Home", tabBarIcon: ({ color, size }) => (

@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { ActivityIndicator, Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../auth";
+import { CopaTheme } from "../constants/copa-theme";
+import { showAppAlert } from "../utils/app-alert";
 
 export default function RegisterScreen() {
     const { cadastrar } = useAuth();
@@ -13,7 +15,7 @@ export default function RegisterScreen() {
 
     async function handleRegister() {
         if (!nome.trim() || !email.trim() || !senha.trim()) {
-            Alert.alert("Atenção", "Preencha nome, e-mail e senha.");
+            showAppAlert("Atenção", "Preencha nome, e-mail e senha.");
             return;
         }
 
@@ -22,7 +24,7 @@ export default function RegisterScreen() {
             await cadastrar(nome.trim(), email.trim(), senha);
             router.replace("/(tabs)/home");
         } catch (error) {
-            Alert.alert("Erro no cadastro", error instanceof Error ? error.message : "Não foi possível cadastrar.");
+            showAppAlert("Erro no cadastro", error instanceof Error ? error.message : "Não foi possível cadastrar.");
         } finally {
             setLoading(false);
         }
@@ -30,8 +32,15 @@ export default function RegisterScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
+            <View style={styles.brand}>
+                <View style={styles.brandMark}>
+                    <Text style={styles.brandMarkText}>+</Text>
+                </View>
+                <Text style={styles.brandKicker}>Novo participante</Text>
+            </View>
+
             <View style={styles.card}>
-                <Text style={styles.title}>Criar Conta</Text>
+                <Text style={styles.title}>Criar conta</Text>
                 <Text style={styles.subtitle}>Entre no bolão e acompanhe seus palpites.</Text>
 
                 <TextInput placeholder="Nome" value={nome} onChangeText={setNome} style={styles.input} />
@@ -55,8 +64,8 @@ export default function RegisterScreen() {
                     {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Cadastrar</Text>}
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => router.replace("/login")}>
-                    <Text style={styles.link}>Já tenho conta</Text>
+                <TouchableOpacity onPress={() => router.replace("/login")} style={styles.loginButton}>
+                    <Text style={styles.loginButtonText}>Já tenho conta</Text>
                 </TouchableOpacity>
             </View>
         </SafeAreaView>
@@ -67,43 +76,93 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: "center",
-        backgroundColor: "#ecfdf5",
-        padding: 20,
+        backgroundColor: CopaTheme.primaryDark,
+        padding: 22,
+    },
+    brand: {
+        alignItems: "center",
+        marginBottom: 18,
+    },
+    brandMark: {
+        alignItems: "center",
+        justifyContent: "center",
+        width: 66,
+        height: 66,
+        borderRadius: 22,
+        backgroundColor: CopaTheme.accent,
+        borderWidth: 4,
+        borderColor: "rgba(255, 255, 255, 0.22)",
+    },
+    brandMarkText: {
+        color: CopaTheme.primaryDark,
+        fontSize: 30,
+        fontWeight: "900",
+        lineHeight: 34,
+    },
+    brandKicker: {
+        color: CopaTheme.primaryLight,
+        fontSize: 12,
+        fontWeight: "900",
+        letterSpacing: 0,
+        marginTop: 8,
+        textTransform: "uppercase",
     },
     card: {
-        gap: 12,
-        padding: 20,
-        borderRadius: 18,
-        backgroundColor: "#fff",
+        gap: 13,
+        padding: 22,
+        borderRadius: 26,
+        backgroundColor: CopaTheme.surface,
+        borderWidth: 1,
+        borderColor: CopaTheme.border,
+        ...CopaTheme.shadow,
     },
     title: {
-        fontSize: 26,
-        fontWeight: "800",
+        color: CopaTheme.primaryDark,
+        fontSize: 30,
+        fontWeight: "900",
         textAlign: "center",
     },
     subtitle: {
-        color: "#6b7280",
+        color: CopaTheme.textMuted,
         textAlign: "center",
     },
     input: {
         borderWidth: 1,
-        borderColor: "#d1d5db",
-        borderRadius: 10,
-        padding: 12,
+        borderColor: CopaTheme.border,
+        borderRadius: 14,
+        backgroundColor: CopaTheme.surfaceAlt,
+        color: CopaTheme.primaryDark,
+        fontSize: 15,
+        padding: 14,
     },
     button: {
         alignItems: "center",
-        borderRadius: 10,
-        backgroundColor: "#16a34a",
-        padding: 14,
+        borderRadius: 14,
+        backgroundColor: CopaTheme.primary,
+        minHeight: 50,
+        justifyContent: "center",
+        padding: 15,
     },
     buttonText: {
         color: "#fff",
-        fontWeight: "700",
+        fontSize: 16,
+        fontWeight: "900",
     },
-    link: {
-        color: "#15803d",
-        fontWeight: "700",
+    loginButton: {
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: 48,
+        borderRadius: 14,
+        borderWidth: 1.5,
+        borderColor: CopaTheme.primary,
+        backgroundColor: CopaTheme.primaryLight,
+        paddingHorizontal: 14,
+        paddingVertical: 12,
+    },
+    loginButtonText: {
+        color: CopaTheme.primaryDark,
+        fontSize: 15,
+        fontWeight: "900",
         textAlign: "center",
     },
 });

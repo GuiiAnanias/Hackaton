@@ -275,6 +275,10 @@ body.dark-mode {
     height: 300px;
 }
 
+.dashboard-hero .hero-actions {
+    display: none;
+}
+
 .danger-hero::after {
     background: radial-gradient(circle, rgba(220, 38, 38, 0.16), transparent 65%);
 }
@@ -819,10 +823,92 @@ option {
     border: 1px solid var(--border);
 }
 
+.status-active {
+    background-color: var(--success-bg);
+    color: var(--success-text);
+    border-color: var(--success-border);
+}
+
+.status-inactive {
+    background-color: var(--error-bg);
+    color: var(--error-text);
+    border-color: var(--error-border);
+}
+
 .result-badge {
     background-color: var(--success-bg);
     color: var(--success-text);
     border: 1px solid var(--success-border);
+}
+
+.table-subtext {
+    display: block;
+    color: var(--text-muted);
+    font-size: 12px;
+    margin-top: 3px;
+}
+
+.user-search-form {
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) auto auto;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.user-search-form input {
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    font-size: 15px;
+}
+
+.user-detail-grid {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 18px;
+    align-items: start;
+}
+
+.avatar-preview {
+    width: 92px;
+    height: 92px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--primary-soft);
+    color: var(--primary-hover);
+    border: 1px solid var(--border);
+    font-size: 34px;
+    font-weight: 900;
+}
+
+.detail-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.detail-list div {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    background-color: var(--bg-card-soft);
+}
+
+.detail-list span {
+    display: block;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 800;
+    margin-bottom: 5px;
+}
+
+.detail-list strong {
+    color: var(--text-main);
 }
 
 .alert-success,
@@ -1105,7 +1191,10 @@ option {
     .card-grid,
     .form-grid,
     .score-inputs,
-    .score-card {
+    .score-card,
+    .user-search-form,
+    .user-detail-grid,
+    .detail-list {
         grid-template-columns: 1fr;
     }
 

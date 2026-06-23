@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { ActivityIndicator, View, Text, TextInput, TouchableOpacity, Alert, StyleSheet} from "react-native";
+import { ActivityIndicator, View, Text, TextInput, TouchableOpacity, StyleSheet} from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { atualizarPalpite, buscarPalpite, Palpite } from "../../api";
 import { useAuth } from "../../auth";
 import { CopaTheme } from "../../constants/copa-theme";
+import { showAppAlert } from "../../utils/app-alert";
 
 export default function EditGuessScreen() {
     const { id } = useLocalSearchParams();
@@ -17,6 +18,7 @@ export default function EditGuessScreen() {
     const [saving, setSaving] = useState(false);
 
     const palpiteId = Number(Array.isArray(id) ? id[0] : id);
+    const bloqueado = palpite ? isPalpiteBloqueado(palpite) : false;
 
     useEffect(() => {
         if (!user) {
@@ -32,7 +34,7 @@ export default function EditGuessScreen() {
                 setTeamB(String(palpite.golsVisitante));
             })
             .catch((error) => {
-                Alert.alert("Erro", error instanceof Error ? error.message : "Não foi possível carregar o palpite.");
+                showAppAlert("Erro", error instanceof Error ? error.message : "Não foi possível carregar o palpite.");
                 router.back();
             })
             .finally(() => setLoading(false));
@@ -44,22 +46,28 @@ export default function EditGuessScreen() {
             return;
         }
 
+        if (bloqueado) {
+            showAppAlert("Palpite bloqueado", "Não é possível editar este palpite.");
+            return;
+        }
+
         const golsMandante = Number(teamA);
         const golsVisitante = Number(teamB);
 
         if (!Number.isInteger(golsMandante) || !Number.isInteger(golsVisitante)
             || golsMandante < 0 || golsVisitante < 0) {
-            Alert.alert("Atenção", "Informe placares válidos.");
+            showAppAlert("Atenção", "Informe placares válidos.");
             return;
         }
 
         try {
             setSaving(true);
             await atualizarPalpite(user.token, palpiteId, golsMandante, golsVisitante);
-            Alert.alert("Atualizado", "Palpite atualizado.");
-            router.replace("/(tabs)/guesses");
+            showAppAlert("Palpite atualizado", "Seu palpite foi atualizado com sucesso.", [
+                { text: "Ver meus palpites", onPress: () => router.replace("/(tabs)/guesses") },
+            ]);
         } catch (error) {
-            Alert.alert("Erro", error instanceof Error ? error.message : "Não foi possível atualizar o palpite.");
+            showAppAlert("Erro", error instanceof Error ? error.message : "Não foi possível atualizar o palpite.");
         } finally {
             setSaving(false);
         }
@@ -81,25 +89,30 @@ export default function EditGuessScreen() {
                 ) : null}
 
                 {loading && <ActivityIndicator color={CopaTheme.info} />}
+                {bloqueado ? (
+                    <Text style={styles.lockedNotice}>Edição bloqueada para esta partida.</Text>
+                ) : null}
 
                 <TextInput
                     placeholder={`Gols ${palpite?.mandante ?? "mandante"}`}
                     value={teamA}
                     onChangeText={setTeamA}
+                    editable={!bloqueado && !saving}
                     keyboardType="numeric"
-                    style={styles.input}
+                    style={[styles.input, bloqueado && styles.disabledInput]}
                 />
                 <TextInput
                     placeholder={`Gols ${palpite?.visitante ?? "visitante"}`}
                     value={teamB}
                     onChangeText={setTeamB}
+                    editable={!bloqueado && !saving}
                     keyboardType="numeric"
-                    style={styles.input}
+                    style={[styles.input, bloqueado && styles.disabledInput]}
                 />
                 <TouchableOpacity
-                    disabled={saving || loading}
+                    disabled={saving || loading || bloqueado}
                     onPress={updateGuess}
-                    style={styles.button}>
+                    style={[styles.button, bloqueado && styles.disabledButton]}>
                     {saving ? (
                         <ActivityIndicator color="#fff" />
                     ) : (
@@ -110,6 +123,17 @@ export default function EditGuessScreen() {
         </SafeAreaView>
     );
 }
+
+function isPalpiteBloqueado(palpite: Palpite) {
+    const status = palpite.statusPartida?.toUpperCase();
+    if (status && status !== "AGENDADA") {
+        return true;
+    }
+
+    const dataHora = new Date(palpite.dataHora).getTime();
+    return Number.isFinite(dataHora) && dataHora <= Date.now();
+}
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -117,20 +141,29 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     header: {
-        padding: 20,
+        padding: 22,
         backgroundColor: CopaTheme.surface,
         borderWidth: 1,
         borderColor: CopaTheme.border,
-        borderRadius: 20,
+        borderRadius: 24,
         gap: 12,
+        ...CopaTheme.shadow,
     },
     backButton: {
         alignSelf: "flex-start",
+        minHeight: 42,
+        justifyContent: "center",
+        borderRadius: 14,
+        borderWidth: 1,
+        borderColor: "#bfdbfe",
+        backgroundColor: "#eff6ff",
+        paddingHorizontal: 14,
+        paddingVertical: 9,
     },
     backText: {
         color: CopaTheme.info,
-        fontSize: 16,
-        fontWeight: "700",
+        fontSize: 14,
+        fontWeight: "900",
     },
     title: {
         color: CopaTheme.primaryDark,
@@ -145,18 +178,31 @@ const styles = StyleSheet.create({
     meta: {
         color: CopaTheme.textMuted,
     },
+    lockedNotice: {
+        borderRadius: 12,
+        backgroundColor: CopaTheme.dangerLight,
+        color: CopaTheme.danger,
+        fontWeight: "700",
+        padding: 12,
+    },
     input: {
         borderWidth: 1,
         borderColor: CopaTheme.border,
-        borderRadius: 12,
-        backgroundColor: "#f8fafc",
-        padding: 12,
+        borderRadius: 14,
+        backgroundColor: CopaTheme.surfaceAlt,
+        padding: 14,
+    },
+    disabledInput: {
+        opacity: 0.7,
     },
     button: {
         alignItems: "center",
         backgroundColor: CopaTheme.info,
         padding: 15,
-        borderRadius: 12,
+        borderRadius: 14,
+    },
+    disabledButton: {
+        opacity: 0.55,
     },
     buttonText: {
         color: CopaTheme.textLight,

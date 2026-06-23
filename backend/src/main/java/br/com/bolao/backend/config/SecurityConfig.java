@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -63,14 +64,33 @@ public class SecurityConfig {
                         .requestMatchers("/js/**").permitAll()
                         .requestMatchers("/webjars/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .anyRequest().permitAll()
+                        .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/admin/login")
                         .loginProcessingUrl("/admin/login")
-                        .defaultSuccessUrl("/admin/dashboard", true)
+                        .successHandler((request, response, authentication) -> {
+                            boolean admin = authentication.getAuthorities()
+                                    .stream()
+                                    .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
+
+                            if (!admin) {
+                                SecurityContextHolder.clearContext();
+                                request.getSession().invalidate();
+                                response.sendRedirect(request.getContextPath() + "/admin/login?error=true");
+                                return;
+                            }
+
+                            response.sendRedirect(request.getContextPath() + "/admin/dashboard");
+                        })
                         .failureUrl("/admin/login?error=true")
                         .permitAll()
+                )
+                .exceptionHandling(exception -> exception
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            SecurityContextHolder.clearContext();
+                            response.sendRedirect(request.getContextPath() + "/admin/login?error=true");
+                        })
                 )
                 .logout(logout -> logout
                         .logoutUrl("/admin/logout")

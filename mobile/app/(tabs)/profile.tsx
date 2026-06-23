@@ -1,10 +1,12 @@
 import { useCallback, useState } from "react";
-import { ActivityIndicator, Alert, Text, TouchableOpacity, View, StyleSheet } from "react-native";
+import { ActivityIndicator, Image, Text, TouchableOpacity, View, StyleSheet } from "react-native";
 import { router } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { buscarPerfil, excluirConta, UserProfile } from "../../api";
+import { buscarPerfil, desativarConta, excluirConta, UserProfile } from "../../api";
 import { useAuth } from "../../auth";
+import { CopaTheme } from "../../constants/copa-theme";
+import { showAppAlert } from "../../utils/app-alert";
 
 export default function ProfileScreen() {
     const { user, logout } = useAuth();
@@ -19,7 +21,7 @@ export default function ProfileScreen() {
         setLoading(true);
         buscarPerfil(user.token)
             .then(setProfile)
-            .catch((error) => Alert.alert("Erro", error instanceof Error ? error.message : "Não foi possível carregar o perfil."))
+            .catch((error) => showAppAlert("Erro", error instanceof Error ? error.message : "Não foi possível carregar o perfil."))
             .finally(() => setLoading(false));
     }, [user]));
 
@@ -33,7 +35,7 @@ export default function ProfileScreen() {
             return;
         }
 
-        Alert.alert("Excluir conta", "Sua conta será desativada e você sairá do app. Deseja continuar?", [
+        showAppAlert("Excluir conta", "Sua conta e todos os seus palpites serão excluídos de forma definitiva. Deseja continuar?", [
             { text: "Cancelar", style: "cancel" },
             {
                 text: "Excluir",
@@ -44,12 +46,37 @@ export default function ProfileScreen() {
                         logout();
                         router.replace("/login");
                     } catch (error) {
-                        Alert.alert("Erro", error instanceof Error ? error.message : "Não foi possível excluir a conta.");
+                        showAppAlert("Erro", error instanceof Error ? error.message : "Não foi possível excluir a conta.");
                     }
                 },
             },
         ]);
     }
+
+    function handleDeactivateAccount() {
+        if (!user) {
+            return;
+        }
+
+        showAppAlert("Desativar conta", "Sua conta será desativada e você sairá do app. Seus dados ficarão guardados.", [
+            { text: "Cancelar", style: "cancel" },
+            {
+                text: "Desativar",
+                style: "destructive",
+                onPress: async () => {
+                    try {
+                        await desativarConta(user.token);
+                        logout();
+                        router.replace("/login");
+                    } catch (error) {
+                        showAppAlert("Erro", error instanceof Error ? error.message : "Não foi possível desativar a conta.");
+                    }
+                },
+            },
+        ]);
+    }
+
+    const isAdmin = (profile?.perfil ?? user?.perfil) === "ADMIN";
 
     return (
         <SafeAreaView style={styles.container}>
@@ -59,6 +86,15 @@ export default function ProfileScreen() {
                     <ActivityIndicator color="#16a34a" />
                 ) : (
                     <>
+                        {profile?.avatarUrl ? (
+                            <Image source={{ uri: profile.avatarUrl }} style={styles.avatar} />
+                        ) : (
+                            <View style={styles.avatarPlaceholder}>
+                                <Text style={styles.avatarInitial}>
+                                    {((profile?.nome ?? user?.nome ?? "U").trim()[0] ?? "U").toUpperCase()}
+                                </Text>
+                            </View>
+                        )}
                         <Text style={styles.name}>{profile?.nome ?? user?.nome}</Text>
                         <Text style={styles.info}>E-mail: {profile?.email}</Text>
                         <Text style={styles.info}>Perfil: {profile?.perfil ?? user?.perfil}</Text>
@@ -84,9 +120,19 @@ export default function ProfileScreen() {
                     <Text style={styles.buttonText}>Sair</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={handleDeleteAccount}>
-                    <Text style={styles.deleteText}>Excluir conta</Text>
-                </TouchableOpacity>
+                {isAdmin ? (
+                    <Text style={styles.protectedText}>Conta ADMIN protegida contra desativação e exclusão.</Text>
+                ) : (
+                    <View style={styles.accountActions}>
+                        <TouchableOpacity onPress={handleDeactivateAccount} style={styles.deactivateButton}>
+                            <Text style={styles.deactivateText}>Desativar conta</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity onPress={handleDeleteAccount} style={styles.deleteButton}>
+                            <Text style={styles.deleteText}>Excluir conta</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
             </View>
         </SafeAreaView>
     );
@@ -95,17 +141,42 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#ecfdf5",
+        backgroundColor: CopaTheme.background,
         padding: 20,
     },
     card: {
         gap: 12,
-        padding: 20,
-        borderRadius: 16,
+        padding: 22,
+        borderRadius: 24,
         backgroundColor: "#fff",
+        borderWidth: 1,
+        borderColor: CopaTheme.border,
+        ...CopaTheme.shadow,
     },
     title: {
+        color: CopaTheme.primaryDark,
         fontSize: 24,
+        fontWeight: "900",
+    },
+    avatar: {
+        alignSelf: "center",
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        backgroundColor: "#dcfce7",
+    },
+    avatarPlaceholder: {
+        alignSelf: "center",
+        alignItems: "center",
+        justifyContent: "center",
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        backgroundColor: "#dcfce7",
+    },
+    avatarInitial: {
+        color: "#166534",
+        fontSize: 36,
         fontWeight: "800",
     },
     name: {
@@ -136,8 +207,10 @@ const styles = StyleSheet.create({
     },
     editButton: {
         alignItems: "center",
-        borderRadius: 8,
-        backgroundColor: "#16a34a",
+        justifyContent: "center",
+        minHeight: 50,
+        borderRadius: 15,
+        backgroundColor: CopaTheme.primary,
         padding: 14,
     },
     editButtonText: {
@@ -146,18 +219,56 @@ const styles = StyleSheet.create({
     },
     button: {
         alignItems: "center",
-        borderRadius: 8,
+        justifyContent: "center",
+        minHeight: 48,
+        borderRadius: 15,
         borderWidth: 1,
         borderColor: "#dc2626",
+        backgroundColor: CopaTheme.dangerLight,
         padding: 14,
     },
     buttonText: {
         color: "#dc2626",
         fontWeight: "700",
     },
-    deleteText: {
-        color: "#991b1b",
+    accountActions: {
+        gap: 10,
+    },
+    deactivateButton: {
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: 48,
+        borderRadius: 15,
+        borderWidth: 1,
+        borderColor: CopaTheme.accentDark,
+        backgroundColor: "#fffbeb",
+        padding: 14,
+    },
+    deactivateText: {
+        color: CopaTheme.accentDark,
         fontWeight: "700",
+        textAlign: "center",
+    },
+    deleteButton: {
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: 48,
+        borderRadius: 15,
+        backgroundColor: CopaTheme.danger,
+        padding: 14,
+    },
+    deleteText: {
+        color: "#fff",
+        fontWeight: "700",
+        textAlign: "center",
+    },
+    protectedText: {
+        borderRadius: 15,
+        backgroundColor: "#eff6ff",
+        color: "#2563eb",
+        fontWeight: "700",
+        lineHeight: 20,
+        padding: 12,
         textAlign: "center",
     },
 });

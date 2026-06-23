@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { alterarSenha, atualizarPerfil, buscarPerfil } from "../api";
 import { useAuth } from "../auth";
+import { CopaTheme } from "../constants/copa-theme";
+import { showAppAlert } from "../utils/app-alert";
 
 export default function EditProfileScreen() {
     const { user, updateUser } = useAuth();
     const [nome, setNome] = useState("");
     const [email, setEmail] = useState("");
+    const [avatarUrl, setAvatarUrl] = useState("");
     const [senhaAtual, setSenhaAtual] = useState("");
     const [novaSenha, setNovaSenha] = useState("");
     const [loading, setLoading] = useState(true);
@@ -24,8 +27,9 @@ export default function EditProfileScreen() {
             .then((profile) => {
                 setNome(profile.nome);
                 setEmail(profile.email);
+                setAvatarUrl(profile.avatarUrl ?? "");
             })
-            .catch((error) => Alert.alert("Erro", error instanceof Error ? error.message : "Não foi possível carregar o perfil."))
+            .catch((error) => showAppAlert("Erro", error instanceof Error ? error.message : "Não foi possível carregar o perfil."))
             .finally(() => setLoading(false));
     }, [user]);
 
@@ -36,12 +40,13 @@ export default function EditProfileScreen() {
 
         try {
             setSaving(true);
-            const profile = await atualizarPerfil(user.token, nome, email);
+            const profile = await atualizarPerfil(user.token, nome, email, avatarUrl.trim() || null);
             updateUser(profile);
-            Alert.alert("Perfil atualizado", "Seus dados foram salvos.");
-            router.back();
+            showAppAlert("Perfil atualizado", "Seus dados foram salvos.", [
+                { text: "OK", onPress: () => router.back() },
+            ]);
         } catch (error) {
-            Alert.alert("Erro", error instanceof Error ? error.message : "Não foi possível atualizar o perfil.");
+            showAppAlert("Erro", error instanceof Error ? error.message : "Não foi possível atualizar o perfil.");
         } finally {
             setSaving(false);
         }
@@ -53,7 +58,7 @@ export default function EditProfileScreen() {
         }
 
         if (!senhaAtual || !novaSenha) {
-            Alert.alert("Atenção", "Informe a senha atual e a nova senha.");
+            showAppAlert("Atenção", "Informe a senha atual e a nova senha.");
             return;
         }
 
@@ -62,9 +67,9 @@ export default function EditProfileScreen() {
             await alterarSenha(user.token, senhaAtual, novaSenha);
             setSenhaAtual("");
             setNovaSenha("");
-            Alert.alert("Senha alterada", "Sua senha foi atualizada.");
+            showAppAlert("Senha alterada", "Sua senha foi atualizada.");
         } catch (error) {
-            Alert.alert("Erro", error instanceof Error ? error.message : "Não foi possível alterar a senha.");
+            showAppAlert("Erro", error instanceof Error ? error.message : "Não foi possível alterar a senha.");
         } finally {
             setSaving(false);
         }
@@ -83,6 +88,16 @@ export default function EditProfileScreen() {
             <View style={styles.card}>
                 <Text style={styles.title}>Editar Perfil</Text>
 
+                <View style={styles.avatarWrapper}>
+                    {avatarUrl.trim() ? (
+                        <Image source={{ uri: avatarUrl.trim() }} style={styles.avatar} />
+                    ) : (
+                        <View style={styles.avatarPlaceholder}>
+                            <Text style={styles.avatarInitial}>{(nome.trim()[0] ?? "U").toUpperCase()}</Text>
+                        </View>
+                    )}
+                </View>
+
                 <TextInput placeholder="Nome" value={nome} onChangeText={setNome} style={styles.input} />
                 <TextInput
                     autoCapitalize="none"
@@ -90,6 +105,14 @@ export default function EditProfileScreen() {
                     placeholder="E-mail"
                     value={email}
                     onChangeText={setEmail}
+                    style={styles.input}
+                />
+                <TextInput
+                    autoCapitalize="none"
+                    keyboardType="url"
+                    placeholder="URL da foto de perfil"
+                    value={avatarUrl}
+                    onChangeText={setAvatarUrl}
                     style={styles.input}
                 />
 
@@ -126,7 +149,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         gap: 16,
-        backgroundColor: "#f0f0f0",
+        backgroundColor: CopaTheme.background,
         padding: 20,
     },
     center: {
@@ -137,28 +160,60 @@ const styles = StyleSheet.create({
     card: {
         gap: 12,
         padding: 18,
-        borderRadius: 16,
-        backgroundColor: "#fff",
+        borderRadius: 24,
+        backgroundColor: CopaTheme.surface,
+        borderWidth: 1,
+        borderColor: CopaTheme.border,
+        ...CopaTheme.shadow,
     },
     title: {
+        color: CopaTheme.primaryDark,
         fontSize: 24,
-        fontWeight: "800",
+        fontWeight: "900",
     },
     sectionTitle: {
+        color: CopaTheme.primaryDark,
         fontSize: 18,
-        fontWeight: "700",
+        fontWeight: "900",
+    },
+    avatarWrapper: {
+        alignItems: "center",
+    },
+    avatar: {
+        width: 92,
+        height: 92,
+        borderRadius: 46,
+        backgroundColor: "#e5e7eb",
+    },
+    avatarPlaceholder: {
+        alignItems: "center",
+        justifyContent: "center",
+        width: 92,
+        height: 92,
+        borderRadius: 46,
+        backgroundColor: "#dcfce7",
+    },
+    avatarInitial: {
+        color: "#166534",
+        fontSize: 34,
+        fontWeight: "800",
     },
     input: {
         borderWidth: 1,
-        borderColor: "#d1d5db",
-        borderRadius: 10,
-        padding: 12,
+        borderColor: CopaTheme.border,
+        borderRadius: 14,
+        backgroundColor: CopaTheme.surfaceAlt,
+        color: CopaTheme.primaryDark,
+        fontSize: 15,
+        padding: 14,
     },
     button: {
         alignItems: "center",
-        borderRadius: 10,
-        backgroundColor: "#16a34a",
-        padding: 14,
+        justifyContent: "center",
+        minHeight: 50,
+        borderRadius: 14,
+        backgroundColor: CopaTheme.primary,
+        padding: 15,
     },
     buttonText: {
         color: "#fff",
@@ -166,10 +221,13 @@ const styles = StyleSheet.create({
     },
     secondaryButton: {
         alignItems: "center",
-        borderRadius: 10,
+        justifyContent: "center",
+        minHeight: 48,
+        borderRadius: 14,
         borderWidth: 1,
         borderColor: "#2563eb",
-        padding: 14,
+        backgroundColor: "#eff6ff",
+        padding: 15,
     },
     secondaryButtonText: {
         color: "#2563eb",

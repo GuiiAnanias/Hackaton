@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/admin-head :: head('Usuarios Admin')}"></head>
+
+<body>
+<div class="admin-wrapper">
+    <aside th:replace="~{fragments/admin-sidebar :: sidebar('usuarios')}"></aside>
+
+    <main class="admin-content">
+        <section class="admin-hero">
+            <div>
+                <span class="hero-badge">Usuarios</span>
+                <h2>Usuarios</h2>
+                <p>Liste, busque, visualize detalhes e controle o bloqueio das contas cadastradas.</p>
+            </div>
+        </section>
+
+        <section class="alert-success" th:if="${mensagemSucesso != null}">
+            <strong th:text="${mensagemSucesso}">Acao realizada com sucesso.</strong>
+        </section>
+
+        <section class="alert-error" th:if="${mensagemErro != null}">
+            <strong th:text="${mensagemErro}">Erro ao carregar usuarios.</strong>
+        </section>
+
+        <section class="panel-card" th:if="${usuarioDetalhe != null}">
+            <div class="section-title-row">
+                <div>
+                    <h3 th:text="${usuarioDetalhe.nome}">Usuario</h3>
+                    <p th:text="${usuarioDetalhe.email}">email@exemplo.com</p>
+                </div>
+                <span class="status-badge"
+                      th:classappend="${usuarioDetalhe.ativo} ? ' status-active' : ' status-inactive'"
+                      th:text="${usuarioDetalhe.ativo} ? 'Ativo' : 'Bloqueado'">Ativo</span>
+            </div>
+
+            <div class="user-detail-grid">
+                <div class="avatar-preview" th:if="${usuarioDetalhe.avatarUrl == null || usuarioDetalhe.avatarUrl.isBlank()}">
+                    <span th:text="${#strings.substring(usuarioDetalhe.nome, 0, 1)}">U</span>
+                </div>
+                <img class="avatar-preview" th:if="${usuarioDetalhe.avatarUrl != null && !usuarioDetalhe.avatarUrl.isBlank()}"
+                     th:src="${usuarioDetalhe.avatarUrl}" alt="Avatar do usuario">
+
+                <div class="detail-list">
+                    <div>
+                        <span>Perfil</span>
+                        <strong th:text="${usuarioDetalhe.perfil}">USER</strong>
+                    </div>
+                    <div>
+                        <span>Pontos</span>
+                        <strong th:text="${usuarioDetalhe.pontuacaoTotal}">0</strong>
+                    </div>
+                    <div>
+                        <span>Placares exatos</span>
+                        <strong th:text="${usuarioDetalhe.placaresExatos}">0</strong>
+                    </div>
+                    <div>
+                        <span>Palpites</span>
+                        <strong th:text="${usuarioDetalhe.totalPalpites}">0</strong>
+                    </div>
+                    <div>
+                        <span>Cadastro</span>
+                        <strong th:text="${usuarioDetalhe.criadoEm}">00/00/0000</strong>
+                    </div>
+                    <div>
+                        <span>Ultimo acesso</span>
+                        <strong th:text="${usuarioDetalhe.ultimoAcessoEm}">Nunca acessou</strong>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel-card">
+            <div class="section-title-row">
+                <div>
+                    <h3>Usuarios cadastrados</h3>
+                    <p th:text="${usuarios.size() + ' usuarios encontrados'}">0 usuarios encontrados</p>
+                </div>
+            </div>
+
+            <form class="user-search-form" method="get" th:action="@{/admin/usuarios}">
+                <input type="search" name="busca" placeholder="Buscar por nome, e-mail ou perfil" th:value="${busca}">
+                <button type="submit" class="admin-button-link">Buscar</button>
+                <a class="admin-button-secondary" th:href="@{/admin/usuarios}">Limpar</a>
+            </form>
+
+            <div class="empty-state" th:if="${usuarios.isEmpty()}">
+                <strong>Nenhum usuario encontrado.</strong>
+                <span>Altere a busca para visualizar outros cadastros.</span>
+            </div>
+
+            <div class="admin-table-responsive" th:if="${!usuarios.isEmpty()}">
+                <table class="admin-table">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuario</th>
+                        <th>Perfil</th>
+                        <th>Status</th>
+                        <th>Pontos</th>
+                        <th>Ultimo acesso</th>
+                        <th>Acoes</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="usuario : ${usuarios}">
+                        <td th:text="${usuario.id}">1</td>
+                        <td>
+                            <strong th:text="${usuario.nome}">Usuario</strong>
+                            <span class="table-subtext" th:text="${usuario.email}">email@exemplo.com</span>
+                        </td>
+                        <td th:text="${usuario.perfil}">USER</td>
+                        <td>
+                            <span class="status-badge"
+                                  th:classappend="${usuario.ativo} ? ' status-active' : ' status-inactive'"
+                                  th:text="${usuario.ativo} ? 'Ativo' : 'Bloqueado'">Ativo</span>
+                        </td>
+                        <td th:text="${usuario.pontuacaoTotal}">0</td>
+                        <td th:text="${usuario.ultimoAcessoEm}">Nunca acessou</td>
+                        <td>
+                            <div class="table-actions">
+                                <a class="table-action"
+                                   th:href="@{/admin/usuarios/{id}(id=${usuario.id}, busca=${busca})}">Detalhes</a>
+                                <form method="post" th:if="${usuario.perfil != 'ADMIN'}"
+                                      th:action="@{/admin/usuarios/{id}/bloqueio(id=${usuario.id})}">
+                                    <button type="submit"
+                                            class="table-action"
+                                            th:classappend="${usuario.ativo} ? ' table-action-danger' : ' table-action-secondary'"
+                                            th:text="${usuario.ativo} ? 'Bloquear' : 'Desbloquear'"
+                                            onclick="return confirm('Deseja alterar o status deste usuario?')">Bloquear</button>
+                                </form>
+                                <span class="status-badge status-active" th:if="${usuario.perfil == 'ADMIN'}">Protegido</span>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script th:replace="~{fragments/admin-head :: scripts}"></script>
+</body>
+
+</html>

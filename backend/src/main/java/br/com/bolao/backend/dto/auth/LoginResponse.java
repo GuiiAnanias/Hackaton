@@ -5,6 +5,7 @@ public record LoginResponse(
         String tipo,
         Long id,
         String nome,
-        String perfil
+        String perfil,
+        String avatarUrl
 ) {
 }

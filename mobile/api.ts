@@ -10,6 +10,7 @@ export type UserSession = {
     id: number;
     nome: string;
     perfil: string;
+    avatarUrl?: string | null;
 };
 
 export type UserProfile = {
@@ -17,6 +18,7 @@ export type UserProfile = {
     nome: string;
     email: string;
     perfil: string;
+    avatarUrl?: string | null;
     pontuacaoTotal: number;
     placaresExatos: number;
 };
@@ -121,10 +123,17 @@ export function cadastrar(nome: string, email: string, senha: string) {
     });
 }
 
-export function recuperarSenha(email: string, novaSenha: string) {
-    return apiRequest<{ mensagem: string }>("/api/auth/recuperar-senha", {
+export function solicitarRecuperacaoSenha(email: string) {
+    return apiRequest<{ mensagem: string; token: string; expiraEm: string }>("/api/auth/recuperar-senha", {
         method: "POST",
-        body: { email, novaSenha },
+        body: { email },
+    });
+}
+
+export function confirmarRecuperacaoSenha(email: string, token: string, novaSenha: string) {
+    return apiRequest<{ mensagem: string }>("/api/auth/recuperar-senha/confirmar", {
+        method: "POST",
+        body: { email, token, novaSenha },
     });
 }
 
@@ -132,11 +141,11 @@ export function buscarPerfil(token: string) {
     return apiRequest<UserProfile>("/api/usuarios/me", { token });
 }
 
-export function atualizarPerfil(token: string, nome: string, email: string) {
+export function atualizarPerfil(token: string, nome: string, email: string, avatarUrl?: string | null) {
     return apiRequest<UserProfile>("/api/usuarios/me", {
         method: "PATCH",
         token,
-        body: { nome, email },
+        body: { nome, email, avatarUrl },
     });
 }
 
@@ -151,6 +160,13 @@ export function alterarSenha(token: string, senhaAtual: string, novaSenha: strin
 export function excluirConta(token: string) {
     return apiRequest<{ mensagem: string }>("/api/usuarios/me", {
         method: "DELETE",
+        token,
+    });
+}
+
+export function desativarConta(token: string) {
+    return apiRequest<{ mensagem: string }>("/api/usuarios/me/desativar", {
+        method: "PATCH",
         token,
     });
 }

@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { ActivityIndicator, Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { API_BASE_URL } from "../api";
 import { useAuth } from "../auth";
 import { CopaTheme } from "../constants/copa-theme";
+import { showAppAlert } from "../utils/app-alert";
 
 export default function LoginScreen() {
     const { login } = useAuth();
@@ -14,7 +15,7 @@ export default function LoginScreen() {
 
     async function handleLogin() {
         if (!email.trim() || !senha.trim()) {
-            Alert.alert("Atenção", "Informe e-mail e senha.");
+            showAppAlert("Atenção", "Informe e-mail e senha.");
             return;
         }
 
@@ -23,7 +24,7 @@ export default function LoginScreen() {
             await login(email.trim(), senha);
             router.replace("/(tabs)/home");
         } catch (error) {
-            Alert.alert("Erro no login", error instanceof Error ? error.message : "Não foi possível fazer login.");
+            showAppAlert("Erro no login", error instanceof Error ? error.message : "Não foi possível fazer login.");
         } finally {
             setLoading(false);
         }
@@ -31,10 +32,17 @@ export default function LoginScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
+            <View style={styles.brand}>
+                <View style={styles.brandMark}>
+                    <Text style={styles.brandMarkText}>26</Text>
+                </View>
+                <Text style={styles.brandKicker}>Copa do Mundo</Text>
+            </View>
+
             <View style={styles.card}>
                 <Text style={styles.title}>Bolão Copa 2026</Text>
                 <Text style={styles.subtitle}>Entre para palpitar nas partidas da Copa.</Text>
-                <Text style={styles.backend}>Backend: {API_BASE_URL}</Text>
+                <Text style={styles.backend}>Conectado em {API_BASE_URL}</Text>
 
                 <TextInput
                     autoCapitalize="none"
@@ -56,12 +64,12 @@ export default function LoginScreen() {
                     {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Entrar</Text>}
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => router.push("/forgot-password")}>
-                    <Text style={styles.link}>Esqueci minha senha</Text>
+                <TouchableOpacity onPress={() => router.push("/forgot-password")} style={styles.secondaryButton}>
+                    <Text style={styles.secondaryButtonText}>Esqueci minha senha</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => router.push("/register")}>
-                    <Text style={styles.registerLink}>Criar nova conta</Text>
+                <TouchableOpacity onPress={() => router.push("/register")} style={styles.createButton}>
+                    <Text style={styles.createButtonText}>Criar nova conta</Text>
                 </TouchableOpacity>
             </View>
         </SafeAreaView>
@@ -72,20 +80,48 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: "center",
-        backgroundColor: CopaTheme.background,
-        padding: 20,
+        backgroundColor: CopaTheme.primaryDark,
+        padding: 22,
+    },
+    brand: {
+        alignItems: "center",
+        marginBottom: 18,
+    },
+    brandMark: {
+        alignItems: "center",
+        justifyContent: "center",
+        width: 66,
+        height: 66,
+        borderRadius: 22,
+        backgroundColor: CopaTheme.accent,
+        borderWidth: 4,
+        borderColor: "rgba(255, 255, 255, 0.22)",
+    },
+    brandMarkText: {
+        color: CopaTheme.primaryDark,
+        fontSize: 24,
+        fontWeight: "900",
+    },
+    brandKicker: {
+        color: CopaTheme.primaryLight,
+        fontSize: 12,
+        fontWeight: "900",
+        letterSpacing: 0,
+        marginTop: 8,
+        textTransform: "uppercase",
     },
     card: {
-        gap: 12,
+        gap: 13,
         padding: 22,
-        borderRadius: 22,
+        borderRadius: 26,
         backgroundColor: CopaTheme.surface,
         borderWidth: 1,
         borderColor: CopaTheme.border,
+        ...CopaTheme.shadow,
     },
     title: {
-        fontSize: 28,
-        fontWeight: "800",
+        fontSize: 30,
+        fontWeight: "900",
         textAlign: "center",
         color: CopaTheme.primaryDark,
     },
@@ -95,36 +131,70 @@ const styles = StyleSheet.create({
         textAlign: "center",
     },
     backend: {
-        color: "#9ca3af",
+        alignSelf: "center",
+        borderRadius: 999,
+        backgroundColor: CopaTheme.surfaceAlt,
+        color: CopaTheme.textSoft,
         fontSize: 12,
         marginBottom: 6,
+        paddingHorizontal: 10,
+        paddingVertical: 5,
         textAlign: "center",
     },
     input: {
         borderWidth: 1,
         borderColor: CopaTheme.border,
-        borderRadius: 10,
-        backgroundColor: "#f8fafc",
-        padding: 12,
+        borderRadius: 14,
+        backgroundColor: CopaTheme.surfaceAlt,
+        color: CopaTheme.primaryDark,
+        fontSize: 15,
+        padding: 14,
     },
     button: {
         alignItems: "center",
-        borderRadius: 10,
+        borderRadius: 14,
         backgroundColor: CopaTheme.primary,
-        padding: 14,
+        minHeight: 50,
+        justifyContent: "center",
+        padding: 15,
     },
     buttonText: {
         color: "#fff",
-        fontWeight: "700",
+        fontSize: 16,
+        fontWeight: "900",
     },
-    link: {
-        color: "#2563eb",
-        fontWeight: "700",
+    secondaryButton: {
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: 48,
+        borderRadius: 14,
+        borderWidth: 1,
+        borderColor: CopaTheme.border,
+        backgroundColor: CopaTheme.surfaceAlt,
+        paddingHorizontal: 14,
+        paddingVertical: 12,
+    },
+    secondaryButtonText: {
+        color: CopaTheme.info,
+        fontSize: 15,
+        fontWeight: "900",
         textAlign: "center",
     },
-    registerLink: {
-        color: CopaTheme.primary,
-        fontWeight: "800",
+    createButton: {
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: 48,
+        borderRadius: 14,
+        borderWidth: 1.5,
+        borderColor: CopaTheme.primary,
+        backgroundColor: CopaTheme.primaryLight,
+        paddingHorizontal: 14,
+        paddingVertical: 12,
+    },
+    createButtonText: {
+        color: CopaTheme.primaryDark,
+        fontSize: 15,
+        fontWeight: "900",
         textAlign: "center",
     },
 });

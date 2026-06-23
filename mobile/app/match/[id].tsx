@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { buscarPartida, Partida } from "../../api";
 import { CopaTheme } from "../../constants/copa-theme";
+import { showAppAlert } from "../../utils/app-alert";
 
 export default function MatchDetailsScreen() {
     const { id } = useLocalSearchParams();
@@ -16,7 +17,7 @@ export default function MatchDetailsScreen() {
         buscarPartida(partidaId)
             .then(setMatch)
             .catch((error) => {
-                Alert.alert("Erro", error instanceof Error ? error.message : "Não foi possível carregar a partida.");
+                showAppAlert("Erro", error instanceof Error ? error.message : "Não foi possível carregar a partida.");
                 router.back();
             })
             .finally(() => setLoading(false));
@@ -35,6 +36,10 @@ export default function MatchDetailsScreen() {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.card}>
+                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                    <Text style={styles.backText}>Voltar</Text>
+                </TouchableOpacity>
+
                 <Text style={styles.badge}>{match.status}</Text>
                 <Text style={styles.title}>{match.mandante} x {match.visitante}</Text>
                 <Text style={styles.info}>Data: {match.dataHoraFormatada ?? new Date(match.dataHora).toLocaleString("pt-BR")}</Text>
@@ -73,12 +78,29 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     },
     card: {
-        gap: 10,
-        padding: 20,
-        borderRadius: 18,
+        gap: 12,
+        padding: 22,
+        borderRadius: 24,
         backgroundColor: CopaTheme.surface,
         borderWidth: 1,
         borderColor: CopaTheme.border,
+        ...CopaTheme.shadow,
+    },
+    backButton: {
+        alignSelf: "flex-start",
+        minHeight: 42,
+        justifyContent: "center",
+        borderRadius: 14,
+        borderWidth: 1,
+        borderColor: "#bfdbfe",
+        backgroundColor: "#eff6ff",
+        paddingHorizontal: 14,
+        paddingVertical: 9,
+    },
+    backText: {
+        color: CopaTheme.info,
+        fontSize: 14,
+        fontWeight: "900",
     },
     badge: {
         alignSelf: "flex-start",
@@ -90,8 +112,9 @@ const styles = StyleSheet.create({
         paddingVertical: 4,
     },
     title: {
-        fontSize: 26,
-        fontWeight: "800",
+        color: CopaTheme.primaryDark,
+        fontSize: 28,
+        fontWeight: "900",
     },
     info: {
         color: "#374151",
@@ -103,9 +126,9 @@ const styles = StyleSheet.create({
     },
     button: {
         alignItems: "center",
-        borderRadius: 10,
+        borderRadius: 14,
         backgroundColor: CopaTheme.primary,
-        padding: 14,
+        padding: 15,
     },
     buttonText: {
         color: "#fff",

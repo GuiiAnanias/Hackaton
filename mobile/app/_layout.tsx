@@ -1,5 +1,6 @@
 import { Stack } from "expo-router";
 import { AuthProvider } from "../auth";
+import { AppAlertHost } from "../components/AppAlert";
 
 export default function RootLayout() {
     return (
@@ -14,6 +15,7 @@ export default function RootLayout() {
                 <Stack.Screen name="edit-guess/[id]" />
                 <Stack.Screen name="edit-profile" />
             </Stack>
+            <AppAlertHost />
         </AuthProvider>
     );
 }

@@ -1,7 +1,10 @@
 package br.com.bolao.backend.controller;
 
+import br.com.bolao.backend.model.Perfil;
 import br.com.bolao.backend.model.Usuario;
+import br.com.bolao.backend.repository.PalpiteRepository;
 import br.com.bolao.backend.repository.UsuarioRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -21,10 +24,14 @@ import java.util.Map;
 public class UsuarioApiController {
 
     private final UsuarioRepository usuarioRepository;
+    private final PalpiteRepository palpiteRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UsuarioApiController(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
+    public UsuarioApiController(UsuarioRepository usuarioRepository,
+                                PalpiteRepository palpiteRepository,
+                                PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
+        this.palpiteRepository = palpiteRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -50,6 +57,7 @@ public class UsuarioApiController {
 
         usuario.setNome(request.nome().trim());
         usuario.setEmail(email);
+        usuario.setAvatarUrl(normalizarAvatarUrl(request.avatarUrl()));
 
         return UsuarioResponse.from(usuarioRepository.save(usuario));
     }
@@ -78,13 +86,33 @@ public class UsuarioApiController {
         return ResponseEntity.ok(Map.of("mensagem", "Senha alterada com sucesso"));
     }
 
-    @DeleteMapping
-    public ResponseEntity<?> excluirConta(Authentication authentication) {
+    @PatchMapping("/desativar")
+    public ResponseEntity<?> desativarConta(Authentication authentication) {
         Usuario usuario = usuarioLogado(authentication);
+        if (usuario.getPerfil() == Perfil.ADMIN) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("erro", "Contas ADMIN nao podem ser desativadas pelo app"));
+        }
+
         usuario.setAtivo(false);
         usuarioRepository.save(usuario);
 
-        return ResponseEntity.ok(Map.of("mensagem", "Conta excluida com sucesso"));
+        return ResponseEntity.ok(Map.of("mensagem", "Conta desativada com sucesso"));
+    }
+
+    @DeleteMapping
+    @Transactional
+    public ResponseEntity<?> excluirConta(Authentication authentication) {
+        Usuario usuario = usuarioLogado(authentication);
+        if (usuario.getPerfil() == Perfil.ADMIN) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("erro", "Contas ADMIN nao podem ser excluidas pelo app"));
+        }
+
+        palpiteRepository.deleteByUsuarioId(usuario.getId());
+        usuarioRepository.delete(usuario);
+
+        return ResponseEntity.ok(Map.of("mensagem", "Conta e palpites excluidos com sucesso"));
     }
 
     private Usuario usuarioLogado(Authentication authentication) {
@@ -102,7 +130,15 @@ public class UsuarioApiController {
         return usuario;
     }
 
-    public record AtualizarPerfilRequest(String nome, String email) {
+    private String normalizarAvatarUrl(String avatarUrl) {
+        if (avatarUrl == null || avatarUrl.isBlank()) {
+            return null;
+        }
+
+        return avatarUrl.trim();
+    }
+
+    public record AtualizarPerfilRequest(String nome, String email, String avatarUrl) {
     }
 
     public record AlterarSenhaRequest(String senhaAtual, String novaSenha) {
@@ -113,6 +149,7 @@ public class UsuarioApiController {
             String nome,
             String email,
             String perfil,
+            String avatarUrl,
             int pontuacaoTotal,
             int placaresExatos
     ) {
@@ -122,6 +159,7 @@ public class UsuarioApiController {
                     usuario.getNome(),
                     usuario.getEmail(),
                     usuario.getPerfil().name(),
+                    usuario.getAvatarUrl(),
                     usuario.getPontuacaoTotal(),
                     usuario.getPlacaresExatos()
             );

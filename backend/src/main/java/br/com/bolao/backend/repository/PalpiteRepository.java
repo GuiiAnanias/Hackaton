@@ -19,4 +19,6 @@ public interface PalpiteRepository extends JpaRepository<Palpite, Long> {
     boolean existsByUsuarioIdAndPartidaId(Long usuarioId, Long partidaId);
 
     long countByUsuarioId(Long usuarioId);
+
+    void deleteByUsuarioId(Long usuarioId);
 }
