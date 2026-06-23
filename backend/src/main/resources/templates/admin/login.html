@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 
-<head>
+<head th:replace="~{fragments/admin-head :: head('Login Admin')}">
     <meta charset="UTF-8">
     <title>Login Admin</title>
     <link rel="stylesheet" th:href="@{/css/admin.css}">
@@ -44,6 +44,7 @@
             </div>
         </section>
     </div>
+    <script th:replace="~{fragments/admin-head :: scripts}"></script>
 </body>
 
 </html>

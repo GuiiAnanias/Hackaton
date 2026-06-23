@@ -10,8 +10,13 @@ import java.util.Optional;
 @Repository
 public interface PalpiteRepository extends JpaRepository<Palpite, Long> {
 
+    List<Palpite> findByUsuarioId(Long usuarioId);
+
     List<Palpite> findByPartidaId(Long partidaId);
 
-    List<Palpite> findByUsuarioId(Long usuarioId);
     Optional<Palpite> findByUsuarioIdAndPartidaId(Long usuarioId, Long partidaId);
+
+    boolean existsByUsuarioIdAndPartidaId(Long usuarioId, Long partidaId);
+
+    long countByUsuarioId(Long usuarioId);
 }
