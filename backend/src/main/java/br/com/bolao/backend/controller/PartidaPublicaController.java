@@ -64,6 +64,10 @@ public class PartidaPublicaController {
                 p.getId(),
                 nome(p.getSelecaoMandante()),
                 nome(p.getSelecaoVisitante()),
+                codigoFifa(p.getSelecaoMandante()),
+                codigoFifa(p.getSelecaoVisitante()),
+                bandeira(p.getSelecaoMandante()),
+                bandeira(p.getSelecaoVisitante()),
                 p.getDataHora() == null ? null : p.getDataHora().format(FORMATO_BR),
                 p.getDataHora() == null ? null : p.getDataHora().toString(),
                 p.getFase(),
@@ -77,5 +81,13 @@ public class PartidaPublicaController {
 
     private String nome(Selecao selecao) {
         return (selecao == null || selecao.getNome() == null) ? "?" : selecao.getNome();
+    }
+
+    private String codigoFifa(Selecao selecao) {
+        return (selecao == null || selecao.getCodigoFifa() == null) ? null : selecao.getCodigoFifa();
+    }
+
+    private String bandeira(Selecao selecao) {
+        return (selecao == null || selecao.getBandeira() == null) ? null : selecao.getBandeira();
     }
 }

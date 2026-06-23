@@ -27,6 +27,10 @@ export type Partida = {
     id: number;
     mandante: string;
     visitante: string;
+    codigoFifaMandante?: string | null;
+    codigoFifaVisitante?: string | null;
+    bandeiraMandante?: string | null;
+    bandeiraVisitante?: string | null;
     dataHoraFormatada?: string;
     dataHora: string;
     fase: string;

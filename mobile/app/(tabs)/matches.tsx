@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { ActivityIndicator, View, Text, FlatList, StyleSheet, Modal, TouchableOpacity } from "react-native";
+import { ActivityIndicator, View, Text, SectionList, StyleSheet, Modal, TouchableOpacity } from "react-native";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { listarPartidas, Partida } from "../../api";
+import { TeamFlag } from "../../components/TeamFlag";
 import { CopaTheme, STATUS_LABELS } from "../../constants/copa-theme";
 
 export default function MatchesScreen() {
@@ -31,6 +32,7 @@ export default function MatchesScreen() {
 
         return statusOk && phaseOk && dateOk;
     });
+    const matchSections = groupMatchesByPhaseAndDate(filteredMatches);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -78,10 +80,13 @@ export default function MatchesScreen() {
                     ))}
                 </View>
 
-                <FlatList
-                    data={filteredMatches}
+                <SectionList
+                    sections={matchSections}
                     keyExtractor={(item) => item.id.toString()}
-                    ListEmptyComponent={!loading ? <Text>Nenhuma partida cadastrada.</Text> : null}
+                    ListEmptyComponent={!loading ? <Text style={styles.empty}>Nenhuma partida cadastrada.</Text> : null}
+                    renderSectionHeader={({ section }) => (
+                        <Text style={styles.sectionHeaderText}>{section.title}</Text>
+                    )}
                     renderItem={({ item }) => {
                         const statusColor = CopaTheme.status[item.status as keyof typeof CopaTheme.status] ?? CopaTheme.textMuted;
 
@@ -92,7 +97,11 @@ export default function MatchesScreen() {
                                 style={styles.card}
                             >
                                 <View style={styles.cardHeader}>
-                                    <Text style={styles.matchTitle}>{item.mandante} x {item.visitante}</Text>
+                                    <View style={styles.teamsRow}>
+                                        <TeamFlag flag={item.bandeiraMandante} code={item.codigoFifaMandante} name={item.mandante} size="sm" />
+                                        <Text style={styles.matchTitle}>{item.mandante} x {item.visitante}</Text>
+                                        <TeamFlag flag={item.bandeiraVisitante} code={item.codigoFifaVisitante} name={item.visitante} size="sm" />
+                                    </View>
                                     <View style={[styles.statusBadge, { backgroundColor: `${statusColor}18` }]}>
                                         <Text style={[styles.statusText, { color: statusColor }]}>
                                             {STATUS_LABELS[item.status] ?? item.status}
@@ -237,6 +246,28 @@ function formatDateLabel(dateKey: string) {
     return new Date(year, month - 1, day).toLocaleDateString("pt-BR");
 }
 
+function groupMatchesByPhaseAndDate(matches: Partida[]) {
+    const sections = new Map<string, { title: string; data: Partida[] }>();
+    const sortedMatches = [...matches].sort((a, b) => {
+        const phaseCompare = (a.fase ?? "").localeCompare(b.fase ?? "", "pt-BR");
+        if (phaseCompare !== 0) {
+            return phaseCompare;
+        }
+
+        return new Date(a.dataHora).getTime() - new Date(b.dataHora).getTime();
+    });
+
+    sortedMatches.forEach((match) => {
+        const dateKey = toDateKey(new Date(match.dataHora));
+        const title = `${match.fase} • ${formatDateLabel(dateKey)}`;
+        const section = sections.get(title) ?? { title, data: [] };
+        section.data.push(match);
+        sections.set(title, section);
+    });
+
+    return Array.from(sections.values());
+}
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -317,6 +348,19 @@ const styles = StyleSheet.create({
         borderColor: CopaTheme.border,
         ...CopaTheme.shadow,
     },
+    sectionHeaderText: {
+        alignSelf: "flex-start",
+        overflow: "hidden",
+        borderRadius: 999,
+        backgroundColor: CopaTheme.primaryLight,
+        color: CopaTheme.primaryDark,
+        fontSize: 12,
+        fontWeight: "900",
+        marginBottom: 8,
+        marginTop: 6,
+        paddingHorizontal: 11,
+        paddingVertical: 6,
+    },
     cardHeader: {
         flexDirection: "row",
         alignItems: "flex-start",
@@ -330,6 +374,12 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "900",
         marginBottom: 4,
+    },
+    teamsRow: {
+        flex: 1,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10,
     },
     statusBadge: {
         borderRadius: 999,
@@ -360,6 +410,11 @@ const styles = StyleSheet.create({
     error: {
         color: "#dc2626",
         marginBottom: 12,
+    },
+    empty: {
+        color: CopaTheme.textMuted,
+        textAlign: "center",
+        paddingVertical: 18,
     },
     modalOverlay: {
         flex: 1,

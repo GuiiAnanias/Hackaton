@@ -495,6 +495,18 @@ body.dark-mode {
     border-bottom: none;
 }
 
+.team-flag-preview {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 42px;
+    min-height: 32px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background-color: var(--bg-card-soft);
+    font-weight: 800;
+}
+
 .ranking-list,
 .match-list,
 .result-list,
@@ -706,6 +718,12 @@ body.dark-mode {
 .admin-form input::placeholder,
 .form-group input::placeholder {
     color: var(--text-soft);
+}
+
+.form-hint {
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1.45;
 }
 
 .admin-form input:focus,

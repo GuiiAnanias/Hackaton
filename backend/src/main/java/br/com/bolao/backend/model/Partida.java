@@ -35,9 +35,6 @@ public class Partida {
     // Status: AGENDADA, EM_ANDAMENTO, ENCERRADA
     private String status = "AGENDADA";
 
-    // TODO: Gere os Getters e Setters (ou use @Data do Lombok se estiver usando)
-    // Construtores vazio e com parâmetros...
-
     public Long getId() {
         return id;
     }

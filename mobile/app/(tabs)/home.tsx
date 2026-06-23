@@ -4,6 +4,7 @@ import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { listarPartidas, Partida } from "../../api";
+import { TeamFlag } from "../../components/TeamFlag";
 import { CopaTheme } from "../../constants/copa-theme";
 
 export default function HomeScreen() {
@@ -39,7 +40,15 @@ export default function HomeScreen() {
                     ListEmptyComponent={!loading ? <Text>Nenhuma partida disponível.</Text> : null}
                     renderItem={({ item }) => (
                         <View style={styles.card}>
-                            <Text style={styles.matchTitle}>{item.mandante} x {item.visitante}</Text>
+                            <View style={styles.matchHeader}>
+                                <TeamFlag flag={item.bandeiraMandante} code={item.codigoFifaMandante} name={item.mandante} />
+                                <View style={styles.matchTitleWrap}>
+                                    <Text style={styles.matchTitle}>{item.mandante}</Text>
+                                    <Text style={styles.versus}>x</Text>
+                                    <Text style={styles.matchTitle}>{item.visitante}</Text>
+                                </View>
+                                <TeamFlag flag={item.bandeiraVisitante} code={item.codigoFifaVisitante} name={item.visitante} />
+                            </View>
                             <Text style={styles.matchDate}>
                                 {item.dataHoraFormatada ?? new Date(item.dataHora).toLocaleString("pt-BR")}
                             </Text>
@@ -117,6 +126,25 @@ const styles = StyleSheet.create({
     matchTitle: {
         fontSize: 17,
         fontWeight: "800",
+        color: CopaTheme.primaryDark,
+        textAlign: "center",
+    },
+    matchHeader: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 12,
+        marginBottom: 8,
+    },
+    matchTitleWrap: {
+        flex: 1,
+        alignItems: "center",
+    },
+    versus: {
+        color: CopaTheme.textMuted,
+        fontSize: 13,
+        fontWeight: "900",
+        marginVertical: 2,
     },
     matchDate: {
         color: "#374151",

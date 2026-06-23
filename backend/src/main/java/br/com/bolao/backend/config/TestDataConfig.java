@@ -13,6 +13,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 @Configuration
 public class TestDataConfig {
@@ -43,21 +45,7 @@ public class TestDataConfig {
                 usuarioRepository.save(admin);
             }
 
-            if (selecaoRepository.count() == 0) {
-                Selecao brasil = criarSelecao("Brasil", "BRA", "G", "brasil.png");
-                Selecao argentina = criarSelecao("Argentina", "ARG", "G", "argentina.png");
-                Selecao franca = criarSelecao("França", "FRA", "H", "franca.png");
-                Selecao alemanha = criarSelecao("Alemanha", "ALE", "H", "alemanha.png");
-                Selecao espanha = criarSelecao("Espanha", "ESP", "B", "espanha.png");
-                Selecao portugal = criarSelecao("Portugal", "POR", "B", "portugal.png");
-
-                selecaoRepository.save(brasil);
-                selecaoRepository.save(argentina);
-                selecaoRepository.save(franca);
-                selecaoRepository.save(alemanha);
-                selecaoRepository.save(espanha);
-                selecaoRepository.save(portugal);
-            }
+            garantirSelecoesDaCopa(selecaoRepository);
 
             if (partidaRepository.count() == 0) {
                 Selecao brasil = selecaoRepository.findAll().stream()
@@ -67,7 +55,7 @@ public class TestDataConfig {
                 Selecao franca = selecaoRepository.findAll().stream()
                         .filter(s -> s.getCodigoFifa().equals("FRA")).findFirst().orElseThrow();
                 Selecao alemanha = selecaoRepository.findAll().stream()
-                        .filter(s -> s.getCodigoFifa().equals("ALE")).findFirst().orElseThrow();
+                        .filter(s -> s.getCodigoFifa().equals("GER")).findFirst().orElseThrow();
                 Selecao espanha = selecaoRepository.findAll().stream()
                         .filter(s -> s.getCodigoFifa().equals("ESP")).findFirst().orElseThrow();
                 Selecao portugal = selecaoRepository.findAll().stream()
@@ -80,13 +68,75 @@ public class TestDataConfig {
         };
     }
 
-    private Selecao criarSelecao(String nome, String codigoFifa, String grupo, String bandeira) {
-        Selecao selecao = new Selecao();
-        selecao.setNome(nome);
-        selecao.setCodigoFifa(codigoFifa);
-        selecao.setGrupo(grupo);
-        selecao.setBandeira(bandeira);
-        return selecao;
+    private void garantirSelecoesDaCopa(SelecaoRepository selecaoRepository) {
+        List<SeedSelecao> selecoes = List.of(
+                new SeedSelecao("México", "MEX", "A", "🇲🇽"),
+                new SeedSelecao("África do Sul", "RSA", "A", "🇿🇦"),
+                new SeedSelecao("Coreia do Sul", "KOR", "A", "🇰🇷"),
+                new SeedSelecao("Tchéquia", "CZE", "A", "🇨🇿"),
+                new SeedSelecao("Canadá", "CAN", "B", "🇨🇦"),
+                new SeedSelecao("Bósnia e Herzegovina", "BIH", "B", "🇧🇦"),
+                new SeedSelecao("Catar", "QAT", "B", "🇶🇦"),
+                new SeedSelecao("Suíça", "SUI", "B", "🇨🇭"),
+                new SeedSelecao("Brasil", "BRA", "C", "🇧🇷"),
+                new SeedSelecao("Marrocos", "MAR", "C", "🇲🇦"),
+                new SeedSelecao("Haiti", "HAI", "C", "🇭🇹"),
+                new SeedSelecao("Escócia", "SCO", "C", "🏴"),
+                new SeedSelecao("Estados Unidos", "USA", "D", "🇺🇸"),
+                new SeedSelecao("Paraguai", "PAR", "D", "🇵🇾"),
+                new SeedSelecao("Austrália", "AUS", "D", "🇦🇺"),
+                new SeedSelecao("Turquia", "TUR", "D", "🇹🇷"),
+                new SeedSelecao("Alemanha", "GER", "E", "🇩🇪"),
+                new SeedSelecao("Curaçao", "CUW", "E", "🇨🇼"),
+                new SeedSelecao("Costa do Marfim", "CIV", "E", "🇨🇮"),
+                new SeedSelecao("Equador", "ECU", "E", "🇪🇨"),
+                new SeedSelecao("Países Baixos", "NED", "F", "🇳🇱"),
+                new SeedSelecao("Japão", "JPN", "F", "🇯🇵"),
+                new SeedSelecao("Suécia", "SWE", "F", "🇸🇪"),
+                new SeedSelecao("Tunísia", "TUN", "F", "🇹🇳"),
+                new SeedSelecao("Bélgica", "BEL", "G", "🇧🇪"),
+                new SeedSelecao("Egito", "EGY", "G", "🇪🇬"),
+                new SeedSelecao("Irã", "IRN", "G", "🇮🇷"),
+                new SeedSelecao("Nova Zelândia", "NZL", "G", "🇳🇿"),
+                new SeedSelecao("Espanha", "ESP", "H", "🇪🇸"),
+                new SeedSelecao("Cabo Verde", "CPV", "H", "🇨🇻"),
+                new SeedSelecao("Arábia Saudita", "KSA", "H", "🇸🇦"),
+                new SeedSelecao("Uruguai", "URU", "H", "🇺🇾"),
+                new SeedSelecao("França", "FRA", "I", "🇫🇷"),
+                new SeedSelecao("Senegal", "SEN", "I", "🇸🇳"),
+                new SeedSelecao("Iraque", "IRQ", "I", "🇮🇶"),
+                new SeedSelecao("Noruega", "NOR", "I", "🇳🇴"),
+                new SeedSelecao("Argentina", "ARG", "J", "🇦🇷"),
+                new SeedSelecao("Argélia", "ALG", "J", "🇩🇿"),
+                new SeedSelecao("Áustria", "AUT", "J", "🇦🇹"),
+                new SeedSelecao("Jordânia", "JOR", "J", "🇯🇴"),
+                new SeedSelecao("Portugal", "POR", "K", "🇵🇹"),
+                new SeedSelecao("RD Congo", "COD", "K", "🇨🇩"),
+                new SeedSelecao("Uzbequistão", "UZB", "K", "🇺🇿"),
+                new SeedSelecao("Colômbia", "COL", "K", "🇨🇴"),
+                new SeedSelecao("Inglaterra", "ENG", "L", "🏴"),
+                new SeedSelecao("Croácia", "CRO", "L", "🇭🇷"),
+                new SeedSelecao("Gana", "GHA", "L", "🇬🇭"),
+                new SeedSelecao("Panamá", "PAN", "L", "🇵🇦")
+        );
+
+        selecoes.forEach(selecao -> salvarOuAtualizarSelecao(selecaoRepository, selecao));
+    }
+
+    private void salvarOuAtualizarSelecao(SelecaoRepository selecaoRepository, SeedSelecao seed) {
+        Optional<Selecao> existente = selecaoRepository.findAll()
+                .stream()
+                .filter(selecao -> seed.codigoFifa().equalsIgnoreCase(selecao.getCodigoFifa())
+                        || seed.nome().equalsIgnoreCase(selecao.getNome()))
+                .findFirst();
+
+        Selecao selecao = existente.orElseGet(Selecao::new);
+        selecao.setNome(seed.nome());
+        selecao.setCodigoFifa(seed.codigoFifa());
+        selecao.setGrupo(seed.grupo());
+        selecao.setBandeira(seed.bandeira());
+
+        selecaoRepository.save(selecao);
     }
 
     private Partida criarPartida(Selecao mandante, Selecao visitante, String fase, String estadio,
@@ -103,5 +153,8 @@ public class TestDataConfig {
         partida.setGolsMandante(golsMandante);
         partida.setGolsVisitante(golsVisitante);
         return partida;
+    }
+
+    private record SeedSelecao(String nome, String codigoFifa, String grupo, String bandeira) {
     }
 }

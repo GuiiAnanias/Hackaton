@@ -5,6 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { confirmarRecuperacaoSenha, solicitarRecuperacaoSenha } from "../api";
 import { CopaTheme } from "../constants/copa-theme";
 import { showAppAlert } from "../utils/app-alert";
+import { isValidEmail } from "../utils/validators";
 
 export default function ForgotPasswordScreen() {
     const [email, setEmail] = useState("");
@@ -19,9 +20,15 @@ export default function ForgotPasswordScreen() {
             return;
         }
 
+        const emailValue = email.trim();
+        if (!isValidEmail(emailValue)) {
+            showAppAlert("Atenção", "Informe um e-mail válido.");
+            return;
+        }
+
         try {
             setLoading(true);
-            const response = await solicitarRecuperacaoSenha(email.trim());
+            const response = await solicitarRecuperacaoSenha(emailValue);
             setToken(response.token);
             setTokenSolicitado(true);
             showAppAlert("Token gerado", `Use este token para trocar sua senha: ${response.token}`);
@@ -38,9 +45,15 @@ export default function ForgotPasswordScreen() {
             return;
         }
 
+        const emailValue = email.trim();
+        if (!isValidEmail(emailValue)) {
+            showAppAlert("Atenção", "Informe um e-mail válido.");
+            return;
+        }
+
         try {
             setLoading(true);
-            await confirmarRecuperacaoSenha(email.trim(), token.trim(), novaSenha);
+            await confirmarRecuperacaoSenha(emailValue, token.trim(), novaSenha);
             showAppAlert("Senha atualizada", "Agora você já pode entrar com a nova senha.", [
                 { text: "Entrar", onPress: () => router.replace("/login") },
             ]);

@@ -47,6 +47,7 @@
                     <tr>
                         <th>ID</th>
                         <th>Nome</th>
+                        <th>Bandeira</th>
                         <th>Código FIFA</th>
                         <th>Grupo</th>
                         <th>Ações</th>
@@ -57,6 +58,10 @@
                         <td th:text="${selecao.id}">1</td>
                         <td>
                             <strong th:text="${selecao.nome}">Brasil</strong>
+                        </td>
+                        <td>
+                            <span class="team-flag-preview"
+                                  th:text="${#strings.isEmpty(selecao.bandeira) ? selecao.codigoFifa : selecao.bandeira}">🇧🇷</span>
                         </td>
                         <td th:text="${selecao.codigoFifa}">BRA</td>
                         <td>

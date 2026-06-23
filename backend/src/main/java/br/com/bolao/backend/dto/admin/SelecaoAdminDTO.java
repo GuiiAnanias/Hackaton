@@ -4,6 +4,7 @@ public record SelecaoAdminDTO(
         Long id,
         String nome,
         String codigoFifa,
-        String grupo
+        String grupo,
+        String bandeira
 ) {
 }

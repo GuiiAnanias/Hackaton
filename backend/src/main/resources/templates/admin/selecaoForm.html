@@ -36,6 +36,13 @@
                 <input type="text" id="grupo" name="grupo" placeholder="G" maxlength="2" th:value="${selecao == null ? '' : selecao.grupo}" required>
             </div>
 
+            <div class="form-group">
+                <label for="bandeira">Bandeira/escudo</label>
+                <input type="text" id="bandeira" name="bandeira" placeholder="🇧🇷 ou https://exemplo.com/brasil.png"
+                       th:value="${selecao == null ? '' : selecao.bandeira}">
+                <small class="form-hint">Use um emoji, uma URL de imagem ou deixe vazio para o app usar o código FIFA.</small>
+            </div>
+
             <div class="form-actions">
                 <a class="admin-button-secondary" th:href="@{/admin/selecoes}">Cancelar</a>
                 <button type="submit" class="admin-button" th:text="${selecao == null ? 'Cadastrar seleção' : 'Salvar alterações'}">Cadastrar seleção</button>

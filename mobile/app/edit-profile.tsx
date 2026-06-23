@@ -6,6 +6,7 @@ import { alterarSenha, atualizarPerfil, buscarPerfil } from "../api";
 import { useAuth } from "../auth";
 import { CopaTheme } from "../constants/copa-theme";
 import { showAppAlert } from "../utils/app-alert";
+import { isValidEmail } from "../utils/validators";
 
 export default function EditProfileScreen() {
     const { user, updateUser } = useAuth();
@@ -38,9 +39,21 @@ export default function EditProfileScreen() {
             return;
         }
 
+        const nomeValue = nome.trim();
+        const emailValue = email.trim();
+        if (!nomeValue || !emailValue) {
+            showAppAlert("Atenção", "Preencha nome e e-mail.");
+            return;
+        }
+
+        if (!isValidEmail(emailValue)) {
+            showAppAlert("Atenção", "Informe um e-mail válido.");
+            return;
+        }
+
         try {
             setSaving(true);
-            const profile = await atualizarPerfil(user.token, nome, email, avatarUrl.trim() || null);
+            const profile = await atualizarPerfil(user.token, nomeValue, emailValue, avatarUrl.trim() || null);
             updateUser(profile);
             showAppAlert("Perfil atualizado", "Seus dados foram salvos.", [
                 { text: "OK", onPress: () => router.back() },

@@ -4,6 +4,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { buscarPartida, Partida } from "../../api";
 import { CopaTheme } from "../../constants/copa-theme";
+import { TeamFlag } from "../../components/TeamFlag";
 import { showAppAlert } from "../../utils/app-alert";
 
 export default function MatchDetailsScreen() {
@@ -41,7 +42,17 @@ export default function MatchDetailsScreen() {
                 </TouchableOpacity>
 
                 <Text style={styles.badge}>{match.status}</Text>
-                <Text style={styles.title}>{match.mandante} x {match.visitante}</Text>
+                <View style={styles.teamsPanel}>
+                    <View style={styles.teamBox}>
+                        <TeamFlag flag={match.bandeiraMandante} code={match.codigoFifaMandante} name={match.mandante} size="lg" />
+                        <Text style={styles.teamName}>{match.mandante}</Text>
+                    </View>
+                    <Text style={styles.vs}>x</Text>
+                    <View style={styles.teamBox}>
+                        <TeamFlag flag={match.bandeiraVisitante} code={match.codigoFifaVisitante} name={match.visitante} size="lg" />
+                        <Text style={styles.teamName}>{match.visitante}</Text>
+                    </View>
+                </View>
                 <Text style={styles.info}>Data: {match.dataHoraFormatada ?? new Date(match.dataHora).toLocaleString("pt-BR")}</Text>
                 <Text style={styles.info}>Fase: {match.fase}</Text>
                 <Text style={styles.info}>Grupo: {match.grupo}</Text>
@@ -114,6 +125,31 @@ const styles = StyleSheet.create({
     title: {
         color: CopaTheme.primaryDark,
         fontSize: 28,
+        fontWeight: "900",
+    },
+    teamsPanel: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 12,
+        borderRadius: 20,
+        backgroundColor: CopaTheme.surfaceAlt,
+        padding: 14,
+    },
+    teamBox: {
+        flex: 1,
+        alignItems: "center",
+        gap: 8,
+    },
+    teamName: {
+        color: CopaTheme.primaryDark,
+        fontSize: 16,
+        fontWeight: "900",
+        textAlign: "center",
+    },
+    vs: {
+        color: CopaTheme.textMuted,
+        fontSize: 18,
         fontWeight: "900",
     },
     info: {

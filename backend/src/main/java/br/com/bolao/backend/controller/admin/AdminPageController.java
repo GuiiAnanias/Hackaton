@@ -222,9 +222,10 @@ public class AdminPageController {
             @RequestParam String nome,
             @RequestParam String codigoFifa,
             @RequestParam String grupo,
+            @RequestParam(required = false) String bandeira,
             RedirectAttributes redirectAttributes) {
         try {
-            adminSelecaoService.criarSelecao(nome, codigoFifa, grupo);
+            adminSelecaoService.criarSelecao(nome, codigoFifa, grupo, bandeira);
             redirectAttributes.addFlashAttribute("mensagemSucesso", "Seleção cadastrada com sucesso.");
             return "redirect:/admin/selecoes";
         } catch (AdminException exception) {
@@ -245,9 +246,10 @@ public class AdminPageController {
             @RequestParam String nome,
             @RequestParam String codigoFifa,
             @RequestParam String grupo,
+            @RequestParam(required = false) String bandeira,
             RedirectAttributes redirectAttributes) {
         try {
-            adminSelecaoService.editarSelecao(id, nome, codigoFifa, grupo);
+            adminSelecaoService.editarSelecao(id, nome, codigoFifa, grupo, bandeira);
             redirectAttributes.addFlashAttribute("mensagemSucesso", "Seleção atualizada com sucesso.");
             return "redirect:/admin/selecoes";
         } catch (AdminException exception) {

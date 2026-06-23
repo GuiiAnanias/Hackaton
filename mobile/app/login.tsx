@@ -6,6 +6,7 @@ import { API_BASE_URL } from "../api";
 import { useAuth } from "../auth";
 import { CopaTheme } from "../constants/copa-theme";
 import { showAppAlert } from "../utils/app-alert";
+import { isValidEmail } from "../utils/validators";
 
 export default function LoginScreen() {
     const { login } = useAuth();
@@ -19,9 +20,15 @@ export default function LoginScreen() {
             return;
         }
 
+        const emailValue = email.trim();
+        if (!isValidEmail(emailValue)) {
+            showAppAlert("Atenção", "Informe um e-mail válido.");
+            return;
+        }
+
         try {
             setLoading(true);
-            await login(email.trim(), senha);
+            await login(emailValue, senha);
             router.replace("/(tabs)/home");
         } catch (error) {
             showAppAlert("Erro no login", error instanceof Error ? error.message : "Não foi possível fazer login.");
@@ -70,6 +77,10 @@ export default function LoginScreen() {
 
                 <TouchableOpacity onPress={() => router.push("/register")} style={styles.createButton}>
                     <Text style={styles.createButtonText}>Criar nova conta</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={() => router.replace("/public")} style={styles.publicButton}>
+                    <Text style={styles.publicButtonText}>Ver área pública</Text>
                 </TouchableOpacity>
             </View>
         </SafeAreaView>
@@ -195,6 +206,18 @@ const styles = StyleSheet.create({
         color: CopaTheme.primaryDark,
         fontSize: 15,
         fontWeight: "900",
+        textAlign: "center",
+    },
+    publicButton: {
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: 44,
+        paddingHorizontal: 14,
+    },
+    publicButtonText: {
+        color: CopaTheme.textMuted,
+        fontSize: 14,
+        fontWeight: "800",
         textAlign: "center",
     },
 });

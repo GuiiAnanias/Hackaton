@@ -4,6 +4,7 @@ import br.com.bolao.backend.model.Perfil;
 import br.com.bolao.backend.model.Usuario;
 import br.com.bolao.backend.repository.PalpiteRepository;
 import br.com.bolao.backend.repository.UsuarioRepository;
+import br.com.bolao.backend.util.EmailValidator;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,7 +51,11 @@ public class UsuarioApiController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nome e e-mail sao obrigatorios");
         }
 
-        String email = request.email().trim().toLowerCase();
+        if (!EmailValidator.isValid(request.email())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Informe um e-mail valido");
+        }
+
+        String email = EmailValidator.normalize(request.email());
         if (!email.equals(usuario.getEmail()) && usuarioRepository.existsByEmail(email)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "E-mail ja cadastrado");
         }

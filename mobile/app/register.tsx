@@ -5,6 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../auth";
 import { CopaTheme } from "../constants/copa-theme";
 import { showAppAlert } from "../utils/app-alert";
+import { isValidEmail } from "../utils/validators";
 
 export default function RegisterScreen() {
     const { cadastrar } = useAuth();
@@ -19,9 +20,15 @@ export default function RegisterScreen() {
             return;
         }
 
+        const emailValue = email.trim();
+        if (!isValidEmail(emailValue)) {
+            showAppAlert("Atenção", "Informe um e-mail válido.");
+            return;
+        }
+
         try {
             setLoading(true);
-            await cadastrar(nome.trim(), email.trim(), senha);
+            await cadastrar(nome.trim(), emailValue, senha);
             router.replace("/(tabs)/home");
         } catch (error) {
             showAppAlert("Erro no cadastro", error instanceof Error ? error.message : "Não foi possível cadastrar.");

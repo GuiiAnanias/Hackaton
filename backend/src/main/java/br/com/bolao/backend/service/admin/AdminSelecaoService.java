@@ -33,18 +33,19 @@ public class AdminSelecaoService {
         return converterParaDTO(selecao);
     }
 
-    public void criarSelecao(String nome, String codigoFifa, String grupo) {
+    public void criarSelecao(String nome, String codigoFifa, String grupo, String bandeira) {
         validarDados(nome, codigoFifa, grupo);
 
         Selecao selecao = new Selecao();
         selecao.setNome(nome.trim());
         selecao.setCodigoFifa(codigoFifa.trim().toUpperCase());
         selecao.setGrupo(grupo.trim().toUpperCase());
+        selecao.setBandeira(normalizarBandeira(bandeira));
 
         selecaoRepository.save(selecao);
     }
 
-    public void editarSelecao(Long id, String nome, String codigoFifa, String grupo) {
+    public void editarSelecao(Long id, String nome, String codigoFifa, String grupo, String bandeira) {
         validarDados(nome, codigoFifa, grupo);
 
         Selecao selecao = selecaoRepository.findById(id)
@@ -53,6 +54,7 @@ public class AdminSelecaoService {
         selecao.setNome(nome.trim());
         selecao.setCodigoFifa(codigoFifa.trim().toUpperCase());
         selecao.setGrupo(grupo.trim().toUpperCase());
+        selecao.setBandeira(normalizarBandeira(bandeira));
 
         selecaoRepository.save(selecao);
     }
@@ -87,7 +89,8 @@ public class AdminSelecaoService {
                 selecao.getId(),
                 formatarTexto(selecao.getNome()),
                 formatarTexto(selecao.getCodigoFifa()),
-                formatarTexto(selecao.getGrupo())
+                formatarTexto(selecao.getGrupo()),
+                selecao.getBandeira() == null ? "" : selecao.getBandeira()
         );
     }
 
@@ -111,5 +114,13 @@ public class AdminSelecaoService {
         }
 
         return valor;
+    }
+
+    private String normalizarBandeira(String bandeira) {
+        if (bandeira == null || bandeira.isBlank()) {
+            return null;
+        }
+
+        return bandeira.trim();
     }
 }

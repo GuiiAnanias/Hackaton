@@ -6,6 +6,7 @@ import br.com.bolao.backend.model.Perfil;
 import br.com.bolao.backend.model.Usuario;
 import br.com.bolao.backend.repository.UsuarioRepository;
 import br.com.bolao.backend.security.JwtService;
+import br.com.bolao.backend.util.EmailValidator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -46,7 +47,12 @@ public class AuthController {
                     .body(Map.of("erro", "E-mail e senha sao obrigatorios"));
         }
 
-        Usuario usuario = usuarioRepository.findByEmail(request.email().trim().toLowerCase()).orElse(null);
+        if (!EmailValidator.isValid(request.email())) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("erro", "Informe um e-mail valido"));
+        }
+
+        Usuario usuario = usuarioRepository.findByEmail(EmailValidator.normalize(request.email())).orElse(null);
 
         if (usuario == null || !passwordEncoder.matches(request.senha(), usuario.getSenha())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -84,7 +90,12 @@ public class AuthController {
                     .body(Map.of("erro", "A senha deve ter pelo menos 6 caracteres"));
         }
 
-        String email = request.email().trim().toLowerCase();
+        if (!EmailValidator.isValid(request.email())) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("erro", "Informe um e-mail valido"));
+        }
+
+        String email = EmailValidator.normalize(request.email());
         if (usuarioRepository.existsByEmail(email)) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(Map.of("erro", "E-mail ja cadastrado"));
@@ -111,7 +122,12 @@ public class AuthController {
                     .body(Map.of("erro", "E-mail e obrigatorio"));
         }
 
-        Usuario usuario = usuarioRepository.findByEmail(request.email().trim().toLowerCase()).orElse(null);
+        if (!EmailValidator.isValid(request.email())) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("erro", "Informe um e-mail valido"));
+        }
+
+        Usuario usuario = usuarioRepository.findByEmail(EmailValidator.normalize(request.email())).orElse(null);
         if (usuario == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("erro", "Usuario nao encontrado"));
@@ -144,7 +160,12 @@ public class AuthController {
                     .body(Map.of("erro", "A nova senha deve ter pelo menos 6 caracteres"));
         }
 
-        Usuario usuario = usuarioRepository.findByEmail(request.email().trim().toLowerCase()).orElse(null);
+        if (!EmailValidator.isValid(request.email())) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("erro", "Informe um e-mail valido"));
+        }
+
+        Usuario usuario = usuarioRepository.findByEmail(EmailValidator.normalize(request.email())).orElse(null);
         if (usuario == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("erro", "Usuario nao encontrado"));
